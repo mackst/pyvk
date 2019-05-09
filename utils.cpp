@@ -10,3 +10,13 @@ std::vector<const char*> vecStrToVecChar(std::vector<std::string> &strArray)
 	return out;
 }
 
+std::vector<float> vecFloatToVecFloat(std::vector<float>& inArray)
+{
+	auto toFloat = [](const float &a) { return (float)a; };
+	std::vector<float> out(inArray.size());
+
+	std::transform(inArray.begin(), inArray.end(), out.begin(), toFloat);
+
+	return out;
+}
+

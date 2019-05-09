@@ -103,7 +103,11 @@ bool Device::create(py::dict createInfo)
 
 	for (auto item : queueCreateInfo)
 	{
-		std::vector<float> queuePriorities = item["queuePriorities"].cast<std::vector<float>>();
+		std::vector<float> queuePrioritieList = item["queuePriorities"].cast<std::vector<float>>();
+		std::vector<float> queuePriorities = vecFloatToVecFloat(queuePrioritieList);
+		//std::vector<float> queuePriorities;
+		//for (auto item : queuePrioritieList)
+			//queuePriorities.emplace_back((float)item);
 
 		VkDeviceQueueCreateInfo info = {};
 		info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -114,9 +118,10 @@ bool Device::create(py::dict createInfo)
 		queueCreateInfos.emplace_back(info);
 
 		// debug
-		py::print(queuePriorities);
-		py::print(info.queueCount);
-		py::print(info.queueFamilyIndex);
+		//std::cout << queuePriorities[0] << std::endl;
+		//py::print(queuePriorities);
+		//py::print(info.queueCount);
+		//py::print(info.queueFamilyIndex);
 	}
 
 	std::vector<std::string> enabledLayerNamesList = createInfo["enabledLayerNames"].cast<std::vector<std::string>>();
@@ -163,6 +168,11 @@ bool Device::create(py::dict createInfo)
 
 void Device::destroy()
 {
+	if (isValid())
+	{
+		_vkDestroyDevice(vkHandle, nullptr);
+		vkHandle = VK_NULL_HANDLE;
+	}
 }
 
 bool Device::isValid()
