@@ -44,6 +44,7 @@ private:
 	void getInstanceFuncPointers();
 
 	VkInstanceCreateInfo _createInfo = {};
+	DebugUtilsMessengerEXT * _debugMessenger = nullptr;
 
 	PFN_vkEnumeratePhysicalDevices _vkEnumeratePhysicalDevices = VK_NULL_HANDLE;
 };

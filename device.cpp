@@ -150,10 +150,13 @@ bool Device::create(py::dict createInfo)
 		_createInfo.enabledExtensionCount = 0;
 	}
 
-	VkPhysicalDeviceFeatures deviceFeatures = {};
+	//VkPhysicalDeviceFeatures deviceFeatures = {};
+	VkPhysicalDeviceFeatures deviceFeatures = createInfo["deviceFeatures"].cast<VkPhysicalDeviceFeatures>();
 	_createInfo.pEnabledFeatures = &deviceFeatures;
 
-	//checkVKResult(_vkCreateDevice(_physicalDevice.vkHandle, &_createInfo, nullptr, &vkHandle));
+	checkVKResult(_vkCreateDevice(_physicalDevice.vkHandle, &_createInfo, nullptr, &vkHandle));
+
+	getFuncPointers();
 
 	return isValid();
 }
@@ -167,7 +170,7 @@ bool Device::isValid()
 	return vkHandle != VK_NULL_HANDLE;
 }
 
-void Device::getInstanceFuncPointers()
+void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");
 	_vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(vkHandle, "vkGetDeviceQueue");

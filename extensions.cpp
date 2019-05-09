@@ -22,6 +22,7 @@ DebugUtilsMessengerEXT::DebugUtilsMessengerEXT(VkInstance &instance, int message
 
 	DebugUtilsMessengerEXT::pycallback = userCallback;
 
+	VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
 	_createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	_createInfo.messageSeverity = messageSeverity;
 	_createInfo.messageType = messageType;
@@ -44,6 +45,7 @@ void DebugUtilsMessengerEXT::destroy()
 	{
 		_vkDestroyDebugUtilsMessengerEXT(_instance, vkHandle, nullptr);
 		_isValid = false;
+		DebugUtilsMessengerEXT::pycallback = {};
 		py::print("DebugUtilsMessengerEXT destroyed.");
 	}
 }

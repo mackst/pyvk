@@ -88,6 +88,9 @@ bool Instance::create()
 
 void Instance::destroy()
 {
+	if (_debugMessenger != nullptr)
+		_debugMessenger->destroy();
+
 	if (vkHandle == VK_NULL_HANDLE)
 		return;
 
@@ -102,7 +105,8 @@ void Instance::destroy()
 
 DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback)
 {
-	return new DebugUtilsMessengerEXT(vkHandle, messageSeverity, messageType, userCallback);
+	_debugMessenger = new DebugUtilsMessengerEXT(vkHandle, messageSeverity, messageType, userCallback);
+	return _debugMessenger;
 }
 
 py::list Instance::getPhysicalDevices()

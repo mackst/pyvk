@@ -31,7 +31,7 @@ private:
 	VkInstance _instance;
 
 	VkDebugUtilsMessengerEXT vkHandle = VK_NULL_HANDLE;
-	VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
+	//VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
 
 	bool _isValid = false;
 

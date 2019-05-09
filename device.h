@@ -58,7 +58,7 @@ private:
 	PFN_vkDestroyDevice _vkDestroyDevice = nullptr;
 	PFN_vkGetDeviceQueue _vkGetDeviceQueue = nullptr;
 
-	void getInstanceFuncPointers();
+	void getFuncPointers();
 };
 
 
