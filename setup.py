@@ -9,7 +9,7 @@ __version__ = '0.0.1'
 __currentDir__ = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 VULKANSDKDIR = 'E:\\VulkanSDK\\1.1.106.0'
 CPPFILES = [i for i in os.listdir(__currentDir__) if i.lower().endswith('.cpp')]
-    
+
 
 
 
@@ -43,7 +43,8 @@ ext_modules = [
             os.path.join(VULKANSDKDIR, 'Lib')
         ],
         libraries=[
-            "vulkan-1"
+            "vulkan-1",
+            "User32"
         ],
         language='c++'
     ),

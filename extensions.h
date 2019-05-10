@@ -1,8 +1,16 @@
 #pragma once
 
+#if defined(_WIN32)
+
+#define VK_USE_PLATFORM_WIN32_KHR
+
+#endif
+
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <vulkan/vulkan.h>
+
 
 
 namespace py = pybind11;
@@ -10,6 +18,7 @@ namespace py = pybind11;
 
 #ifndef EXTENSIONS_H
 #define EXTENSIONS_H
+
 
 
 
@@ -28,7 +37,7 @@ public:
 
 
 private:
-	VkInstance _instance;
+	VkInstance _instance = VK_NULL_HANDLE;
 
 	VkDebugUtilsMessengerEXT vkHandle = VK_NULL_HANDLE;
 	//VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
@@ -41,6 +50,30 @@ private:
 	// function pointer
 	PFN_vkCreateDebugUtilsMessengerEXT _vkCreateDebugUtilsMessengerEXT = nullptr;
 	PFN_vkDestroyDebugUtilsMessengerEXT _vkDestroyDebugUtilsMessengerEXT = nullptr;
+};
+
+
+class SurfaceKHR
+{
+public:
+	SurfaceKHR();
+	SurfaceKHR(VkInstance &instance, py::dict createInfo);
+	~SurfaceKHR();
+
+	bool create(py::dict createInfo);
+	void destroy();
+
+	bool isValid();
+
+	VkSurfaceKHR vkHandle = VK_NULL_HANDLE;
+private:
+	VkInstance _instance = VK_NULL_HANDLE;
+
+	//bool _isValid = false;
+
+	// function pointer
+	PFN_vkCreateWin32SurfaceKHR _createWin32Surface = nullptr;
+	PFN_vkDestroySurfaceKHR _destroySurfaceKHR = nullptr;
 };
 
 

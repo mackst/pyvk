@@ -1,6 +1,7 @@
 #include "device.h"
 #include "utils.h"
 #include "exception.h"
+#include "extensions.h"
 
 
 PhysicalDevice::PhysicalDevice()
@@ -12,7 +13,7 @@ PhysicalDevice::PhysicalDevice(VkInstance & instance, VkPhysicalDevice & device)
 	_vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties");
 	_vkGetPhysicalDeviceProperties2 = (PFN_vkGetPhysicalDeviceProperties2)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties2");
 	_vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceQueueFamilyProperties");
-
+	_vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
 
 }
 
@@ -30,7 +31,7 @@ bool PhysicalDevice::isValid()
 std::string PhysicalDevice::toString()
 {
 	auto properties = getProperties();
-	std::string a = "<class PhysicalDevice for " + properties["deviceName"].cast<std::string>() + ">";
+	std::string a = "<PhysicalDevice() for " + properties["deviceName"].cast<std::string>() + ">";
 	return a;
 }
 
@@ -79,6 +80,13 @@ py::list PhysicalDevice::getQueueFamilyProperties()
 	}
 
 	return out;
+}
+
+bool PhysicalDevice::getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex)
+{
+	VkBool32 support = false;
+	checkVKResult(_vkGetPhysicalDeviceSurfaceSupportKHR(vkHandle, queueFamilyIndex, surface.vkHandle, &support));
+	return support;
 }
 
 
@@ -172,6 +180,7 @@ void Device::destroy()
 	{
 		_vkDestroyDevice(vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
+		_physicalDevice = {};
 	}
 }
 

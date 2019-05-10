@@ -18,6 +18,8 @@ PYBIND11_MODULE(_vk, m)
 		.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, 
 			py::arg("messageSeverity"), py::arg("messageType"), py::arg("userCallback"),
 			py::return_value_policy::reference)
+		.def("createSurface", &Instance::createSurface, py::arg("createInfo"), 
+			py::return_value_policy::reference)
 		.def("getPhysicalDevices", &Instance::getPhysicalDevices)
 		.def_property_readonly("isValid", &Instance::isValid)
 		.def_static("version", &Instance::version)
@@ -27,6 +29,7 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<PhysicalDevice> PhysicalDeviceClass(m, "PhysicalDevice");
 	PhysicalDeviceClass
 		.def(py::init<>())
+		.def("getSurfaceSupportKHR", &PhysicalDevice::getSurfaceSupportKHR, py::arg("surface"), py::arg("queueFamilyIndex"))
 		.def("__repr__", &PhysicalDevice::toString)
 		.def_property_readonly("isValid", &PhysicalDevice::isValid)
 		.def_property_readonly("properties", &PhysicalDevice::getProperties)
@@ -134,6 +137,10 @@ PYBIND11_MODULE(_vk, m)
 
 
 	// extensions
+	
+	py::class_<SurfaceKHR>(m, "SurfaceKHR")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &SurfaceKHR::isValid);
 
 	py::class_<DebugUtilsMessengerEXT> DebugUtilsMessengerClass(m, "DebugUtilsMessengerEXT");
 	DebugUtilsMessengerClass

@@ -89,7 +89,16 @@ bool Instance::create()
 void Instance::destroy()
 {
 	if (_debugMessenger != nullptr)
+	{
 		_debugMessenger->destroy();
+		_debugMessenger = nullptr;
+	}
+		
+	if (_surfaceKHR != nullptr)
+	{
+		_surfaceKHR->destroy();
+		_surfaceKHR = nullptr;
+	}
 
 	if (vkHandle == VK_NULL_HANDLE)
 		return;
@@ -107,6 +116,13 @@ DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(int messageSeveri
 {
 	_debugMessenger = new DebugUtilsMessengerEXT(vkHandle, messageSeverity, messageType, userCallback);
 	return _debugMessenger;
+}
+
+SurfaceKHR * Instance::createSurface(py::dict createInfo)
+{
+	_surfaceKHR = new SurfaceKHR(vkHandle, createInfo);
+	return _surfaceKHR;
+	//return new SurfaceKHR(vkHandle, createInfo);
 }
 
 py::list Instance::getPhysicalDevices()

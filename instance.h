@@ -1,5 +1,11 @@
 #pragma once
 
+#if defined(_WIN32)
+
+#define VK_USE_PLATFORM_WIN32_KHR
+
+#endif
+
 #ifndef INSTANCE_H
 #define INSTANCE_H
 
@@ -30,6 +36,7 @@ public:
 	void destroy();
 
 	DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback);
+	SurfaceKHR* createSurface(py::dict createInfo);
 	py::list getPhysicalDevices();
 
 	bool isValid();
@@ -44,7 +51,8 @@ private:
 	void getInstanceFuncPointers();
 
 	VkInstanceCreateInfo _createInfo = {};
-	DebugUtilsMessengerEXT * _debugMessenger = nullptr;
+	DebugUtilsMessengerEXT *_debugMessenger = nullptr;
+	SurfaceKHR *_surfaceKHR = nullptr;
 
 	PFN_vkEnumeratePhysicalDevices _vkEnumeratePhysicalDevices = VK_NULL_HANDLE;
 };

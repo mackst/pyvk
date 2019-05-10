@@ -1,4 +1,11 @@
 #pragma once
+
+#if defined(_WIN32)
+
+#define VK_USE_PLATFORM_WIN32_KHR
+
+#endif
+
 #include <vector>
 #include <string>
 #include <pybind11/pybind11.h>
@@ -6,6 +13,9 @@
 #include <vulkan/vulkan.h>
 
 namespace py = pybind11;
+
+
+class SurfaceKHR;
 
 
 #ifndef DEVICE_H
@@ -26,6 +36,7 @@ public:
 	py::dict getProperties();
 	py::dict getProperties2();
 	py::list getQueueFamilyProperties();
+	bool getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex);
 
 	VkInstance _instance;
 	VkPhysicalDevice vkHandle = VK_NULL_HANDLE;
@@ -34,6 +45,7 @@ private:
 	PFN_vkGetPhysicalDeviceProperties _vkGetPhysicalDeviceProperties = nullptr;
 	PFN_vkGetPhysicalDeviceProperties2 _vkGetPhysicalDeviceProperties2 = nullptr;
 	PFN_vkGetPhysicalDeviceQueueFamilyProperties _vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
+	PFN_vkGetPhysicalDeviceSurfaceSupportKHR _vkGetPhysicalDeviceSurfaceSupportKHR = nullptr;
 
 };
 
