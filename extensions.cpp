@@ -87,6 +87,9 @@ bool SurfaceKHR::create(py::dict createInfo)
 {
 
 #if defined(_WIN32)
+	if (_createWin32Surface == nullptr)
+		throw ExtensionNotPresent("VK_KHR_win32_surface not present.");
+
 	HWND winId = (HWND)createInfo["winId"].cast<LONG>();
 	HINSTANCE hinstance = (HINSTANCE)GetWindowLongA(winId, -6);
 

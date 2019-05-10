@@ -14,7 +14,8 @@ PhysicalDevice::PhysicalDevice(VkInstance & instance, VkPhysicalDevice & device)
 	_vkGetPhysicalDeviceProperties2 = (PFN_vkGetPhysicalDeviceProperties2)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties2");
 	_vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceQueueFamilyProperties");
 	_vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
-
+	_vkEnumerateDeviceLayerProperties = (PFN_vkEnumerateDeviceLayerProperties)vkGetInstanceProcAddr(_instance, "vkEnumerateDeviceLayerProperties");
+	_vkEnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)vkGetInstanceProcAddr(_instance, "vkEnumerateDeviceExtensionProperties");
 }
 
 PhysicalDevice::~PhysicalDevice()
@@ -58,6 +59,60 @@ py::dict PhysicalDevice::getProperties2()
 	return py::dict();
 }
 
+py::list PhysicalDevice::layerProperties()
+{
+	py::list properties;
+	std::vector<VkLayerProperties> layerProperties;
+	uint32_t propertieCount;
+
+	if (!isValid())
+		return properties;
+
+	checkVKResult(_vkEnumerateDeviceLayerProperties(vkHandle, &propertieCount, nullptr));
+
+	layerProperties.resize(propertieCount);
+	checkVKResult(_vkEnumerateDeviceLayerProperties(vkHandle, &propertieCount, layerProperties.data()));
+
+	for (auto item : layerProperties)
+	{
+		py::dict lp;
+		lp["layerName"] = py::str(item.layerName);
+		lp["specVersion"] = py::int_(item.specVersion);
+		lp["implementationVersion"] = py::int_(item.implementationVersion);
+		lp["description"] = py::str(item.description);
+
+		properties.append(lp);
+	}
+
+	return properties;
+}
+
+py::list PhysicalDevice::extensionProperties(const char * layerName)
+{
+	py::list extProperties;
+	uint32_t propertyCount;
+	std::vector<VkExtensionProperties> properties;
+
+	if (!isValid())
+		return extProperties;
+
+	checkVKResult(_vkEnumerateDeviceExtensionProperties(vkHandle, layerName, &propertyCount, nullptr));
+
+	properties.resize(propertyCount);
+	checkVKResult(_vkEnumerateDeviceExtensionProperties(vkHandle, layerName, &propertyCount, properties.data()));
+
+	for (auto item : properties)
+	{
+		py::dict prop;
+		prop["extensionName"] = py::str(item.extensionName);
+		prop["specVersion"] = py::int_(item.specVersion);
+
+		extProperties.append(prop);
+	}
+
+	return extProperties;
+}
+
 py::list PhysicalDevice::getQueueFamilyProperties()
 {
 	py::list out;
@@ -82,7 +137,7 @@ py::list PhysicalDevice::getQueueFamilyProperties()
 	return out;
 }
 
-bool PhysicalDevice::getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex)
+VkBool32 PhysicalDevice::getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex)
 {
 	VkBool32 support = false;
 	checkVKResult(_vkGetPhysicalDeviceSurfaceSupportKHR(vkHandle, queueFamilyIndex, surface.vkHandle, &support));

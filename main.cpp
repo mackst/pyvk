@@ -30,6 +30,8 @@ PYBIND11_MODULE(_vk, m)
 	PhysicalDeviceClass
 		.def(py::init<>())
 		.def("getSurfaceSupportKHR", &PhysicalDevice::getSurfaceSupportKHR, py::arg("surface"), py::arg("queueFamilyIndex"))
+		.def("getLayerProperties", &PhysicalDevice::layerProperties)
+		.def("getExtensionProperties", &PhysicalDevice::extensionProperties, py::arg("layerName") = nullptr)
 		.def("__repr__", &PhysicalDevice::toString)
 		.def_property_readonly("isValid", &PhysicalDevice::isValid)
 		.def_property_readonly("properties", &PhysicalDevice::getProperties)

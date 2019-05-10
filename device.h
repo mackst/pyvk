@@ -35,13 +35,17 @@ public:
 
 	py::dict getProperties();
 	py::dict getProperties2();
+	py::list layerProperties();
+	py::list extensionProperties(const char* layerName = nullptr);
 	py::list getQueueFamilyProperties();
-	bool getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex);
+	VkBool32 getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex);
 
 	VkInstance _instance;
 	VkPhysicalDevice vkHandle = VK_NULL_HANDLE;
 
 private:
+	PFN_vkEnumerateDeviceExtensionProperties _vkEnumerateDeviceExtensionProperties = nullptr;
+	PFN_vkEnumerateDeviceLayerProperties _vkEnumerateDeviceLayerProperties = nullptr;
 	PFN_vkGetPhysicalDeviceProperties _vkGetPhysicalDeviceProperties = nullptr;
 	PFN_vkGetPhysicalDeviceProperties2 _vkGetPhysicalDeviceProperties2 = nullptr;
 	PFN_vkGetPhysicalDeviceQueueFamilyProperties _vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
