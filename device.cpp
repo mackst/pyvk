@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "exception.h"
 #include "extensions.h"
+#include "deviceQueue.h"
 
 
 PhysicalDevice::PhysicalDevice()
@@ -244,8 +245,15 @@ bool Device::isValid()
 	return vkHandle != VK_NULL_HANDLE;
 }
 
+DeviceQueue * Device::getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex)
+{
+	return new DeviceQueue(this, queueFamilyIndex, queueIndex);
+}
+
 void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");
 	_vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(vkHandle, "vkGetDeviceQueue");
 }
+
+

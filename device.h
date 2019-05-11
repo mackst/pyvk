@@ -16,6 +16,7 @@ namespace py = pybind11;
 
 
 class SurfaceKHR;
+class DeviceQueue;
 
 
 #ifndef DEVICE_H
@@ -55,6 +56,8 @@ private:
 
 
 
+
+
 class Device
 {
 public:
@@ -63,7 +66,9 @@ public:
 
 	bool create(py::dict createInfo);
 	void destroy();
+
 	bool isValid();
+	DeviceQueue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 private:
@@ -76,6 +81,9 @@ private:
 
 	void getFuncPointers();
 };
+
+
+
 
 
 #endif // !DEVICE_H

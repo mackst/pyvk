@@ -3,7 +3,7 @@
 #include <pybind11/functional.h>
 
 #include "instance.h"
-#include "device.h"
+#include "deviceQueue.h"
 
 
 
@@ -46,7 +46,12 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<Device>(m, "Device")
 		.def(py::init<PhysicalDevice&, py::dict>(), py::arg("physicalDevice"), py::arg("createInfo"))
+		.def("getQueue", &Device::getQueue)
 		.def_property_readonly("isValid", &Device::isValid);
+
+	py::class_<DeviceQueue>(m, "DeviceQueue")
+		.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
+		.def_property_readonly("isValid", &DeviceQueue::isValid);
 
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())

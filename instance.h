@@ -6,8 +6,7 @@
 
 #endif
 
-#ifndef INSTANCE_H
-#define INSTANCE_H
+
 
 
 //#include <vector>
@@ -23,6 +22,9 @@
 
 namespace py = pybind11;
 
+
+#ifndef INSTANCE_H
+#define INSTANCE_H
 
 
 class Instance
