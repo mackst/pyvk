@@ -53,6 +53,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
 		.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
 		.def("createImageView", &Device::createImageView, py::arg("createInfo"))
+		.def("createShaderModule", &Device::createShaderModule, py::arg("filename"))
 		.def_property_readonly("isValid", &Device::isValid);
 
 	py::class_<DeviceQueue>(m, "DeviceQueue")
@@ -71,6 +72,11 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<ImageView>(m, "ImageView")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &ImageView::isValid);
+
+	py::class_<ShaderModule>(m, "ShaderModule")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &ShaderModule::isValid);
+
 
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())

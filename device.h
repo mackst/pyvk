@@ -63,6 +63,21 @@ private:
 };
 
 
+class ShaderModule
+{
+public:
+	ShaderModule();
+	ShaderModule(VkDevice device, const std::string &filename);
+	~ShaderModule();
+
+	bool isValid();
+
+	VkShaderModule vkHandle = VK_NULL_HANDLE;
+private:
+	VkDevice _device = VK_NULL_HANDLE;
+	PFN_vkCreateShaderModule _vkCreateShaderModule = nullptr;
+	PFN_vkDestroyShaderModule _vkDestroyShaderModule = nullptr;
+};
 
 
 
@@ -80,6 +95,7 @@ public:
 	SwapchainKHR* createSwapchainKHR(py::dict createInfo);
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 	ImageView* createImageView(py::dict createInfo);
+	ShaderModule* createShaderModule(const std::string &filename);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 
