@@ -122,3 +122,11 @@ bool SurfaceKHR::isValid()
 {
 	return vkHandle != VK_NULL_HANDLE;
 }
+
+SwapchainKHR::SwapchainKHR()
+{
+}
+
+SwapchainKHR::~SwapchainKHR()
+{
+}

@@ -77,6 +77,20 @@ private:
 };
 
 
+class SwapchainKHR
+{
+public:
+	SwapchainKHR();
+	~SwapchainKHR();
+
+	VkSwapchainKHR vkHandle = VK_NULL_HANDLE;
+private:
+
+	PFN_vkCreateSwapchainKHR _vkCreateSwapchainKHR = nullptr;
+};
+
+
+
 
 
 #endif // !EXTENSIONS_H
