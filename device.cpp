@@ -305,6 +305,11 @@ ShaderModule * Device::createShaderModule(const std::string &filename)
 	return new ShaderModule(vkHandle, filename);
 }
 
+PipelineLayout * Device::createPipelineLayout(py::dict createInfo)
+{
+	return new PipelineLayout(vkHandle, createInfo);
+}
+
 void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");

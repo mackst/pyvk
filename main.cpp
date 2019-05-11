@@ -54,6 +54,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
 		.def("createImageView", &Device::createImageView, py::arg("createInfo"))
 		.def("createShaderModule", &Device::createShaderModule, py::arg("filename"))
+		.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo"))
 		.def_property_readonly("isValid", &Device::isValid);
 
 	py::class_<DeviceQueue>(m, "DeviceQueue")
@@ -76,6 +77,10 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<ShaderModule>(m, "ShaderModule")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &ShaderModule::isValid);
+
+	py::class_<PipelineLayout>(m, "PipelineLayout")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &PipelineLayout::isValid);
 
 
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
@@ -190,6 +195,12 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("levelCount", &VkImageSubresourceRange::levelCount)
 		.def_readwrite("baseArrayLayer", &VkImageSubresourceRange::baseArrayLayer)
 		.def_readwrite("layerCount", &VkImageSubresourceRange::layerCount);
+
+	py::class_<VkPushConstantRange>(m, "PushConstantRange")
+		.def(py::init<>())
+		.def_readwrite("stageFlags", &VkPushConstantRange::stageFlags)
+		.def_readwrite("offset", &VkPushConstantRange::offset)
+		.def_readwrite("size", &VkPushConstantRange::size);
 
 	// enums
 	py::enum_<VkQueueFlagBits>(m, "QueueFlagBits", py::arithmetic())
@@ -545,6 +556,23 @@ PYBIND11_MODULE(_vk, m)
 		.value("PLANE_0_BIT_KHR", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_0_BIT_KHR)
 		.value("PLANE_1_BIT_KHR", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_1_BIT_KHR)
 		.value("PLANE_2_BIT_KHR", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_2_BIT_KHR);
+	py::enum_<VkShaderStageFlagBits>(m, "ShaderStageFlagBits")
+		.value("VK_SHADER_STAGE_VERTEX_BIT", VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT)
+		.value("VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT", VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT)
+		.value("VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT", VkShaderStageFlagBits::VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
+		.value("VK_SHADER_STAGE_GEOMETRY_BIT", VkShaderStageFlagBits::VK_SHADER_STAGE_GEOMETRY_BIT)
+		.value("VK_SHADER_STAGE_FRAGMENT_BIT", VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT)
+		.value("VK_SHADER_STAGE_COMPUTE_BIT", VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT)
+		.value("VK_SHADER_STAGE_ALL_GRAPHICS", VkShaderStageFlagBits::VK_SHADER_STAGE_ALL_GRAPHICS)
+		.value("VK_SHADER_STAGE_ALL", VkShaderStageFlagBits::VK_SHADER_STAGE_ALL)
+		.value("VK_SHADER_STAGE_RAYGEN_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_NV)
+		.value("VK_SHADER_STAGE_ANY_HIT_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_NV)
+		.value("VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV)
+		.value("VK_SHADER_STAGE_MISS_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_NV)
+		.value("VK_SHADER_STAGE_INTERSECTION_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_NV)
+		.value("VK_SHADER_STAGE_CALLABLE_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_NV)
+		.value("VK_SHADER_STAGE_TASK_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_NV)
+		.value("VK_SHADER_STAGE_MESH_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_NV);
 
 	// extensions
 	

@@ -13,6 +13,7 @@
 #include <vulkan/vulkan.h>
 
 #include "image.h"
+#include "pipeline.h"
 
 namespace py = pybind11;
 
@@ -96,6 +97,7 @@ public:
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 	ImageView* createImageView(py::dict createInfo);
 	ShaderModule* createShaderModule(const std::string &filename);
+	PipelineLayout* createPipelineLayout(py::dict createInfo);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 
