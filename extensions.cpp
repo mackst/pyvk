@@ -1,6 +1,7 @@
 #include "extensions.h"
 #include "instance.h"
 #include "exception.h"
+#include "vktypes.h"
 
 
 py::function DebugUtilsMessengerEXT::pycallback;
@@ -135,7 +136,7 @@ SwapchainKHR::SwapchainKHR(Device * device, py::dict createInfo) : _device(devic
 		throw ExtensionNotPresent("VK_KHR_swapchain not present");
 
 	_vkDestroySwapchainKHR = (PFN_vkDestroySwapchainKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkDestroySwapchainKHR");
-
+	_vkGetSwapchainImagesKHR = (PFN_vkGetSwapchainImagesKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkGetSwapchainImagesKHR");
 
 	_surface = createInfo["surface"].cast<SurfaceKHR*>();
 	std::vector<uint32_t> queueFamilyIndices = createInfo["queueFamilyIndices"].cast<std::vector<uint32_t>>();
@@ -190,4 +191,26 @@ SwapchainKHR::~SwapchainKHR()
 bool SwapchainKHR::isValid()
 {
 	return vkHandle != VK_NULL_HANDLE;
+}
+
+py::list SwapchainKHR::getImagesKHR()
+{
+	py::list images;
+	if (_device == nullptr || !isValid() || _vkGetSwapchainImagesKHR == nullptr)
+		return images;
+
+	uint32_t count;
+	checkVKResult(_vkGetSwapchainImagesKHR(_device->vkHandle, vkHandle, &count, nullptr));
+
+	std::vector<VkImage> _images(count);
+	checkVKResult(_vkGetSwapchainImagesKHR(_device->vkHandle, vkHandle, &count, _images.data()));
+
+	for (auto item : _images)
+	{
+		Image im;
+		im.vkHandle = item;
+		images.append(im);
+	}
+
+	return images;
 }

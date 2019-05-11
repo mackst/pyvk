@@ -4,6 +4,7 @@
 
 #include "instance.h"
 #include "deviceQueue.h"
+#include "vktypes.h"
 
 
 
@@ -59,7 +60,12 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<SwapchainKHR>(m, "SwapchainKHR")
 		.def(py::init<Device*, py::dict>())
+		.def("getImagesKHR", &SwapchainKHR::getImagesKHR)
 		.def_property_readonly("isValid", &SwapchainKHR::isValid);
+
+	py::class_<Image>(m, "Image")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Image::isValid);
 
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())

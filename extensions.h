@@ -89,6 +89,8 @@ public:
 
 	bool isValid();
 
+	py::list getImagesKHR();
+
 	VkSwapchainKHR vkHandle = VK_NULL_HANDLE;
 private:
 	Device *_device = nullptr;
@@ -96,6 +98,7 @@ private:
 
 	PFN_vkCreateSwapchainKHR _vkCreateSwapchainKHR = nullptr;
 	PFN_vkDestroySwapchainKHR _vkDestroySwapchainKHR = nullptr;
+	PFN_vkGetSwapchainImagesKHR _vkGetSwapchainImagesKHR = nullptr;
 };
 
 
