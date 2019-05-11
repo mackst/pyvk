@@ -1,4 +1,4 @@
-#include "vktypes.h"
+#include "image.h"
 
 Image::Image()
 {

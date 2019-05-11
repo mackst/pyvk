@@ -4,7 +4,7 @@
 
 #include "instance.h"
 #include "deviceQueue.h"
-#include "vktypes.h"
+#include "image.h"
 
 
 
