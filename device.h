@@ -17,6 +17,7 @@ namespace py = pybind11;
 
 class SurfaceKHR;
 class DeviceQueue;
+class SwapchainKHR;
 
 
 #ifndef DEVICE_H
@@ -74,6 +75,7 @@ public:
 
 	bool isValid();
 	DeviceQueue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
+	SwapchainKHR* createSwapchainKHR(py::dict createInfo);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 private:

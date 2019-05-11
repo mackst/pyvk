@@ -50,11 +50,16 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<Device>(m, "Device")
 		.def(py::init<PhysicalDevice&, py::dict>(), py::arg("physicalDevice"), py::arg("createInfo"))
 		.def("getQueue", &Device::getQueue)
+		.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
 		.def_property_readonly("isValid", &Device::isValid);
 
 	py::class_<DeviceQueue>(m, "DeviceQueue")
 		.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
 		.def_property_readonly("isValid", &DeviceQueue::isValid);
+
+	py::class_<SwapchainKHR>(m, "SwapchainKHR")
+		.def(py::init<Device*, py::dict>())
+		.def_property_readonly("isValid", &SwapchainKHR::isValid);
 
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())
@@ -474,6 +479,9 @@ PYBIND11_MODULE(_vk, m)
 		.value("EXTENDED_SRGB_NONLINEAR_EXT", VkColorSpaceKHR::VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT)
 		.value("DISPLAY_NATIVE_AMD", VkColorSpaceKHR::VK_COLOR_SPACE_DISPLAY_NATIVE_AMD)
 		.value("SRGB_NONLINEAR_KHR", VkColorSpaceKHR::VK_COLORSPACE_SRGB_NONLINEAR_KHR);
+	py::enum_<VkSharingMode>(m, "SharingMode")
+		.value("CONCURRENT", VkSharingMode::VK_SHARING_MODE_CONCURRENT)
+		.value("EXCLUSIVE", VkSharingMode::VK_SHARING_MODE_EXCLUSIVE);
 
 	// extensions
 	

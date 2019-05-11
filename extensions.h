@@ -16,6 +16,9 @@
 namespace py = pybind11;
 
 
+class Device;
+
+
 #ifndef EXTENSIONS_H
 #define EXTENSIONS_H
 
@@ -81,12 +84,18 @@ class SwapchainKHR
 {
 public:
 	SwapchainKHR();
+	SwapchainKHR(Device *device, py::dict createInfo);
 	~SwapchainKHR();
+
+	bool isValid();
 
 	VkSwapchainKHR vkHandle = VK_NULL_HANDLE;
 private:
+	Device *_device = nullptr;
+	SurfaceKHR *_surface = nullptr;
 
 	PFN_vkCreateSwapchainKHR _vkCreateSwapchainKHR = nullptr;
+	PFN_vkDestroySwapchainKHR _vkDestroySwapchainKHR = nullptr;
 };
 
 

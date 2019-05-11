@@ -285,6 +285,11 @@ DeviceQueue * Device::getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex)
 	return new DeviceQueue(this, queueFamilyIndex, queueIndex);
 }
 
+SwapchainKHR * Device::createSwapchainKHR(py::dict createInfo)
+{
+	return new SwapchainKHR(this, createInfo);
+}
+
 void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");
