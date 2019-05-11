@@ -52,6 +52,7 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<PhysicalDevice&, py::dict>(), py::arg("physicalDevice"), py::arg("createInfo"))
 		.def("getQueue", &Device::getQueue)
 		.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
+		.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
 		.def_property_readonly("isValid", &Device::isValid);
 
 	py::class_<DeviceQueue>(m, "DeviceQueue")

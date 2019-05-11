@@ -76,6 +76,7 @@ public:
 	bool isValid();
 	DeviceQueue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
 	SwapchainKHR* createSwapchainKHR(py::dict createInfo);
+	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 private:

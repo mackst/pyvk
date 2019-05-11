@@ -290,6 +290,11 @@ SwapchainKHR * Device::createSwapchainKHR(py::dict createInfo)
 	return new SwapchainKHR(this, createInfo);
 }
 
+py::list Device::getSwapchainImagesKHR(SwapchainKHR & swapchain)
+{
+	return swapchain.getImagesKHR();
+}
+
 void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");
