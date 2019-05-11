@@ -4,7 +4,6 @@
 
 #include "instance.h"
 #include "deviceQueue.h"
-#include "image.h"
 
 
 
@@ -53,6 +52,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("getQueue", &Device::getQueue)
 		.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
 		.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
+		.def("createImageView", &Device::createImageView, py::arg("createInfo"))
 		.def_property_readonly("isValid", &Device::isValid);
 
 	py::class_<DeviceQueue>(m, "DeviceQueue")
@@ -67,6 +67,10 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<Image>(m, "Image")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &Image::isValid);
+
+	py::class_<ImageView>(m, "ImageView")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &ImageView::isValid);
 
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())
@@ -165,6 +169,21 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("width", &VkExtent3D::width)
 		.def_readwrite("height", &VkExtent3D::height)
 		.def_readwrite("depth", &VkExtent3D::depth);
+
+	py::class_<VkComponentMapping>(m, "ComponentMapping")
+		.def(py::init<>())
+		.def_readwrite("r", &VkComponentMapping::r)
+		.def_readwrite("g", &VkComponentMapping::g)
+		.def_readwrite("b", &VkComponentMapping::b)
+		.def_readwrite("a", &VkComponentMapping::a);
+
+	py::class_<VkImageSubresourceRange>(m, "ImageSubresourceRange")
+		.def(py::init<>())
+		.def_readwrite("aspectMask", &VkImageSubresourceRange::aspectMask)
+		.def_readwrite("baseMipLevel", &VkImageSubresourceRange::baseMipLevel)
+		.def_readwrite("levelCount", &VkImageSubresourceRange::levelCount)
+		.def_readwrite("baseArrayLayer", &VkImageSubresourceRange::baseArrayLayer)
+		.def_readwrite("layerCount", &VkImageSubresourceRange::layerCount);
 
 	// enums
 	py::enum_<VkQueueFlagBits>(m, "QueueFlagBits", py::arithmetic())
@@ -489,6 +508,37 @@ PYBIND11_MODULE(_vk, m)
 	py::enum_<VkSharingMode>(m, "SharingMode")
 		.value("CONCURRENT", VkSharingMode::VK_SHARING_MODE_CONCURRENT)
 		.value("EXCLUSIVE", VkSharingMode::VK_SHARING_MODE_EXCLUSIVE);
+	py::enum_<VkImageViewType>(m, "ImageViewType")
+		.value("TYPE_1D", VkImageViewType::VK_IMAGE_VIEW_TYPE_1D)
+		.value("TYPE_2D", VkImageViewType::VK_IMAGE_VIEW_TYPE_2D)
+		.value("TYPE_3D", VkImageViewType::VK_IMAGE_VIEW_TYPE_3D)
+		.value("TYPE_CUBE", VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE)
+		.value("TYPE_1D_ARRAY", VkImageViewType::VK_IMAGE_VIEW_TYPE_1D_ARRAY)
+		.value("TYPE_2D_ARRAY", VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY)
+		.value("TYPE_CUBE_ARRAY", VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE_ARRAY);
+	py::enum_<VkComponentSwizzle>(m, "ComponentSwizzle")
+		.value("IDENTITY", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_IDENTITY)
+		.value("ZERO", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_ZERO)
+		.value("ONE", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_ONE)
+		.value("R", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_R)
+		.value("G", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_G)
+		.value("B", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_B)
+		.value("A", VkComponentSwizzle::VK_COMPONENT_SWIZZLE_A);
+	py::enum_<VkImageAspectFlagBits>(m, "ImageAspectFlagBits")
+		.value("COLOR_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)
+		.value("DEPTH_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)
+		.value("STENCIL_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_STENCIL_BIT)
+		.value("METADATA_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_METADATA_BIT)
+		.value("PLANE_0_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_0_BIT)
+		.value("PLANE_1_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_1_BIT)
+		.value("PLANE_2_BIT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_2_BIT)
+		.value("MEMORY_PLANE_0_BIT_EXT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT)
+		.value("MEMORY_PLANE_1_BIT_EXT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT)
+		.value("MEMORY_PLANE_2_BIT_EXT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT)
+		.value("MEMORY_PLANE_3_BIT_EXT", VkImageAspectFlagBits::VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT)
+		.value("PLANE_0_BIT_KHR", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_0_BIT_KHR)
+		.value("PLANE_1_BIT_KHR", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_1_BIT_KHR)
+		.value("PLANE_2_BIT_KHR", VkImageAspectFlagBits::VK_IMAGE_ASPECT_PLANE_2_BIT_KHR);
 
 	// extensions
 	

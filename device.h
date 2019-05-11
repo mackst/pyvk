@@ -12,6 +12,8 @@
 #include <pybind11/stl.h>
 #include <vulkan/vulkan.h>
 
+#include "image.h"
+
 namespace py = pybind11;
 
 
@@ -77,15 +79,19 @@ public:
 	DeviceQueue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
 	SwapchainKHR* createSwapchainKHR(py::dict createInfo);
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
+	ImageView* createImageView(py::dict createInfo);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
-private:
-	PhysicalDevice _physicalDevice;
 
-
+protected:
 	PFN_vkCreateDevice _vkCreateDevice = nullptr;
 	PFN_vkDestroyDevice _vkDestroyDevice = nullptr;
 	PFN_vkGetDeviceQueue _vkGetDeviceQueue = nullptr;
+	PFN_vkCreateImageView _vkCreateImageView = nullptr;
+	PFN_vkDestroyImageView _vkDestroyImageView = nullptr;
+
+private:
+	PhysicalDevice _physicalDevice;
 
 	void getFuncPointers();
 };

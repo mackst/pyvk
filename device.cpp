@@ -295,10 +295,16 @@ py::list Device::getSwapchainImagesKHR(SwapchainKHR & swapchain)
 	return swapchain.getImagesKHR();
 }
 
+ImageView* Device::createImageView(py::dict createInfo)
+{
+	return new ImageView(vkHandle, createInfo);
+}
+
 void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");
 	_vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(vkHandle, "vkGetDeviceQueue");
+	_vkCreateImageView = (PFN_vkCreateImageView)vkGetDeviceProcAddr(vkHandle, "vkCreateImageView");
 }
 
 
