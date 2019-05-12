@@ -310,6 +310,11 @@ PipelineLayout * Device::createPipelineLayout(py::dict createInfo)
 	return new PipelineLayout(vkHandle, createInfo);
 }
 
+RenderPass * Device::createRenderPass(RenderPassCreateInfo & createInfo)
+{
+	return new RenderPass(vkHandle, createInfo);
+}
+
 void Device::getFuncPointers()
 {
 	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");

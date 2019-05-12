@@ -14,6 +14,7 @@
 
 #include "image.h"
 #include "pipeline.h"
+#include "renderpass.h"
 
 namespace py = pybind11;
 
@@ -98,6 +99,7 @@ public:
 	ImageView* createImageView(py::dict createInfo);
 	ShaderModule* createShaderModule(const std::string &filename);
 	PipelineLayout* createPipelineLayout(py::dict createInfo);
+	RenderPass* createRenderPass(RenderPassCreateInfo &createInfo);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 
