@@ -4,6 +4,7 @@
 
 #include "instance.h"
 #include "deviceQueue.h"
+#include "vktypes.h"
 
 
 
@@ -161,25 +162,40 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<VkOffset2D>(m, "Offset2D")
 		.def(py::init<>())
+		.def(py::init(&getOffset2D))
 		.def_readwrite("x", &VkOffset2D::x)
-		.def_readwrite("y", &VkOffset2D::y);
+		.def_readwrite("y", &VkOffset2D::y)
+		.def("__repr__", &offset2DToString);
 
-	py::class_<VkOffset3D>(m, "Offset2D3D")
+	py::class_<VkOffset3D>(m, "Offset3D")
 		.def(py::init<>())
+		.def(py::init(&getOffset3D))
 		.def_readwrite("x", &VkOffset3D::x)
 		.def_readwrite("y", &VkOffset3D::y)
-		.def_readwrite("z", &VkOffset3D::z);
+		.def_readwrite("z", &VkOffset3D::z)
+		.def("__repr__", &offset3DToString);
 
 	py::class_<VkExtent2D>(m, "Extent2D")
 		.def(py::init<>())
+		.def(py::init(&getExtent2D))
 		.def_readwrite("width", &VkExtent2D::width)
-		.def_readwrite("height", &VkExtent2D::height);
+		.def_readwrite("height", &VkExtent2D::height)
+		.def("__repr__", &extent2DToString);
 
 	py::class_<VkExtent3D>(m, "Extent3D")
 		.def(py::init<>())
+		.def(py::init(&getExtent3D))
 		.def_readwrite("width", &VkExtent3D::width)
 		.def_readwrite("height", &VkExtent3D::height)
-		.def_readwrite("depth", &VkExtent3D::depth);
+		.def_readwrite("depth", &VkExtent3D::depth)
+		.def("__repr__", &extent3DToString);
+
+	py::class_<VkRect2D>(m, "Rect2D")
+		.def(py::init<>())
+		.def(py::init(&getRect2D))
+		.def_readwrite("offset", &VkRect2D::offset)
+		.def_readwrite("extent", &VkRect2D::extent)
+		.def("__repr__", &rect2DToString);
 
 	py::class_<VkComponentMapping>(m, "ComponentMapping")
 		.def(py::init<>())
@@ -201,6 +217,47 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("stageFlags", &VkPushConstantRange::stageFlags)
 		.def_readwrite("offset", &VkPushConstantRange::offset)
 		.def_readwrite("size", &VkPushConstantRange::size);
+
+	py::class_<VkVertexInputBindingDescription>(m, "VertexInputBindingDescription")
+		.def(py::init<>())
+		.def_readwrite("binding", &VkVertexInputBindingDescription::binding)
+		.def_readwrite("stride", &VkVertexInputBindingDescription::stride)
+		.def_readwrite("inputRate", &VkVertexInputBindingDescription::inputRate);
+
+	py::class_<VkVertexInputAttributeDescription>(m, "VertexInputAttributeDescription")
+		.def(py::init<>())
+		.def_readwrite("location", &VkVertexInputAttributeDescription::location)
+		.def_readwrite("binding", &VkVertexInputAttributeDescription::binding)
+		.def_readwrite("format", &VkVertexInputAttributeDescription::format)
+		.def_readwrite("offset", &VkVertexInputAttributeDescription::offset);
+
+	py::class_<VkViewport>(m, "Viewport")
+		.def(py::init<>())
+		.def(py::init(&getViewport))
+		.def_readwrite("x", &VkViewport::x)
+		.def_readwrite("y", &VkViewport::y)
+		.def_readwrite("width", &VkViewport::width)
+		.def_readwrite("height", &VkViewport::height)
+		.def_readwrite("minDepth", &VkViewport::minDepth)
+		.def_readwrite("maxDepth", &VkViewport::maxDepth)
+		.def("__repr__", &viewportToString);
+
+	py::class_<VkAttachmentDescription>(m, "AttachmentDescription")
+		.def(py::init<>())
+		.def_readwrite("flags", &VkAttachmentDescription::flags)
+		.def_readwrite("format", &VkAttachmentDescription::format)
+		.def_readwrite("samples", &VkAttachmentDescription::samples)
+		.def_readwrite("loadOp", &VkAttachmentDescription::loadOp)
+		.def_readwrite("storeOp", &VkAttachmentDescription::storeOp)
+		.def_readwrite("stencilLoadOp", &VkAttachmentDescription::stencilLoadOp)
+		.def_readwrite("stencilStoreOp", &VkAttachmentDescription::stencilStoreOp)
+		.def_readwrite("initialLayout", &VkAttachmentDescription::initialLayout)
+		.def_readwrite("finalLayout", &VkAttachmentDescription::finalLayout);
+
+	py::class_<VkAttachmentReference>(m, "AttachmentReference")
+		.def(py::init<>())
+		.def_readwrite("attachment", &VkAttachmentReference::attachment)
+		.def_readwrite("layout", &VkAttachmentReference::layout);
 
 	// enums
 	py::enum_<VkQueueFlagBits>(m, "QueueFlagBits", py::arithmetic())
@@ -573,6 +630,172 @@ PYBIND11_MODULE(_vk, m)
 		.value("VK_SHADER_STAGE_CALLABLE_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_NV)
 		.value("VK_SHADER_STAGE_TASK_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_TASK_BIT_NV)
 		.value("VK_SHADER_STAGE_MESH_BIT_NV", VkShaderStageFlagBits::VK_SHADER_STAGE_MESH_BIT_NV);
+	py::enum_<VkVertexInputRate>(m, "VertexInputRate")
+		.value("VERTEX", VkVertexInputRate::VK_VERTEX_INPUT_RATE_VERTEX)
+		.value("INSTANCE", VkVertexInputRate::VK_VERTEX_INPUT_RATE_INSTANCE);
+	py::enum_<VkPrimitiveTopology>(m, "PrimitiveTopology")
+		.value("POINT_LIST", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
+		.value("LINE_LIST", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST)
+		.value("LINE_STRIP", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_STRIP)
+		.value("TRIANGLE_LIST", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+		.value("TRIANGLE_STRIP", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP)
+		.value("TRIANGLE_FAN", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN)
+		.value("LINE_LIST_WITH_ADJACENCY", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY)
+		.value("LINE_STRIP_WITH_ADJACENCY", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY)
+		.value("TRIANGLE_LIST_WITH_ADJACENCY", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY)
+		.value("TRIANGLE_STRIP_WITH_ADJACENCY", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY)
+		.value("PATCH_LIST", VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_PATCH_LIST);
+	py::enum_<VkPolygonMode>(m, "PolygonMode")
+		.value("POINT", VkPolygonMode::VK_POLYGON_MODE_POINT)
+		.value("LINE", VkPolygonMode::VK_POLYGON_MODE_LINE)
+		.value("FILL", VkPolygonMode::VK_POLYGON_MODE_FILL)
+		.value("FILL_RECTANGLE_NV", VkPolygonMode::VK_POLYGON_MODE_FILL_RECTANGLE_NV);
+	py::enum_<VkCullModeFlagBits>(m, "CullModeFlagBits")
+		.value("NONE", VkCullModeFlagBits::VK_CULL_MODE_NONE)
+		.value("FRONT_BIT", VkCullModeFlagBits::VK_CULL_MODE_FRONT_BIT)
+		.value("BACK_BIT", VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT)
+		.value("FRONT_AND_BACK", VkCullModeFlagBits::VK_CULL_MODE_FRONT_AND_BACK);
+	py::enum_<VkFrontFace>(m, "FrontFace")
+		.value("COUNTER_CLOCKWISE", VkFrontFace::VK_FRONT_FACE_COUNTER_CLOCKWISE)
+		.value("CLOCKWISE", VkFrontFace::VK_FRONT_FACE_CLOCKWISE);
+	py::enum_<VkSampleCountFlagBits>(m, "SampleCountFlagBits")
+		.value("COUNT_1_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT)
+		.value("COUNT_2_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_2_BIT)
+		.value("COUNT_4_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_4_BIT)
+		.value("COUNT_8_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_8_BIT)
+		.value("COUNT_16_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_16_BIT)
+		.value("COUNT_32_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_32_BIT)
+		.value("COUNT_64_BIT", VkSampleCountFlagBits::VK_SAMPLE_COUNT_64_BIT);
+	py::enum_<VkBlendFactor>(m, "BlendFactor")
+		.value("ZERO", VkBlendFactor::VK_BLEND_FACTOR_ZERO)
+		.value("ONE", VkBlendFactor::VK_BLEND_FACTOR_ONE)
+		.value("SRC_COLOR", VkBlendFactor::VK_BLEND_FACTOR_SRC_COLOR)
+		.value("DST_COLOR", VkBlendFactor::VK_BLEND_FACTOR_DST_COLOR)
+		.value("ONE_MINUS_SRC_COLOR", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR)
+		.value("ONE_MINUS_DST_COLOR", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR)
+		.value("SRC_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_SRC_ALPHA)
+		.value("ONE_MINUS_SRC_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA)
+		.value("DST_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_DST_ALPHA)
+		.value("ONE_MINUS_DST_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA)
+		.value("CONSTANT_COLOR", VkBlendFactor::VK_BLEND_FACTOR_CONSTANT_COLOR)
+		.value("ONE_MINUS_CONSTANT_COLOR", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR)
+		.value("CONSTANT_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_CONSTANT_ALPHA)
+		.value("ONE_MINUS_CONSTANT_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA)
+		.value("SRC_ALPHA_SATURATE", VkBlendFactor::VK_BLEND_FACTOR_SRC_ALPHA_SATURATE)
+		.value("SRC1_COLOR", VkBlendFactor::VK_BLEND_FACTOR_SRC1_COLOR)
+		.value("ONE_MINUS_SRC1_COLOR", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR)
+		.value("SRC1_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_SRC1_ALPHA)
+		.value("ONE_MINUS_SRC1_ALPHA", VkBlendFactor::VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA);
+	py::enum_<VkBlendOp>(m, "BlendOp")
+		.value("ADD", VkBlendOp::VK_BLEND_OP_ADD)
+		.value("SUBTRACT", VkBlendOp::VK_BLEND_OP_SUBTRACT)
+		.value("REVERSE_SUBTRACT", VkBlendOp::VK_BLEND_OP_REVERSE_SUBTRACT)
+		.value("MIN", VkBlendOp::VK_BLEND_OP_MIN)
+		.value("MAX", VkBlendOp::VK_BLEND_OP_MAX)
+		.value("ZERO_EXT", VkBlendOp::VK_BLEND_OP_ZERO_EXT)
+		.value("SRC_EXT", VkBlendOp::VK_BLEND_OP_SRC_EXT)
+		.value("DST_EXT", VkBlendOp::VK_BLEND_OP_DST_EXT)
+		.value("SRC_OVER_EXT", VkBlendOp::VK_BLEND_OP_SRC_OVER_EXT)
+		.value("DST_OVER_EXT", VkBlendOp::VK_BLEND_OP_DST_OVER_EXT)
+		.value("SRC_IN_EXT", VkBlendOp::VK_BLEND_OP_SRC_IN_EXT)
+		.value("DST_IN_EXT", VkBlendOp::VK_BLEND_OP_DST_IN_EXT)
+		.value("SRC_OUT_EXT", VkBlendOp::VK_BLEND_OP_SRC_OUT_EXT)
+		.value("DST_OUT_EXT", VkBlendOp::VK_BLEND_OP_DST_OUT_EXT)
+		.value("SRC_ATOP_EXT", VkBlendOp::VK_BLEND_OP_SRC_ATOP_EXT)
+		.value("DST_ATOP_EXT", VkBlendOp::VK_BLEND_OP_DST_ATOP_EXT)
+		.value("XOR_EXT", VkBlendOp::VK_BLEND_OP_XOR_EXT)
+		.value("MULTIPLY_EXT", VkBlendOp::VK_BLEND_OP_MULTIPLY_EXT)
+		.value("SCREEN_EXT", VkBlendOp::VK_BLEND_OP_SCREEN_EXT)
+		.value("OVERLAY_EXT", VkBlendOp::VK_BLEND_OP_OVERLAY_EXT)
+		.value("DARKEN_EXT", VkBlendOp::VK_BLEND_OP_DARKEN_EXT)
+		.value("LIGHTEN_EXT", VkBlendOp::VK_BLEND_OP_LIGHTEN_EXT)
+		.value("COLORDODGE_EXT", VkBlendOp::VK_BLEND_OP_COLORDODGE_EXT)
+		.value("COLORBURN_EXT", VkBlendOp::VK_BLEND_OP_COLORBURN_EXT)
+		.value("HARDLIGHT_EXT", VkBlendOp::VK_BLEND_OP_HARDLIGHT_EXT)
+		.value("SOFTLIGHT_EXT", VkBlendOp::VK_BLEND_OP_SOFTLIGHT_EXT)
+		.value("DIFFERENCE_EXT", VkBlendOp::VK_BLEND_OP_DIFFERENCE_EXT)
+		.value("EXCLUSION_EXT", VkBlendOp::VK_BLEND_OP_EXCLUSION_EXT)
+		.value("INVERT_EXT", VkBlendOp::VK_BLEND_OP_INVERT_EXT)
+		.value("INVERT_RGB_EXT", VkBlendOp::VK_BLEND_OP_INVERT_RGB_EXT)
+		.value("LINEARDODGE_EXT", VkBlendOp::VK_BLEND_OP_LINEARDODGE_EXT)
+		.value("LINEARBURN_EXT", VkBlendOp::VK_BLEND_OP_LINEARBURN_EXT)
+		.value("VIVIDLIGHT_EXT", VkBlendOp::VK_BLEND_OP_VIVIDLIGHT_EXT)
+		.value("LINEARLIGHT_EXT", VkBlendOp::VK_BLEND_OP_LINEARLIGHT_EXT)
+		.value("PINLIGHT_EXT", VkBlendOp::VK_BLEND_OP_PINLIGHT_EXT)
+		.value("HARDMIX_EXT", VkBlendOp::VK_BLEND_OP_HARDMIX_EXT)
+		.value("HSL_HUE_EXT", VkBlendOp::VK_BLEND_OP_HSL_HUE_EXT)
+		.value("HSL_SATURATION_EXT", VkBlendOp::VK_BLEND_OP_HSL_SATURATION_EXT)
+		.value("HSL_COLOR_EXT", VkBlendOp::VK_BLEND_OP_HSL_COLOR_EXT)
+		.value("HSL_LUMINOSITY_EXT", VkBlendOp::VK_BLEND_OP_HSL_LUMINOSITY_EXT)
+		.value("PLUS_EXT", VkBlendOp::VK_BLEND_OP_PLUS_EXT)
+		.value("PLUS_CLAMPED_EXT", VkBlendOp::VK_BLEND_OP_PLUS_CLAMPED_EXT)
+		.value("PLUS_CLAMPED_ALPHA_EXT", VkBlendOp::VK_BLEND_OP_PLUS_CLAMPED_ALPHA_EXT)
+		.value("PLUS_DARKER_EXT", VkBlendOp::VK_BLEND_OP_PLUS_DARKER_EXT)
+		.value("MINUS_EXT", VkBlendOp::VK_BLEND_OP_MINUS_EXT)
+		.value("MINUS_CLAMPED_EXT", VkBlendOp::VK_BLEND_OP_MINUS_CLAMPED_EXT)
+		.value("CONTRAST_EXT", VkBlendOp::VK_BLEND_OP_CONTRAST_EXT)
+		.value("INVERT_OVG_EXT", VkBlendOp::VK_BLEND_OP_INVERT_OVG_EXT)
+		.value("RED_EXT", VkBlendOp::VK_BLEND_OP_RED_EXT)
+		.value("GREEN_EXT", VkBlendOp::VK_BLEND_OP_GREEN_EXT)
+		.value("BLUE_EXT", VkBlendOp::VK_BLEND_OP_BLUE_EXT);
+	py::enum_<VkColorComponentFlagBits>(m, "ColorComponentFlagBits", py::arithmetic())
+		.value("R_BIT", VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT)
+		.value("G_BIT", VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT)
+		.value("B_BIT", VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT)
+		.value("A_BIT", VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT);
+	py::enum_<VkLogicOp>(m, "LogicOp")
+		.value("CLEAR", VkLogicOp::VK_LOGIC_OP_CLEAR)
+		.value("AND", VkLogicOp::VK_LOGIC_OP_AND)
+		.value("AND_REVERSE", VkLogicOp::VK_LOGIC_OP_AND_REVERSE)
+		.value("COPY", VkLogicOp::VK_LOGIC_OP_COPY)
+		.value("AND_INVERTED", VkLogicOp::VK_LOGIC_OP_AND_INVERTED)
+		.value("NO_OP", VkLogicOp::VK_LOGIC_OP_NO_OP)
+		.value("XOR", VkLogicOp::VK_LOGIC_OP_XOR)
+		.value("OR", VkLogicOp::VK_LOGIC_OP_OR)
+		.value("NOR", VkLogicOp::VK_LOGIC_OP_NOR)
+		.value("EQUIVALENT", VkLogicOp::VK_LOGIC_OP_EQUIVALENT)
+		.value("INVERT", VkLogicOp::VK_LOGIC_OP_INVERT)
+		.value("OR_REVERSE", VkLogicOp::VK_LOGIC_OP_OR_REVERSE)
+		.value("COPY_INVERTED", VkLogicOp::VK_LOGIC_OP_COPY_INVERTED)
+		.value("OR_INVERTED", VkLogicOp::VK_LOGIC_OP_OR_INVERTED)
+		.value("NAND", VkLogicOp::VK_LOGIC_OP_NAND)
+		.value("SET", VkLogicOp::VK_LOGIC_OP_SET);
+	py::enum_<VkAttachmentStoreOp>(m, "AttachmentStoreOp")
+		.value("STORE", VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE)
+		.value("DONT_CARE", VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE);
+	py::enum_<VkAttachmentLoadOp>(m, "AttachmentLoadOp")
+		.value("LOAD", VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD)
+		.value("CLEAR", VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR)
+		.value("DONT_CARE", VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+	py::enum_<VkImageLayout>(m, "ImageLayout")
+		.value("UNDEFINED", VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED)
+		.value("GENERAL", VkImageLayout::VK_IMAGE_LAYOUT_GENERAL)
+		.value("COLOR_ATTACHMENT_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+		.value("DEPTH_STENCIL_ATTACHMENT_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		.value("DEPTH_STENCIL_READ_ONLY_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL)
+		.value("SHADER_READ_ONLY_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		.value("TRANSFER_SRC_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+		.value("TRANSFER_DST_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+		.value("PREINITIALIZED", VkImageLayout::VK_IMAGE_LAYOUT_PREINITIALIZED)
+		.value("DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL)
+		.value("DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL)
+		.value("PRESENT_SRC_KHR", VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+		.value("SHARED_PRESENT_KHR", VkImageLayout::VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR)
+		.value("SHADING_RATE_OPTIMAL_NV", VkImageLayout::VK_IMAGE_LAYOUT_SHADING_RATE_OPTIMAL_NV)
+		.value("FRAGMENT_DENSITY_MAP_OPTIMAL_EXT", VkImageLayout::VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT)
+		.value("DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR)
+		.value("DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR);
+	py::enum_<VkAttachmentDescriptionFlagBits>(m, "AttachmentDescriptionFlagBits")
+		.value("MAY_ALIAS_BIT", VkAttachmentDescriptionFlagBits::VK_ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT)
+		.value("FLAG_BITS_MAX_ENUM", VkAttachmentDescriptionFlagBits::VK_ATTACHMENT_DESCRIPTION_FLAG_BITS_MAX_ENUM);
+	py::enum_<VkSubpassDescriptionFlagBits>(m, "SubpassDescriptionFlagBits")
+		.value("PER_VIEW_ATTRIBUTES_BIT_NVX", VkSubpassDescriptionFlagBits::VK_SUBPASS_DESCRIPTION_PER_VIEW_ATTRIBUTES_BIT_NVX)
+		.value("PER_VIEW_POSITION_X_ONLY_BIT_NVX", VkSubpassDescriptionFlagBits::VK_SUBPASS_DESCRIPTION_PER_VIEW_POSITION_X_ONLY_BIT_NVX)
+		.value("FLAG_BITS_MAX_ENUM", VkSubpassDescriptionFlagBits::VK_SUBPASS_DESCRIPTION_FLAG_BITS_MAX_ENUM);
+	py::enum_<VkPipelineBindPoint>(m, "PipelineBindPoint")
+		.value("GRAPHICS", VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS)
+		.value("COMPUTE", VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE)
+		.value("RAY_TRACING_NV", VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_NV);
 
 	// extensions
 	
