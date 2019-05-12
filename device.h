@@ -16,6 +16,7 @@
 #include "pipeline.h"
 #include "renderpass.h"
 
+
 namespace py = pybind11;
 
 
@@ -65,23 +66,6 @@ private:
 };
 
 
-class ShaderModule
-{
-public:
-	ShaderModule();
-	ShaderModule(VkDevice device, const std::string &filename);
-	~ShaderModule();
-
-	bool isValid();
-
-	VkShaderModule vkHandle = VK_NULL_HANDLE;
-private:
-	VkDevice _device = VK_NULL_HANDLE;
-	PFN_vkCreateShaderModule _vkCreateShaderModule = nullptr;
-	PFN_vkDestroyShaderModule _vkDestroyShaderModule = nullptr;
-};
-
-
 
 class Device
 {
@@ -98,7 +82,8 @@ public:
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 	ImageView* createImageView(py::dict createInfo);
 	ShaderModule* createShaderModule(const std::string &filename);
-	PipelineLayout* createPipelineLayout(py::dict createInfo);
+	//PipelineLayout* createPipelineLayout(py::dict createInfo);
+	PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
 	RenderPass* createRenderPass(RenderPassCreateInfo &createInfo);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;

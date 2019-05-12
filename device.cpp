@@ -305,7 +305,12 @@ ShaderModule * Device::createShaderModule(const std::string &filename)
 	return new ShaderModule(vkHandle, filename);
 }
 
-PipelineLayout * Device::createPipelineLayout(py::dict createInfo)
+//PipelineLayout * Device::createPipelineLayout(py::dict createInfo)
+//{
+//	return new PipelineLayout(vkHandle, createInfo);
+//}
+
+PipelineLayout * Device::createPipelineLayout(PipelineLayoutCreateInfo & createInfo)
 {
 	return new PipelineLayout(vkHandle, createInfo);
 }
@@ -324,36 +329,4 @@ void Device::getFuncPointers()
 
 
 
-ShaderModule::ShaderModule()
-{
-}
 
-ShaderModule::ShaderModule(VkDevice device, const std::string & filename) : _device(device)
-{
-	_vkCreateShaderModule = (PFN_vkCreateShaderModule)vkGetDeviceProcAddr(_device, "vkCreateShaderModule");
-	_vkDestroyShaderModule = (PFN_vkDestroyShaderModule)vkGetDeviceProcAddr(_device, "vkDestroyShaderModule");
-
-	auto code = readFile(filename);
-
-	VkShaderModuleCreateInfo createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = code.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-	checkVKResult(_vkCreateShaderModule(_device, &createInfo, nullptr, &vkHandle));
-}
-
-ShaderModule::~ShaderModule()
-{
-	if (isValid() || _vkDestroyShaderModule != nullptr)
-	{
-		_vkDestroyShaderModule(_device, vkHandle, nullptr);
-		vkHandle = VK_NULL_HANDLE;
-		_device = VK_NULL_HANDLE;
-	}
-}
-
-bool ShaderModule::isValid()
-{
-	return vkHandle != VK_NULL_HANDLE;
-}

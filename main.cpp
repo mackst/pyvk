@@ -103,6 +103,63 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("dependencies", &RenderPassCreateInfo::dependencies)
 		.def_readwrite("subpasses", &RenderPassCreateInfo::subpasses);
 
+	py::class_<PipelineShaderStageCreateInfo>(m, "PipelineShaderStageCreateInfo")
+		.def(py::init<>())
+		.def(py::init<ShaderModule*, std::string&>(), py::arg("shaderModule"), py::arg("name"))
+		.def_readwrite("stage", &PipelineShaderStageCreateInfo::stage)
+		.def_readwrite("module", &PipelineShaderStageCreateInfo::module)
+		.def_readwrite("name", &PipelineShaderStageCreateInfo::name);
+
+	py::class_<PipelineVertexInputStateCreateInfo>(m, "PipelineVertexInputStateCreateInfo")
+		.def(py::init<>())
+		.def_readwrite("vertexBindingDescriptions", &PipelineVertexInputStateCreateInfo::vertexBindingDescriptions)
+		.def_readwrite("vertexAttributeDescriptions", &PipelineVertexInputStateCreateInfo::vertexAttributeDescriptions);
+
+	py::class_<PipelineInputAssemblyStateCreateInfo>(m, "PipelineInputAssemblyStateCreateInfo")
+		.def(py::init<>())
+		.def(py::init<VkPrimitiveTopology, VkBool32>(), py::arg("topology"), py::arg("primitiveRestartEnable"))
+		.def_readwrite("primitiveRestartEnable", &PipelineInputAssemblyStateCreateInfo::primitiveRestartEnable)
+		.def_readwrite("topology", &PipelineInputAssemblyStateCreateInfo::topology);
+
+	py::class_<PipelineViewportStateCreateInfo>(m, "PipelineViewportStateCreateInfo")
+		.def(py::init<>())
+		.def_readwrite("viewports", &PipelineViewportStateCreateInfo::viewports)
+		.def_readwrite("scissors", &PipelineViewportStateCreateInfo::scissors);
+
+	py::class_<PipelineRasterizationStateCreateInfo>(m, "PipelineRasterizationStateCreateInfo")
+		.def(py::init<>())
+		.def_readwrite("rasterizerDiscardEnable", &PipelineRasterizationStateCreateInfo::rasterizerDiscardEnable)
+		.def_readwrite("polygonMode", &PipelineRasterizationStateCreateInfo::polygonMode)
+		.def_readwrite("lineWidth", &PipelineRasterizationStateCreateInfo::lineWidth)
+		.def_readwrite("frontFace", &PipelineRasterizationStateCreateInfo::frontFace)
+		.def_readwrite("depthClampEnable", &PipelineRasterizationStateCreateInfo::depthClampEnable)
+		.def_readwrite("depthBiasSlopeFactor", &PipelineRasterizationStateCreateInfo::depthBiasSlopeFactor)
+		.def_readwrite("depthBiasEnable", &PipelineRasterizationStateCreateInfo::depthBiasEnable)
+		.def_readwrite("depthBiasConstantFactor", &PipelineRasterizationStateCreateInfo::depthBiasConstantFactor)
+		.def_readwrite("depthBiasClamp", &PipelineRasterizationStateCreateInfo::depthBiasClamp)
+		.def_readwrite("cullMode", &PipelineRasterizationStateCreateInfo::cullMode);
+
+	py::class_<PipelineMultisampleStateCreateInfo>(m, "PipelineMultisampleStateCreateInfo")
+		.def(py::init<>())
+		.def_readwrite("sampleShadingEnable", &PipelineMultisampleStateCreateInfo::sampleShadingEnable)
+		.def_readwrite("sampleMask", &PipelineMultisampleStateCreateInfo::sampleMask)
+		.def_readwrite("rasterizationSamples", &PipelineMultisampleStateCreateInfo::rasterizationSamples)
+		.def_readwrite("minSampleShading", &PipelineMultisampleStateCreateInfo::minSampleShading)
+		.def_readwrite("alphaToOneEnable", &PipelineMultisampleStateCreateInfo::alphaToOneEnable)
+		.def_readwrite("alphaToCoverageEnable", &PipelineMultisampleStateCreateInfo::alphaToCoverageEnable);
+
+	py::class_<PipelineColorBlendStateCreateInfo>(m, "PipelineColorBlendStateCreateInfo")
+		.def(py::init<>())
+		.def_readwrite("logicOpEnable", &PipelineColorBlendStateCreateInfo::logicOpEnable)
+		.def_readwrite("logicOp", &PipelineColorBlendStateCreateInfo::logicOp)
+		.def_readwrite("blendConstants", &PipelineColorBlendStateCreateInfo::blendConstants)
+		.def_readwrite("attachments", &PipelineColorBlendStateCreateInfo::attachments);
+
+	py::class_<PipelineLayoutCreateInfo>(m, "PipelineLayoutCreateInfo")
+		.def(py::init<>())
+		.def_readwrite("setLayouts", &PipelineLayoutCreateInfo::setLayouts)
+		.def_readwrite("pushConstantRanges", &PipelineLayoutCreateInfo::pushConstantRanges);
+
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())
 		.def_readwrite("robustBufferAccess", &VkPhysicalDeviceFeatures::robustBufferAccess)
@@ -287,6 +344,18 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("srcAccessMask", &VkSubpassDependency::srcAccessMask)
 		.def_readwrite("dstAccessMask", &VkSubpassDependency::dstAccessMask)
 		.def_readwrite("dependencyFlags", &VkSubpassDependency::dependencyFlags);
+
+	py::class_<VkPipelineColorBlendAttachmentState>(m, "PipelineColorBlendAttachmentState")
+		.def(py::init<>())
+		.def_readwrite("blendEnable", &VkPipelineColorBlendAttachmentState::blendEnable)
+		.def_readwrite("srcColorBlendFactor", &VkPipelineColorBlendAttachmentState::srcColorBlendFactor)
+		.def_readwrite("dstColorBlendFactor", &VkPipelineColorBlendAttachmentState::dstColorBlendFactor)
+		.def_readwrite("colorBlendOp", &VkPipelineColorBlendAttachmentState::colorBlendOp)
+		.def_readwrite("srcAlphaBlendFactor", &VkPipelineColorBlendAttachmentState::srcAlphaBlendFactor)
+		.def_readwrite("dstAlphaBlendFactor", &VkPipelineColorBlendAttachmentState::dstAlphaBlendFactor)
+		.def_readwrite("alphaBlendOp", &VkPipelineColorBlendAttachmentState::alphaBlendOp)
+		.def_readwrite("colorWriteMask", &VkPipelineColorBlendAttachmentState::colorWriteMask);
+
 
 	// enums
 	py::enum_<VkQueueFlagBits>(m, "QueueFlagBits", py::arithmetic())
@@ -890,7 +959,6 @@ PYBIND11_MODULE(_vk, m)
 		.value("VIEW_LOCAL_BIT_KHR", VkDependencyFlagBits::VK_DEPENDENCY_VIEW_LOCAL_BIT_KHR)
 		.value("DEVICE_GROUP_BIT_KHR", VkDependencyFlagBits::VK_DEPENDENCY_DEVICE_GROUP_BIT_KHR)
 		.value("FLAG_BITS_MAX_ENUM", VkDependencyFlagBits::VK_DEPENDENCY_FLAG_BITS_MAX_ENUM);
-
 
 	// extensions
 	
