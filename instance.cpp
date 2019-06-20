@@ -3,6 +3,24 @@
 
 
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL instance_debug_callback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+	VkDebugUtilsMessageTypeFlagsEXT message_type,
+	const VkDebugUtilsMessengerCallbackDataEXT* message_data,
+	void* usrdata
+) {
+	if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+	{
+		throw std::runtime_error(message_data->pMessage);
+	}
+	else
+	{
+		std::cout << std::endl << message_data->pMessage << std::endl;
+	}
+
+	return VK_FALSE;
+}
+
 
 
 //Instance::Instance()
@@ -82,6 +100,17 @@ Instance::Instance(InstanceCreateInfo &info)
 	VkInstanceCreateInfo createInfo;
 	info.getVKStruct(&createInfo);
 	createInfo.pApplicationInfo = &appInfo;
+
+	VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
+	debugInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	debugInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+								VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+								VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
+								VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
+	debugInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+							VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+							VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	debugInfo.pfnUserCallback = instance_debug_callback;
 
 	auto func = (PFN_vkCreateInstance)vkGetInstanceProcAddr(nullptr, "vkCreateInstance");
 	if (func != nullptr)

@@ -14,7 +14,7 @@ PYBIND11_MODULE(_vk, m)
 {
 	m.doc() = "vulkan for python.";
 
-	//m.def("initialize", []() { checkVKResult(volkInitialize()); return true; });
+	m.def("makeVersion", [](uint32_t major, uint32_t minor, uint32_t patch) { return VK_MAKE_VERSION(major, minor, patch); }, py::arg("major") = 1, py::arg("minor") = 0, py::arg("patch") = 0);
 
 	py::class_<Instance>(m, "Instance")
 		//.def(py::init<>())
@@ -123,7 +123,7 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<InstanceCreateInfo>(m, "InstanceCreateInfo")
 		.def(py::init<>())
-		.def(py::init<ApplicationInfo *, std::vector<std::string> &, std::vector<std::string> &>(),
+		.def(py::init<ApplicationInfo &, std::vector<std::string> &, std::vector<std::string> &>(),
 			py::arg("appInfo"), py::arg("layerNames"), py::arg("extentsionNames"))
 		.def_readwrite("applicationInfo", &InstanceCreateInfo::appInfo)
 		.def_readwrite("enabledExtensionNames", &InstanceCreateInfo::extensionNames)

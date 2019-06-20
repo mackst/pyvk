@@ -67,42 +67,42 @@ void InstanceCreateInfo::getVKStruct(VkInstanceCreateInfo * info)
 
 //py::function DebugUtilsMessengerCreateInfoEXT::pycallback = {};
 
-DebugUtilsMessengerCreateInfoEXT::DebugUtilsMessengerCreateInfoEXT()
-{
-}
+// DebugUtilsMessengerCreateInfoEXT::DebugUtilsMessengerCreateInfoEXT()
+// {
+// }
 
-DebugUtilsMessengerCreateInfoEXT::~DebugUtilsMessengerCreateInfoEXT()
-{
-	//DebugUtilsMessengerCreateInfoEXT::pycallback = {};
-	pycallback = {};
-}
+// DebugUtilsMessengerCreateInfoEXT::~DebugUtilsMessengerCreateInfoEXT()
+// {
+// 	//DebugUtilsMessengerCreateInfoEXT::pycallback = {};
+// 	pycallback = {};
+// }
 
-//VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCreateInfoEXT::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData, void * pUserData)
-//{
-//	py::dict data;
-//	//data["cmdBufLabelCount"] = pCallbackData->cmdBufLabelCount;
-//	data["message"] = pCallbackData->pMessage;
-//	data["messageIdName"] = pCallbackData->pMessageIdName;
-//
-//	DebugUtilsMessengerCreateInfoEXT::pycallback(messageSeverity, messageType, data);
-//	return VK_FALSE;
-//}
+// //VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCreateInfoEXT::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData, void * pUserData)
+// //{
+// //	py::dict data;
+// //	//data["cmdBufLabelCount"] = pCallbackData->cmdBufLabelCount;
+// //	data["message"] = pCallbackData->pMessage;
+// //	data["messageIdName"] = pCallbackData->pMessageIdName;
+// //
+// //	DebugUtilsMessengerCreateInfoEXT::pycallback(messageSeverity, messageType, data);
+// //	return VK_FALSE;
+// //}
 
-void DebugUtilsMessengerCreateInfoEXT::getVKStruct(VkDebugUtilsMessengerCreateInfoEXT * info)
-{
-	auto dcallback = [&](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData, void * pUserData) -> VKAPI_ATTR VkBool32 VKAPI_CALL {
-		py::dict data;
-		//data["cmdBufLabelCount"] = pCallbackData->cmdBufLabelCount;
-		data["message"] = pCallbackData->pMessage;
-		data["messageIdName"] = pCallbackData->pMessageIdName;
+// void DebugUtilsMessengerCreateInfoEXT::getVKStruct(VkDebugUtilsMessengerCreateInfoEXT * info)
+// {
+// 	auto dcallback = [&](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData, void * pUserData) -> VKAPI_ATTR VkBool32 VKAPI_CALL {
+// 		py::dict data;
+// 		//data["cmdBufLabelCount"] = pCallbackData->cmdBufLabelCount;
+// 		data["message"] = pCallbackData->pMessage;
+// 		data["messageIdName"] = pCallbackData->pMessageIdName;
 
-		pycallback(messageSeverity, messageType, data);
-		return VK_FALSE;
-	};
+// 		pycallback(messageSeverity, messageType, data);
+// 		return VK_FALSE;
+// 	};
 
-	info->sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	info->messageSeverity = messageSeverity;
-	info->messageType = messageTypes;
-	//info->pfnUserCallback = &debugCallback;
-	info->pfnUserCallback = &dcallback;
-}
+// 	info->sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+// 	info->messageSeverity = messageSeverity;
+// 	info->messageType = messageTypes;
+// 	//info->pfnUserCallback = &debugCallback;
+// 	info->pfnUserCallback = &dcallback;
+// }
