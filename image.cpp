@@ -38,10 +38,10 @@ ImageView::~ImageView()
 	{
 		if (_vkDestroyImageView != nullptr)
 			_vkDestroyImageView(_device, vkHandle, nullptr);
-		else
-		{
-			vkDestroyImageView(_device, vkHandle, nullptr);
-		}
+		//else
+		//{
+		//	vkDestroyImageView(_device, vkHandle, nullptr);
+		//}
 		vkHandle = VK_NULL_HANDLE;
 		_device = VK_NULL_HANDLE;
 	}

@@ -21,16 +21,16 @@ ShaderModule::ShaderModule(VkDevice device, const std::string & filename) : _dev
 	checkVKResult(_vkCreateShaderModule(_device, &createInfo, nullptr, &vkHandle));
 }
 
-ShaderModule::ShaderModule(ShaderModule & other)
-{
-	if (other.isValid())
-	{
-		vkHandle = other.vkHandle;
-		_device = other._device;
-		_vkCreateShaderModule = other._vkCreateShaderModule;
-		_vkDestroyShaderModule = other._vkDestroyShaderModule;
-	}
-}
+//ShaderModule::ShaderModule(ShaderModule & other)
+//{
+//	if (other.isValid())
+//	{
+//		vkHandle = other.vkHandle;
+//		_device = other._device;
+//		_vkCreateShaderModule = other._vkCreateShaderModule;
+//		_vkDestroyShaderModule = other._vkDestroyShaderModule;
+//	}
+//}
 
 ShaderModule::~ShaderModule()
 {

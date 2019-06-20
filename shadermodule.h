@@ -2,7 +2,8 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <vulkan/vulkan.h>
+
+#include "volk.h"
 
 namespace py = pybind11;
 
@@ -17,7 +18,7 @@ class ShaderModule
 public:
 	ShaderModule();
 	ShaderModule(VkDevice device, const std::string &filename);
-	ShaderModule(ShaderModule &other);
+	//ShaderModule(ShaderModule &other);
 	~ShaderModule();
 
 	bool isValid();

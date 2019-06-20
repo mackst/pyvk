@@ -115,11 +115,24 @@ RenderPass::RenderPass()
 
 RenderPass::RenderPass(VkDevice device, RenderPassCreateInfo & createInfo): _device(device)
 {
+	if (_device == VK_NULL_HANDLE)
+		throw std::runtime_error("VKDevice has been destroyed");
 	_vkCreateRenderPass = (PFN_vkCreateRenderPass)vkGetDeviceProcAddr(_device, "vkCreateRenderPass");
 	_vkDestroyRenderPass = (PFN_vkDestroyRenderPass)vkGetDeviceProcAddr(_device, "vkDestroyRenderPass");
 
 	auto _createInfo = createInfo.to_vktype();
 	checkVKResult(_vkCreateRenderPass(_device, &_createInfo, nullptr, &vkHandle));
+}
+
+RenderPass::RenderPass(RenderPass & other)
+{
+	if (other.isValid())
+	{
+		vkHandle = other.vkHandle;
+		_device = other._device;
+		_vkCreateRenderPass = other._vkCreateRenderPass;
+		_vkDestroyRenderPass = other._vkDestroyRenderPass;
+	}
 }
 
 RenderPass::~RenderPass()

@@ -1,5 +1,6 @@
 #include "pipeline.h"
 #include "exception.h"
+#include "createInfo.h"
 
 PipelineLayout::PipelineLayout()
 {
@@ -9,14 +10,14 @@ PipelineLayout::PipelineLayout(VkDevice device, py::dict createInfo) : _device(d
 {
 	getFuncPointers();
 
-	py::list setLayoutList = createInfo["setLayouts"].cast<py::list>();
-	py::list pushConstantRangeList = createInfo["pushConstantRanges"].cast<py::list>();
+	//py::list setLayoutList = createInfo["setLayouts"].cast<py::list>();
+	//py::list pushConstantRangeList = createInfo["pushConstantRanges"].cast<py::list>();
 
 	VkPipelineLayoutCreateInfo _createInfo = {};
 	_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	_createInfo.setLayoutCount = 0;
 	_createInfo.pushConstantRangeCount = 0;
-
+	//auto _createInfo = dictToVkPipelineLayoutCreateInfo(createInfo);
 	checkVKResult(_vkCreatePipelineLayout(_device, &_createInfo, nullptr, &vkHandle));
 }
 
@@ -27,6 +28,17 @@ PipelineLayout::PipelineLayout(VkDevice device, PipelineLayoutCreateInfo & creat
 	auto _createInfo = createInfo.to_vktype();
 	checkVKResult(_vkCreatePipelineLayout(_device, &_createInfo, nullptr, &vkHandle));
 }
+
+//PipelineLayout::PipelineLayout(PipelineLayout & other)
+//{
+//	if (other.isValid())
+//	{
+//		vkHandle = other.vkHandle;
+//		_device = other._device;
+//		_vkCreatePipelineLayout = other._vkCreatePipelineLayout;
+//		_vkDestroyPipelineLayout = other._vkDestroyPipelineLayout;
+//	}
+//}
 
 PipelineLayout::~PipelineLayout()
 {
@@ -53,9 +65,17 @@ PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo()
 {
 }
 
-PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo(ShaderModule *shaderModule, std::string &funcName) : module(shaderModule), name(funcName)
+PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo(VkShaderStageFlagBits shaderStage, ShaderModule *shaderModule, std::string &funcName) 
+	:stage(shaderStage), module(shaderModule), name(funcName)
 {
 }
+
+//PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo(PipelineShaderStageCreateInfo & other)
+//{
+//	stage = other.stage;
+//	module = other.module;
+//	name = other.name;
+//}
 
 PipelineShaderStageCreateInfo::~PipelineShaderStageCreateInfo()
 {
@@ -74,6 +94,12 @@ VkPipelineShaderStageCreateInfo PipelineShaderStageCreateInfo::to_vktype()
 PipelineVertexInputStateCreateInfo::PipelineVertexInputStateCreateInfo()
 {
 }
+
+//PipelineVertexInputStateCreateInfo::PipelineVertexInputStateCreateInfo(PipelineVertexInputStateCreateInfo &other)
+//{
+//	vertexAttributeDescriptions = other.vertexAttributeDescriptions;
+//	vertexBindingDescriptions = other.vertexBindingDescriptions;
+//}
 
 PipelineVertexInputStateCreateInfo::~PipelineVertexInputStateCreateInfo()
 {
@@ -117,6 +143,12 @@ PipelineInputAssemblyStateCreateInfo::PipelineInputAssemblyStateCreateInfo(VkPri
 {
 }
 
+//PipelineInputAssemblyStateCreateInfo::PipelineInputAssemblyStateCreateInfo(PipelineInputAssemblyStateCreateInfo &other)
+//{
+//	topology = other.topology;
+//	primitiveRestartEnable = other.primitiveRestartEnable;
+//}
+
 PipelineInputAssemblyStateCreateInfo::~PipelineInputAssemblyStateCreateInfo()
 {
 }
@@ -134,6 +166,12 @@ PipelineViewportStateCreateInfo::PipelineViewportStateCreateInfo()
 {
 }
 
+//PipelineViewportStateCreateInfo::PipelineViewportStateCreateInfo(PipelineViewportStateCreateInfo & other)
+//{
+//	viewports = other.viewports;
+//	scissors = other.scissors;
+//}
+
 PipelineViewportStateCreateInfo::~PipelineViewportStateCreateInfo()
 {
 }
@@ -148,6 +186,7 @@ VkPipelineViewportStateCreateInfo PipelineViewportStateCreateInfo::to_vktype()
 	{
 		out.viewportCount = vpCount;
 		out.pViewports = viewports.data();
+		py::print("set viewports.");
 	}
 	else
 	{
@@ -164,13 +203,27 @@ VkPipelineViewportStateCreateInfo PipelineViewportStateCreateInfo::to_vktype()
 	{
 		out.scissorCount = 0;
 	}
-	
+
 	return out;
 }
 
 PipelineRasterizationStateCreateInfo::PipelineRasterizationStateCreateInfo()
 {
 }
+
+//PipelineRasterizationStateCreateInfo::PipelineRasterizationStateCreateInfo(PipelineRasterizationStateCreateInfo & other)
+//{
+//	depthClampEnable = other.depthClampEnable;
+//	rasterizerDiscardEnable = other.rasterizerDiscardEnable;
+//	polygonMode = other.polygonMode;
+//	cullMode = other.cullMode;
+//	frontFace = other.frontFace;
+//	depthBiasEnable = other.depthBiasEnable;
+//	depthBiasConstantFactor = other.depthBiasConstantFactor;
+//	depthBiasClamp = other.depthBiasClamp;
+//	depthBiasSlopeFactor = other.depthBiasSlopeFactor;
+//	lineWidth = other.lineWidth;
+//}
 
 PipelineRasterizationStateCreateInfo::~PipelineRasterizationStateCreateInfo()
 {
@@ -198,6 +251,16 @@ PipelineMultisampleStateCreateInfo::PipelineMultisampleStateCreateInfo()
 {
 }
 
+//PipelineMultisampleStateCreateInfo::PipelineMultisampleStateCreateInfo(PipelineMultisampleStateCreateInfo & other)
+//{
+//	rasterizationSamples = other.rasterizationSamples;
+//	sampleShadingEnable = other.sampleShadingEnable;
+//	minSampleShading = other.minSampleShading;
+//	sampleMask = other.sampleMask;
+//	alphaToCoverageEnable = other.alphaToCoverageEnable;
+//	alphaToOneEnable = other.alphaToOneEnable;
+//}
+
 PipelineMultisampleStateCreateInfo::~PipelineMultisampleStateCreateInfo()
 {
 }
@@ -218,6 +281,14 @@ VkPipelineMultisampleStateCreateInfo PipelineMultisampleStateCreateInfo::to_vkty
 PipelineColorBlendStateCreateInfo::PipelineColorBlendStateCreateInfo()
 {
 }
+
+//PipelineColorBlendStateCreateInfo::PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateInfo & other)
+//{
+//	logicOpEnable = other.logicOpEnable;
+//	logicOp = other.logicOp;
+//	attachments = other.attachments;
+//	blendConstants = other.blendConstants;
+//}
 
 PipelineColorBlendStateCreateInfo::~PipelineColorBlendStateCreateInfo()
 {
@@ -273,4 +344,100 @@ VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo::to_vktype()
 	}
 
 	return out;
+}
+
+Pipeline::Pipeline()
+{
+}
+
+//Pipeline::Pipeline(Pipeline & other)
+//{
+//	if (other.isValid())
+//	{
+//		vkHandle = other.vkHandle;
+//		_device = other._device;
+//		_vkDestroyPipeline = other._vkDestroyPipeline;
+//	}
+//}
+
+Pipeline::~Pipeline()
+{
+	if (isValid() && _vkDestroyPipeline != nullptr && _device != VK_NULL_HANDLE)
+	{
+		_vkDestroyPipeline(_device, vkHandle, nullptr);
+		vkHandle = VK_NULL_HANDLE;
+		_device = VK_NULL_HANDLE;
+		_vkDestroyPipeline = nullptr;
+	}
+}
+
+bool Pipeline::isValid()
+{
+	return vkHandle != VK_NULL_HANDLE;
+}
+
+GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
+{
+}
+
+GraphicsPipelineCreateInfo::~GraphicsPipelineCreateInfo()
+{
+}
+
+VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo::to_vktype()
+{
+	VkGraphicsPipelineCreateInfo out = {};
+	out.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	if (vertexInputState != nullptr)
+		out.pVertexInputState = &vertexInputState->to_vktype();
+	if (inputAssemblyState != nullptr)
+		out.pInputAssemblyState = &inputAssemblyState->to_vktype();
+	if (viewportState != nullptr)
+	{
+		auto vps = viewportState->to_vktype();
+		py::print((int)vps.sType);
+		out.pViewportState = &vps;
+		py::print((int)out.pViewportState->sType);
+	}
+	if (rasterizationState != nullptr)
+		out.pRasterizationState = &rasterizationState->to_vktype();
+	if (multisampleState != nullptr)
+		out.pMultisampleState = &multisampleState->to_vktype();
+	if (colorBlendState != nullptr)
+		out.pColorBlendState = &colorBlendState->to_vktype();
+	out.layout = layout->vkHandle;
+	out.renderPass = renderPass->vkHandle;
+	if (basePipelineHandle != nullptr)
+		out.basePipelineHandle = basePipelineHandle->vkHandle;
+	else
+		out.basePipelineHandle = VK_NULL_HANDLE;
+	out.subpass = subpass;
+	out.basePipelineIndex = basePipelineIndex;
+
+	uint32_t stageCount = static_cast<uint32_t>(stages.size());
+	if (stageCount > 0)
+	{
+		out.stageCount = stageCount;
+		std::vector<VkPipelineShaderStageCreateInfo> _stages;
+		for (auto item : stages)
+			_stages.emplace_back(item->to_vktype());
+		out.pStages = _stages.data();
+	}
+	else
+		out.stageCount = 0;
+
+	return out;
+}
+
+PipelineCache::PipelineCache()
+{
+}
+
+PipelineCache::~PipelineCache()
+{
+}
+
+bool PipelineCache::isValid()
+{
+	return vkHandle != VK_NULL_HANDLE;
 }

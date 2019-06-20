@@ -1,20 +1,21 @@
 #pragma once
 
-#if defined(_WIN32)
-
-#define VK_USE_PLATFORM_WIN32_KHR
-
-#endif
+//#if defined(_WIN32)
+//
+//#define VK_USE_PLATFORM_WIN32_KHR
+//
+//#endif
 
 #include <vector>
 #include <string>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <vulkan/vulkan.h>
+
+
+#include "volk.h"
 
 #include "image.h"
 #include "pipeline.h"
-#include "renderpass.h"
 
 
 namespace py = pybind11;
@@ -82,9 +83,11 @@ public:
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 	ImageView* createImageView(py::dict createInfo);
 	ShaderModule* createShaderModule(const std::string &filename);
-	//PipelineLayout* createPipelineLayout(py::dict createInfo);
-	PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
+	PipelineLayout* createPipelineLayout(py::dict createInfo);
+	//PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
 	RenderPass* createRenderPass(RenderPassCreateInfo &createInfo);
+	//std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> createInfos);
+	std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, py::list createInfos);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 
@@ -94,6 +97,8 @@ protected:
 	PFN_vkGetDeviceQueue _vkGetDeviceQueue = nullptr;
 	PFN_vkCreateImageView _vkCreateImageView = nullptr;
 	PFN_vkDestroyImageView _vkDestroyImageView = nullptr;
+	PFN_vkCreateGraphicsPipelines _vkCreateGraphicsPipelines = nullptr;
+	PFN_vkDestroyPipeline _vkDestroyPipeline = nullptr;
 
 private:
 	PhysicalDevice _physicalDevice;

@@ -6,7 +6,7 @@
 
 
 #include <string>
-#include <vulkan/vulkan.h>
+#include "volk.h"
 
 
 class OutOfHostMemory : public std::exception {

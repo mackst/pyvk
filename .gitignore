@@ -3,5 +3,8 @@
 *.user
 
 build.bat
+py_binding.txt
 
 build/
+.vscode/
+x64/

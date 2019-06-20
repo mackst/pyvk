@@ -1,15 +1,17 @@
 #pragma once
 
-#if defined(_WIN32)
-
-#define VK_USE_PLATFORM_WIN32_KHR
-
-#endif
+//#if defined(_WIN32)
+//
+//#define VK_USE_PLATFORM_WIN32_KHR
+//
+//#endif
 
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <vulkan/vulkan.h>
+
+
+#include "volk.h"
 
 
 
@@ -80,26 +82,26 @@ private:
 };
 
 
-class SwapchainKHR
-{
-public:
-	SwapchainKHR();
-	SwapchainKHR(Device *device, py::dict createInfo);
-	~SwapchainKHR();
-
-	bool isValid();
-
-	py::list getImagesKHR();
-
-	VkSwapchainKHR vkHandle = VK_NULL_HANDLE;
-private:
-	Device *_device = nullptr;
-	SurfaceKHR *_surface = nullptr;
-
-	PFN_vkCreateSwapchainKHR _vkCreateSwapchainKHR = nullptr;
-	PFN_vkDestroySwapchainKHR _vkDestroySwapchainKHR = nullptr;
-	PFN_vkGetSwapchainImagesKHR _vkGetSwapchainImagesKHR = nullptr;
-};
+//class SwapchainKHR
+//{
+//public:
+//	SwapchainKHR();
+//	SwapchainKHR(Device *device, py::dict createInfo);
+//	~SwapchainKHR();
+//
+//	bool isValid();
+//
+//	py::list getImagesKHR();
+//
+//	VkSwapchainKHR vkHandle = VK_NULL_HANDLE;
+//private:
+//	Device *_device = nullptr;
+//	SurfaceKHR *_surface = nullptr;
+//
+//	PFN_vkCreateSwapchainKHR _vkCreateSwapchainKHR = nullptr;
+//	PFN_vkDestroySwapchainKHR _vkDestroySwapchainKHR = nullptr;
+//	PFN_vkGetSwapchainImagesKHR _vkGetSwapchainImagesKHR = nullptr;
+//};
 
 
 

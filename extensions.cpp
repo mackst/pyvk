@@ -42,7 +42,7 @@ void DebugUtilsMessengerEXT::destroy()
 	if (vkHandle != VK_NULL_HANDLE)
 	{
 		_vkDestroyDebugUtilsMessengerEXT(_instance, vkHandle, nullptr);
-		py::print("DebugUtilsMessengerEXT destroyed.");
+		//py::print("DebugUtilsMessengerEXT destroyed.");
 		DebugUtilsMessengerEXT::pycallback = {};
 		_instance = VK_NULL_HANDLE;
 		vkHandle = VK_NULL_HANDLE;
@@ -125,92 +125,92 @@ bool SurfaceKHR::isValid()
 }
 
 
-SwapchainKHR::SwapchainKHR()
-{
-}
-
-SwapchainKHR::SwapchainKHR(Device * device, py::dict createInfo) : _device(device)
-{
-	_vkCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkCreateSwapchainKHR");
-	if (_vkCreateSwapchainKHR == nullptr)
-		throw ExtensionNotPresent("VK_KHR_swapchain not present");
-
-	_vkDestroySwapchainKHR = (PFN_vkDestroySwapchainKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkDestroySwapchainKHR");
-	_vkGetSwapchainImagesKHR = (PFN_vkGetSwapchainImagesKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkGetSwapchainImagesKHR");
-
-	_surface = createInfo["surface"].cast<SurfaceKHR*>();
-	std::vector<uint32_t> queueFamilyIndices = createInfo["queueFamilyIndices"].cast<std::vector<uint32_t>>();
-	
-	//VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE;
-	SwapchainKHR swapchain;
-	if (createInfo.contains("oldSwapchain"))
-	{
-		auto osc = createInfo["oldSwapchain"];
-		if (!osc.is_none())
-		{
-			swapchain = createInfo["oldSwapchain"].cast<SwapchainKHR>();
-		}
-	}
-
-	VkSwapchainCreateInfoKHR _createInfo = {};
-	_createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	_createInfo.surface = _surface->vkHandle;
-	_createInfo.minImageCount = createInfo["minImageCount"].cast<uint32_t>();
-	_createInfo.imageFormat = createInfo["imageFormat"].cast<VkFormat>();
-	_createInfo.imageColorSpace = createInfo["imageColorSpace"].cast<VkColorSpaceKHR>();
-	_createInfo.imageExtent = createInfo["imageExtent"].cast<VkExtent2D>();
-	_createInfo.imageArrayLayers = createInfo["imageArrayLayers"].cast<uint32_t>();
-	_createInfo.imageUsage = createInfo["imageUsage"].cast<VkImageUsageFlagBits>();
-	_createInfo.imageSharingMode = createInfo["imageSharingMode"].cast<VkSharingMode>();
-	_createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
-	_createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-	_createInfo.preTransform = createInfo["preTransform"].cast<VkSurfaceTransformFlagBitsKHR>();
-	_createInfo.compositeAlpha = createInfo["compositeAlpha"].cast<VkCompositeAlphaFlagBitsKHR>();
-	_createInfo.presentMode = createInfo["presentMode"].cast<VkPresentModeKHR>();
-	_createInfo.clipped = createInfo["clipped"].cast<VkBool32>();
-	
-	if (swapchain.isValid())
-		_createInfo.oldSwapchain = swapchain.vkHandle;
-	else
-		_createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-	checkVKResult(_vkCreateSwapchainKHR(_device->vkHandle, &_createInfo, nullptr, &vkHandle));
-}
-
-SwapchainKHR::~SwapchainKHR()
-{
-	if (isValid())
-	{
-		_vkDestroySwapchainKHR(_device->vkHandle, vkHandle, nullptr);
-		vkHandle = VK_NULL_HANDLE;
-		_device = nullptr;
-		_surface = nullptr;
-	}
-}
-
-bool SwapchainKHR::isValid()
-{
-	return vkHandle != VK_NULL_HANDLE;
-}
-
-py::list SwapchainKHR::getImagesKHR()
-{
-	py::list images;
-	if (_device == nullptr || !isValid() || _vkGetSwapchainImagesKHR == nullptr)
-		return images;
-
-	uint32_t count;
-	checkVKResult(_vkGetSwapchainImagesKHR(_device->vkHandle, vkHandle, &count, nullptr));
-
-	std::vector<VkImage> _images(count);
-	checkVKResult(_vkGetSwapchainImagesKHR(_device->vkHandle, vkHandle, &count, _images.data()));
-
-	for (auto item : _images)
-	{
-		Image im;
-		im.vkHandle = item;
-		images.append(im);
-	}
-
-	return images;
-}
+//SwapchainKHR::SwapchainKHR()
+//{
+//}
+//
+//SwapchainKHR::SwapchainKHR(Device * device, py::dict createInfo) : _device(device)
+//{
+//	_vkCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkCreateSwapchainKHR");
+//	if (_vkCreateSwapchainKHR == nullptr)
+//		throw ExtensionNotPresent("VK_KHR_swapchain not present");
+//
+//	_vkDestroySwapchainKHR = (PFN_vkDestroySwapchainKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkDestroySwapchainKHR");
+//	_vkGetSwapchainImagesKHR = (PFN_vkGetSwapchainImagesKHR)vkGetDeviceProcAddr(_device->vkHandle, "vkGetSwapchainImagesKHR");
+//
+//	_surface = createInfo["surface"].cast<SurfaceKHR*>();
+//	std::vector<uint32_t> queueFamilyIndices = createInfo["queueFamilyIndices"].cast<std::vector<uint32_t>>();
+//	
+//	//VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE;
+//	SwapchainKHR swapchain;
+//	if (createInfo.contains("oldSwapchain"))
+//	{
+//		auto osc = createInfo["oldSwapchain"];
+//		if (!osc.is_none())
+//		{
+//			swapchain = createInfo["oldSwapchain"].cast<SwapchainKHR>();
+//		}
+//	}
+//
+//	VkSwapchainCreateInfoKHR _createInfo = {};
+//	_createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+//	_createInfo.surface = _surface->vkHandle;
+//	_createInfo.minImageCount = createInfo["minImageCount"].cast<uint32_t>();
+//	_createInfo.imageFormat = createInfo["imageFormat"].cast<VkFormat>();
+//	_createInfo.imageColorSpace = createInfo["imageColorSpace"].cast<VkColorSpaceKHR>();
+//	_createInfo.imageExtent = createInfo["imageExtent"].cast<VkExtent2D>();
+//	_createInfo.imageArrayLayers = createInfo["imageArrayLayers"].cast<uint32_t>();
+//	_createInfo.imageUsage = createInfo["imageUsage"].cast<VkImageUsageFlagBits>();
+//	_createInfo.imageSharingMode = createInfo["imageSharingMode"].cast<VkSharingMode>();
+//	_createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
+//	_createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+//	_createInfo.preTransform = createInfo["preTransform"].cast<VkSurfaceTransformFlagBitsKHR>();
+//	_createInfo.compositeAlpha = createInfo["compositeAlpha"].cast<VkCompositeAlphaFlagBitsKHR>();
+//	_createInfo.presentMode = createInfo["presentMode"].cast<VkPresentModeKHR>();
+//	_createInfo.clipped = createInfo["clipped"].cast<VkBool32>();
+//	
+//	if (swapchain.isValid())
+//		_createInfo.oldSwapchain = swapchain.vkHandle;
+//	else
+//		_createInfo.oldSwapchain = VK_NULL_HANDLE;
+//
+//	checkVKResult(_vkCreateSwapchainKHR(_device->vkHandle, &_createInfo, nullptr, &vkHandle));
+//}
+//
+//SwapchainKHR::~SwapchainKHR()
+//{
+//	if (isValid())
+//	{
+//		_vkDestroySwapchainKHR(_device->vkHandle, vkHandle, nullptr);
+//		vkHandle = VK_NULL_HANDLE;
+//		_device = nullptr;
+//		_surface = nullptr;
+//	}
+//}
+//
+//bool SwapchainKHR::isValid()
+//{
+//	return vkHandle != VK_NULL_HANDLE;
+//}
+//
+//py::list SwapchainKHR::getImagesKHR()
+//{
+//	py::list images;
+//	if (_device == nullptr || !isValid() || _vkGetSwapchainImagesKHR == nullptr)
+//		return images;
+//
+//	uint32_t count;
+//	checkVKResult(_vkGetSwapchainImagesKHR(_device->vkHandle, vkHandle, &count, nullptr));
+//
+//	std::vector<VkImage> _images(count);
+//	checkVKResult(_vkGetSwapchainImagesKHR(_device->vkHandle, vkHandle, &count, _images.data()));
+//
+//	for (auto item : _images)
+//	{
+//		Image im;
+//		im.vkHandle = item;
+//		images.append(im);
+//	}
+//
+//	return images;
+//}

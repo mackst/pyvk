@@ -1,23 +1,15 @@
 #pragma once
 
-#if defined(_WIN32)
-
-#define VK_USE_PLATFORM_WIN32_KHR
-
-#endif
-
-
-
-
 //#include <vector>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <vulkan/vulkan.h>
 
+#include "volk.h"
 #include "exception.h"
 #include "utils.h"
 #include "extensions.h"
-#include "device.h"
+//#include "device.h"
+#include "createInfo.h"
 
 
 namespace py = pybind11;
@@ -27,36 +19,39 @@ namespace py = pybind11;
 #define INSTANCE_H
 
 
+void initvk();
+
+
 class Instance
 {
 public:
 	//Instance();
-	Instance(py::dict);
+	//Instance(py::dict);
+	Instance(InstanceCreateInfo &info);
 	~Instance();
 
-	bool create();
+	//bool create();
+	//bool create(InstanceCreateInfo &);
+	//bool create(py::dict);
 	void destroy();
 
-	DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback);
-	SurfaceKHR* createSurface(py::dict createInfo);
-	py::list getPhysicalDevices();
+	//DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback);
+	//SurfaceKHR* createSurface(py::dict createInfo);
+	//py::list getPhysicalDevices();
 
 	bool isValid();
 
 	static uint32_t version();
-	static py::list layerProperties();
-	static py::list extensionProperties(const char* layerName = nullptr);
+	static std::vector<VkLayerProperties> layerProperties();
+	static std::vector<VkExtensionProperties> extensionProperties(const char* layerName = nullptr);
 
 	
 	VkInstance vkHandle = VK_NULL_HANDLE;
 private:
 	void getInstanceFuncPointers();
 
-	VkInstanceCreateInfo _createInfo = {};
 	DebugUtilsMessengerEXT *_debugMessenger = nullptr;
 	SurfaceKHR *_surfaceKHR = nullptr;
-
-	PFN_vkEnumeratePhysicalDevices _vkEnumeratePhysicalDevices = VK_NULL_HANDLE;
 };
 
 
