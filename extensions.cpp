@@ -4,33 +4,46 @@
 #include "image.h"
 
 
-py::function DebugUtilsMessengerEXT::pycallback;
+//py::function DebugUtilsMessengerEXT::pycallback;
 
 
 DebugUtilsMessengerEXT::DebugUtilsMessengerEXT()
 {
 }
 
-DebugUtilsMessengerEXT::DebugUtilsMessengerEXT(VkInstance &instance, int messageSeverity, int messageType, py::function userCallback) : _instance(instance)
+DebugUtilsMessengerEXT::DebugUtilsMessengerEXT(VkInstance & instance, DebugUtilsMessengerCreateInfoEXT & info)
+	: _instance(instance), _createInfo(info)
 {
-	_vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT");
-	_vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
-
-	if (_vkCreateDebugUtilsMessengerEXT == nullptr || _vkDestroyDebugUtilsMessengerEXT == nullptr)
+	if (vkCreateDebugUtilsMessengerEXT == nullptr || vkDestroyDebugUtilsMessengerEXT == nullptr)
 		throw ExtensionNotPresent("VK_EXT_debug_report not present.");
 
+	VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
+	_createInfo.getVKStruct(&createInfo);
 
-	DebugUtilsMessengerEXT::pycallback = userCallback;
-
-	VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
-	_createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	_createInfo.messageSeverity = messageSeverity;
-	_createInfo.messageType = messageType;
-	_createInfo.pfnUserCallback = DebugUtilsMessengerEXT::debugCallback;
-
-	checkVKResult(_vkCreateDebugUtilsMessengerEXT(_instance, &_createInfo, nullptr, &vkHandle));
+	checkVKResult(vkCreateDebugUtilsMessengerEXT(_instance, &createInfo, nullptr, &vkHandle));
 	_isValid = true;
 }
+
+//DebugUtilsMessengerEXT::DebugUtilsMessengerEXT(VkInstance &instance, int messageSeverity, int messageType, py::function userCallback) : _instance(instance)
+//{
+//	//_vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT");
+//	//_vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
+//
+//	if (vkCreateDebugUtilsMessengerEXT == nullptr || vkDestroyDebugUtilsMessengerEXT == nullptr)
+//		throw ExtensionNotPresent("VK_EXT_debug_report not present.");
+//
+//
+//	//DebugUtilsMessengerEXT::pycallback = userCallback;
+//
+//	VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
+//	_createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+//	_createInfo.messageSeverity = messageSeverity;
+//	_createInfo.messageType = messageType;
+//	_createInfo.pfnUserCallback = DebugUtilsMessengerEXT::debugCallback;
+//
+//	checkVKResult(vkCreateDebugUtilsMessengerEXT(_instance, &_createInfo, nullptr, &vkHandle));
+//	_isValid = true;
+//}
 
 DebugUtilsMessengerEXT::~DebugUtilsMessengerEXT()
 {
@@ -41,9 +54,10 @@ void DebugUtilsMessengerEXT::destroy()
 {
 	if (vkHandle != VK_NULL_HANDLE)
 	{
-		_vkDestroyDebugUtilsMessengerEXT(_instance, vkHandle, nullptr);
+		vkDestroyDebugUtilsMessengerEXT(_instance, vkHandle, nullptr);
 		//py::print("DebugUtilsMessengerEXT destroyed.");
-		DebugUtilsMessengerEXT::pycallback = {};
+		//DebugUtilsMessengerEXT::pycallback = {};
+		_createInfo = {};
 		_instance = VK_NULL_HANDLE;
 		vkHandle = VK_NULL_HANDLE;
 		_isValid = false;
@@ -56,16 +70,16 @@ bool DebugUtilsMessengerEXT::isValid()
 }
 
 
-VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerEXT::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData, void * pUserData)
-{
-	py::dict data;
-	//data["cmdBufLabelCount"] = pCallbackData->cmdBufLabelCount;
-	data["message"] = pCallbackData->pMessage;
-	data["messageIdName"] = pCallbackData->pMessageIdName;
-
-	DebugUtilsMessengerEXT::pycallback(messageSeverity, messageType, data);
-	return VK_FALSE;
-}
+//VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerEXT::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData, void * pUserData)
+//{
+//	py::dict data;
+//	//data["cmdBufLabelCount"] = pCallbackData->cmdBufLabelCount;
+//	data["message"] = pCallbackData->pMessage;
+//	data["messageIdName"] = pCallbackData->pMessageIdName;
+//
+//	//DebugUtilsMessengerEXT::pycallback(messageSeverity, messageType, data);
+//	return VK_FALSE;
+//}
 
 SurfaceKHR::SurfaceKHR()
 {

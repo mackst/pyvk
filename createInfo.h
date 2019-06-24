@@ -44,6 +44,7 @@ public:
  {
  public:
  	DebugUtilsMessengerCreateInfoEXT();
+	DebugUtilsMessengerCreateInfoEXT(DebugUtilsMessengerCreateInfoEXT &info);
  	~DebugUtilsMessengerCreateInfoEXT();
 
 	py::function getUserCallback() { return userData.pycallback; }

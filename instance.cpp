@@ -220,7 +220,7 @@ bool Instance::create(InstanceCreateInfo &info)
 	auto result = vkCreateInstance(&createInfo, nullptr, &vkHandle);
 	//py::print(result);
 	checkVKResult(result);
-
+	volkLoadInstance(vkHandle);
 	return true;
 }
 
@@ -242,13 +242,20 @@ void Instance::destroy()
 	if (vkHandle == VK_NULL_HANDLE)
 		return;
 
-	auto func = (PFN_vkDestroyInstance)vkGetInstanceProcAddr(vkHandle, "vkDestroyInstance");
-	if (func != nullptr)
-		func(vkHandle, nullptr);
+	//auto func = (PFN_vkDestroyInstance)vkGetInstanceProcAddr(vkHandle, "vkDestroyInstance");
+	//if (func != nullptr)
+	//	func(vkHandle, nullptr);
 	//else
-	//	vkDestroyInstance(vkHandle, nullptr);
+	vkDestroyInstance(vkHandle, nullptr);
 	vkHandle = VK_NULL_HANDLE;
 	//py::print("instance destroyed.");
+}
+
+DebugUtilsMessengerEXT Instance::createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT & info)
+{
+	DebugUtilsMessengerEXT dum(vkHandle, info);
+	return dum;
+	//return new DebugUtilsMessengerEXT(vkHandle, info);
 }
 
 //DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback)

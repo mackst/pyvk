@@ -9,7 +9,7 @@
 #include "utils.h"
 #include "extensions.h"
 //#include "device.h"
-#include "createInfo.h"
+//#include "createInfo.h"
 
 
 namespace py = pybind11;
@@ -35,6 +35,7 @@ public:
 	//bool create(py::dict);
 	void destroy();
 
+	DebugUtilsMessengerEXT createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT &info);
 	//DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback);
 	//SurfaceKHR* createSurface(py::dict createInfo);
 	//py::list getPhysicalDevices();

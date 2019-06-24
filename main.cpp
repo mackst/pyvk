@@ -23,6 +23,7 @@ PYBIND11_MODULE(_vk, m)
 		//.def("create", &Instance::create, py::arg("createInfo"))
 		//.def("create2", &Instance::create2, py::arg("createInfo"))
 		.def("destroy", &Instance::destroy)
+		.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, py::arg("createInfo"))//, py::return_value_policy::reference)
 		//.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, 
 		//	py::arg("messageSeverity"), py::arg("messageType"), py::arg("userCallback"),
 		//	py::return_value_policy::reference)
@@ -105,6 +106,14 @@ PYBIND11_MODULE(_vk, m)
 	//	.def_readwrite("preserveAttachments", &SubpassDescription::preserveAttachments)
 	//	.def_readwrite("resolveAttachments", &SubpassDescription::resolveAttachments);
 
+	// extension classes
+	py::class_<DebugUtilsMessengerEXT>(m, "DebugUtilsMessengerEXT")
+		.def(py::init<>())
+		//.def(py::init<DebugUtilsMessengerCreateInfoEXT&>(), py::arg("createInfo"))
+		.def_property_readonly("isValid", &DebugUtilsMessengerEXT::isValid);
+
+	//
+
 	py::class_<ApplicationInfo>(m, "ApplicationInfo")
 		.def(py::init<>())
 		.def(py::init<std::string, std::string, uint32_t, uint32_t, uint32_t>(),
@@ -148,11 +157,11 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<VkDebugUtilsMessengerCallbackDataEXT>(m, "DebugUtilsMessengerCallbackDataEXT")
 		.def(py::init<>())
 		.def_readonly("messageIdName", &VkDebugUtilsMessengerCallbackDataEXT::pMessageIdName)
-		.def_readonly("messageIdName", &VkDebugUtilsMessengerCallbackDataEXT::pMessage)
+		.def_readonly("message", &VkDebugUtilsMessengerCallbackDataEXT::pMessage)
 		.def_readwrite("messageIdNumber", &VkDebugUtilsMessengerCallbackDataEXT::messageIdNumber)
 		.def_property_readonly("queueLabels", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsLabelEXT> labels(data.queueLabelCount); for (auto i = 0; i < data.queueLabelCount; i++) { labels[i] = *data.pQueueLabels; data.pQueueLabels++; } return labels; })
 		.def_property_readonly("cmdBufLabels", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsLabelEXT> labels(data.cmdBufLabelCount); for (auto i = 0; i < data.cmdBufLabelCount; i++) { labels[i] = *data.pCmdBufLabels; data.pCmdBufLabels++; } return labels; })
-		.def_property_readonly("objects", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsObjectNameInfoEXT> labels(data.objectCount); for (auto i = 0; i < data.objectCount; i++) { labels[i] = *data.pObjects; data.pCmdBufLabels++; } return labels; });
+		.def_property_readonly("objects", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsObjectNameInfoEXT> labels(data.objectCount); for (auto i = 0; i < data.objectCount; i++) { labels[i] = *data.pObjects; data.pObjects++; } return labels; });
 
 	py::class_<VkDebugUtilsLabelEXT>(m, "DebugUtilsLabelEXT")
 		.def(py::init<>())

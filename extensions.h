@@ -7,18 +7,18 @@
 //#endif
 
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+//#include <pybind11/pybind11.h>
+//#include <pybind11/stl.h>
 
 
-#include "volk.h"
+#include "createInfo.h"
 
 
 
 namespace py = pybind11;
 
 
-class Device;
+//class Device;
 
 
 #ifndef EXTENSIONS_H
@@ -31,14 +31,15 @@ class DebugUtilsMessengerEXT
 {
 public:
 	DebugUtilsMessengerEXT();
-	DebugUtilsMessengerEXT(VkInstance &instance, int messageSeverity, int messageType, py::function userCallback);
+	DebugUtilsMessengerEXT(VkInstance &instance, DebugUtilsMessengerCreateInfoEXT &info);
+	//DebugUtilsMessengerEXT(VkInstance &instance, int messageSeverity, int messageType, py::function userCallback);
 	~DebugUtilsMessengerEXT();
 
 	void destroy();
 
 	bool isValid();
 
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+	//static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 
 
 private:
@@ -46,15 +47,16 @@ private:
 
 	VkDebugUtilsMessengerEXT vkHandle = VK_NULL_HANDLE;
 	//VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
+	DebugUtilsMessengerCreateInfoEXT _createInfo;
 
 	bool _isValid = false;
 
 	// python function callback
-	static py::function pycallback;
+	//static py::function pycallback;
 
 	// function pointer
-	PFN_vkCreateDebugUtilsMessengerEXT _vkCreateDebugUtilsMessengerEXT = nullptr;
-	PFN_vkDestroyDebugUtilsMessengerEXT _vkDestroyDebugUtilsMessengerEXT = nullptr;
+	//PFN_vkCreateDebugUtilsMessengerEXT _vkCreateDebugUtilsMessengerEXT = nullptr;
+	//PFN_vkDestroyDebugUtilsMessengerEXT _vkDestroyDebugUtilsMessengerEXT = nullptr;
 };
 
 

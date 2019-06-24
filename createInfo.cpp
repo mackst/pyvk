@@ -71,6 +71,13 @@ DebugUtilsMessengerCreateInfoEXT::DebugUtilsMessengerCreateInfoEXT()
 {
 }
 
+DebugUtilsMessengerCreateInfoEXT::DebugUtilsMessengerCreateInfoEXT(DebugUtilsMessengerCreateInfoEXT & info)
+{
+	messageSeverity = info.messageSeverity;
+	messageType = info.messageType;
+	userData = info.userData;
+}
+
 DebugUtilsMessengerCreateInfoEXT::~DebugUtilsMessengerCreateInfoEXT()
 {
 	userData = {};
