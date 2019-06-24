@@ -12,15 +12,15 @@ PhysicalDevice::PhysicalDevice()
 
 PhysicalDevice::PhysicalDevice(VkInstance & instance, VkPhysicalDevice & device) : _instance(instance), vkHandle(device)
 {
-	_vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties");
-	_vkGetPhysicalDeviceProperties2 = (PFN_vkGetPhysicalDeviceProperties2)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties2");
-	_vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceQueueFamilyProperties");
-	_vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
-	_vkEnumerateDeviceLayerProperties = (PFN_vkEnumerateDeviceLayerProperties)vkGetInstanceProcAddr(_instance, "vkEnumerateDeviceLayerProperties");
-	_vkEnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)vkGetInstanceProcAddr(_instance, "vkEnumerateDeviceExtensionProperties");
-	_vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
-	_vkGetPhysicalDeviceSurfaceFormatsKHR = (PFN_vkGetPhysicalDeviceSurfaceFormatsKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
-	_vkGetPhysicalDeviceSurfacePresentModesKHR = (PFN_vkGetPhysicalDeviceSurfacePresentModesKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+	//_vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties");
+	//_vkGetPhysicalDeviceProperties2 = (PFN_vkGetPhysicalDeviceProperties2)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceProperties2");
+	//_vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceQueueFamilyProperties");
+	//_vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+	//_vkEnumerateDeviceLayerProperties = (PFN_vkEnumerateDeviceLayerProperties)vkGetInstanceProcAddr(_instance, "vkEnumerateDeviceLayerProperties");
+	//_vkEnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)vkGetInstanceProcAddr(_instance, "vkEnumerateDeviceExtensionProperties");
+	//_vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+	//_vkGetPhysicalDeviceSurfaceFormatsKHR = (PFN_vkGetPhysicalDeviceSurfaceFormatsKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+	//_vkGetPhysicalDeviceSurfacePresentModesKHR = (PFN_vkGetPhysicalDeviceSurfacePresentModesKHR)vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
 }
 
 PhysicalDevice::~PhysicalDevice()
@@ -37,149 +37,120 @@ bool PhysicalDevice::isValid()
 std::string PhysicalDevice::toString()
 {
 	auto properties = getProperties();
-	std::string a = "<PhysicalDevice() for " + properties["deviceName"].cast<std::string>() + ">";
+	std::string dn(properties.deviceName);
+	std::string a = "<PhysicalDevice() for " + dn + ">";
 	return a;
 }
 
-py::dict PhysicalDevice::getProperties()
+VkPhysicalDeviceProperties PhysicalDevice::getProperties()
 {
-	py::dict out;
 	VkPhysicalDeviceProperties properties;
-	_vkGetPhysicalDeviceProperties(vkHandle, &properties);
-
-	out["apiVersion"] = properties.apiVersion;
-	out["driverVersion"] = properties.driverVersion;
-	out["vendorID"] = properties.vendorID;
-	out["deviceID"] = properties.deviceID;
-	out["deviceType"] = properties.deviceType;
-	out["deviceName"] = py::str(properties.deviceName);
-	out["pipelineCacheUUID"] = properties.pipelineCacheUUID;
-	//out["limits"] = properties.limits;
-
-	return out;
-}
-
-py::dict PhysicalDevice::getProperties2()
-{
-	return py::dict();
-}
-
-py::list PhysicalDevice::layerProperties()
-{
-	py::list properties;
-	std::vector<VkLayerProperties> layerProperties;
-	uint32_t propertieCount;
-
-	if (!isValid())
-		return properties;
-
-	checkVKResult(_vkEnumerateDeviceLayerProperties(vkHandle, &propertieCount, nullptr));
-
-	layerProperties.resize(propertieCount);
-	checkVKResult(_vkEnumerateDeviceLayerProperties(vkHandle, &propertieCount, layerProperties.data()));
-
-	for (auto item : layerProperties)
-	{
-		py::dict lp;
-		lp["layerName"] = py::str(item.layerName);
-		lp["specVersion"] = py::int_(item.specVersion);
-		lp["implementationVersion"] = py::int_(item.implementationVersion);
-		lp["description"] = py::str(item.description);
-
-		properties.append(lp);
-	}
+	vkGetPhysicalDeviceProperties(vkHandle, &properties);
 
 	return properties;
 }
 
-py::list PhysicalDevice::extensionProperties(const char * layerName)
+VkPhysicalDeviceProperties2 PhysicalDevice::getProperties2(VkPhysicalDeviceProperties2* properties2)
 {
-	py::list extProperties;
+	//VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
+	if (vkGetPhysicalDeviceProperties2 == nullptr)
+		throw ExtensionNotPresent("VK_KHR_get_physical_device_properties2 not present.");
+	
+	if (properties2 != nullptr)
+	{
+		vkGetPhysicalDeviceProperties2(vkHandle, properties2);
+		return *properties2;
+	}
+	else
+	{
+		VkPhysicalDeviceProperties2 properties;
+		vkGetPhysicalDeviceProperties2(vkHandle, &properties);
+		return properties;
+	}
+}
+
+std::vector<VkLayerProperties> PhysicalDevice::layerProperties()
+{
+	std::vector<VkLayerProperties> layerProperties;
+	uint32_t propertieCount;
+
+	if (!isValid())
+		return layerProperties;
+
+	checkVKResult(vkEnumerateDeviceLayerProperties(vkHandle, &propertieCount, nullptr));
+
+	layerProperties.resize(propertieCount);
+	checkVKResult(vkEnumerateDeviceLayerProperties(vkHandle, &propertieCount, layerProperties.data()));
+
+
+	return layerProperties;
+}
+
+std::vector<VkExtensionProperties> PhysicalDevice::extensionProperties(const char * layerName)
+{
 	uint32_t propertyCount;
 	std::vector<VkExtensionProperties> properties;
 
 	if (!isValid())
-		return extProperties;
+		return properties;
 
-	checkVKResult(_vkEnumerateDeviceExtensionProperties(vkHandle, layerName, &propertyCount, nullptr));
+	checkVKResult(vkEnumerateDeviceExtensionProperties(vkHandle, layerName, &propertyCount, nullptr));
 
 	properties.resize(propertyCount);
-	checkVKResult(_vkEnumerateDeviceExtensionProperties(vkHandle, layerName, &propertyCount, properties.data()));
+	checkVKResult(vkEnumerateDeviceExtensionProperties(vkHandle, layerName, &propertyCount, properties.data()));
 
-	for (auto item : properties)
-	{
-		py::dict prop;
-		prop["extensionName"] = py::str(item.extensionName);
-		prop["specVersion"] = py::int_(item.specVersion);
-
-		extProperties.append(prop);
-	}
-
-	return extProperties;
+	return properties;
 }
 
-py::list PhysicalDevice::getQueueFamilyProperties()
+std::vector<VkQueueFamilyProperties> PhysicalDevice::getQueueFamilyProperties()
 {
-	py::list out;
-
 	uint32_t propertyCount;
-	_vkGetPhysicalDeviceQueueFamilyProperties(vkHandle, &propertyCount, nullptr);
+	vkGetPhysicalDeviceQueueFamilyProperties(vkHandle, &propertyCount, nullptr);
 
 	std::vector<VkQueueFamilyProperties> properties(propertyCount);
-	_vkGetPhysicalDeviceQueueFamilyProperties(vkHandle, &propertyCount, properties.data());
+	vkGetPhysicalDeviceQueueFamilyProperties(vkHandle, &propertyCount, properties.data());
 
-	for (auto item : properties)
-	{
-		py::dict p;
-		p["queueFlags"] = item.queueFlags;
-		p["queueCount"] = item.queueCount;
-		p["timestampValidBits"] = item.timestampValidBits;
-		p["minImageTransferGranularity"] = item.minImageTransferGranularity;
-
-		out.append(p);
-	}
-
-	return out;
+	return properties;
 }
 
-VkBool32 PhysicalDevice::getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex)
-{
-	VkBool32 support = false;
-	checkVKResult(_vkGetPhysicalDeviceSurfaceSupportKHR(vkHandle, queueFamilyIndex, surface.vkHandle, &support));
-	return support;
-}
-
-VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilitiesKHR(SurfaceKHR & surface)
-{
-	VkSurfaceCapabilitiesKHR capabilities;
-
-	checkVKResult(_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkHandle, surface.vkHandle, &capabilities));
-
-	return capabilities;
-}
-
-std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormatsKHR(SurfaceKHR & surface)
-{
-	uint32_t formatCount;
-
-	checkVKResult(_vkGetPhysicalDeviceSurfaceFormatsKHR(vkHandle, surface.vkHandle, &formatCount, nullptr));
-
-	std::vector<VkSurfaceFormatKHR> formats(formatCount);
-	checkVKResult(_vkGetPhysicalDeviceSurfaceFormatsKHR(vkHandle, surface.vkHandle, &formatCount, formats.data()));
-
-	return formats;
-}
-
-std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModeKHR(SurfaceKHR & surface)
-{
-	uint32_t count;
-	checkVKResult(_vkGetPhysicalDeviceSurfacePresentModesKHR(vkHandle, surface.vkHandle, &count, nullptr));
-
-	std::vector<VkPresentModeKHR> modes(count);
-	checkVKResult(_vkGetPhysicalDeviceSurfacePresentModesKHR(vkHandle, surface.vkHandle, &count, modes.data()));
-
-	return modes;
-}
+//VkBool32 PhysicalDevice::getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex)
+//{
+//	VkBool32 support = false;
+//	checkVKResult(_vkGetPhysicalDeviceSurfaceSupportKHR(vkHandle, queueFamilyIndex, surface.vkHandle, &support));
+//	return support;
+//}
+//
+//VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilitiesKHR(SurfaceKHR & surface)
+//{
+//	VkSurfaceCapabilitiesKHR capabilities;
+//
+//	checkVKResult(_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkHandle, surface.vkHandle, &capabilities));
+//
+//	return capabilities;
+//}
+//
+//std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormatsKHR(SurfaceKHR & surface)
+//{
+//	uint32_t formatCount;
+//
+//	checkVKResult(_vkGetPhysicalDeviceSurfaceFormatsKHR(vkHandle, surface.vkHandle, &formatCount, nullptr));
+//
+//	std::vector<VkSurfaceFormatKHR> formats(formatCount);
+//	checkVKResult(_vkGetPhysicalDeviceSurfaceFormatsKHR(vkHandle, surface.vkHandle, &formatCount, formats.data()));
+//
+//	return formats;
+//}
+//
+//std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModeKHR(SurfaceKHR & surface)
+//{
+//	uint32_t count;
+//	checkVKResult(_vkGetPhysicalDeviceSurfacePresentModesKHR(vkHandle, surface.vkHandle, &count, nullptr));
+//
+//	std::vector<VkPresentModeKHR> modes(count);
+//	checkVKResult(_vkGetPhysicalDeviceSurfacePresentModesKHR(vkHandle, surface.vkHandle, &count, modes.data()));
+//
+//	return modes;
+//}
 
 
 Device::Device(PhysicalDevice &physicalDevice, py::dict createInfo) : _physicalDevice(physicalDevice)

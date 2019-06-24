@@ -8,7 +8,7 @@
 #include "exception.h"
 #include "utils.h"
 #include "extensions.h"
-//#include "device.h"
+#include "device.h"
 //#include "createInfo.h"
 
 
@@ -37,7 +37,7 @@ public:
 
 	DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT &info);
 	//SurfaceKHR* createSurface(py::dict createInfo);
-	//py::list getPhysicalDevices();
+	py::list getPhysicalDevices();
 
 	bool isValid();
 

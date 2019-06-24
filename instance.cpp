@@ -259,24 +259,24 @@ DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(DebugUtilsMesseng
 //	//return new SurfaceKHR(vkHandle, createInfo);
 //}
 //
-//py::list Instance::getPhysicalDevices()
-//{
-//	py::list devices;
-//	
-//	uint32_t deviceCount;
-//	checkVKResult(vkEnumeratePhysicalDevices(vkHandle, &deviceCount, nullptr));
-//
-//	std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
-//	checkVKResult(vkEnumeratePhysicalDevices(vkHandle, &deviceCount, physicalDevices.data()));
-//
-//	for (auto item : physicalDevices)
-//	{
-//		PhysicalDevice device(vkHandle, item);
-//		devices.append(device);
-//	}
-//
-//	return devices;
-//}
+py::list Instance::getPhysicalDevices()
+{
+	py::list devices;
+	
+	uint32_t deviceCount;
+	checkVKResult(vkEnumeratePhysicalDevices(vkHandle, &deviceCount, nullptr));
+
+	std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
+	checkVKResult(vkEnumeratePhysicalDevices(vkHandle, &deviceCount, physicalDevices.data()));
+
+	for (auto item : physicalDevices)
+	{
+		PhysicalDevice device(vkHandle, item);
+		devices.append(device);
+	}
+
+	return devices;
+}
 
 bool Instance::isValid()
 {

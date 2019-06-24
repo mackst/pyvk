@@ -29,32 +29,25 @@ PYBIND11_MODULE(_vk, m)
 		//	py::return_value_policy::reference)
 		//.def("createSurface", &Instance::createSurface, py::arg("createInfo"), 
 		//	py::return_value_policy::reference)
-		//.def("getPhysicalDevices", &Instance::getPhysicalDevices)
+		.def("getPhysicalDevices", &Instance::getPhysicalDevices)
 		.def_property_readonly("isValid", &Instance::isValid)
 		.def_static("version", &Instance::version)
 		.def_static("getLayerProperties", &Instance::layerProperties)
 		.def_static("getExtensionProperties", &Instance::extensionProperties, py::arg("layerName") = nullptr);
 
-	//py::class_<PhysicalDevice> PhysicalDeviceClass(m, "PhysicalDevice");
-	//PhysicalDeviceClass
-	//	.def(py::init<>())
-	//	.def("getSurfaceSupportKHR", &PhysicalDevice::getSurfaceSupportKHR, py::arg("surface"), py::arg("queueFamilyIndex"))
-	//	.def("getLayerProperties", &PhysicalDevice::layerProperties)
-	//	.def("getExtensionProperties", &PhysicalDevice::extensionProperties, py::arg("layerName") = nullptr)
-	//	.def("getSurfaceCapabilitiesKHR", &PhysicalDevice::getSurfaceCapabilitiesKHR, py::arg("surface"))
-	//	.def("getSurfaceFormatsKHR", &PhysicalDevice::getSurfaceFormatsKHR, py::arg("surface"))
-	//	.def("getSurfacePresentModeKHR", &PhysicalDevice::getSurfacePresentModeKHR, py::arg("surface"))
-	//	.def("__repr__", &PhysicalDevice::toString)
-	//	.def_property_readonly("isValid", &PhysicalDevice::isValid)
-	//	.def_property_readonly("properties", &PhysicalDevice::getProperties)
-	//	.def_property_readonly("queueFamilyProperties", &PhysicalDevice::getQueueFamilyProperties);
-	//py::enum_<VkPhysicalDeviceType>(PhysicalDeviceClass, "DeviceType")
-	//	.value("CPU", VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_CPU)
-	//	.value("OTHER", VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_OTHER)
-	//	.value("DISCRETE_GPU", VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-	//	.value("INTEGRATED_GPU", VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
-	//	.value("VIRTUAL_GPU", VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
-	//	.export_values();
+	py::class_<PhysicalDevice>(m, "PhysicalDevice")
+		.def(py::init<>())
+		//.def("getSurfaceSupportKHR", &PhysicalDevice::getSurfaceSupportKHR, py::arg("surface"), py::arg("queueFamilyIndex"))
+		.def("getLayerProperties", &PhysicalDevice::layerProperties)
+		.def("getExtensionProperties", &PhysicalDevice::extensionProperties, py::arg("layerName") = nullptr)
+		//.def("getSurfaceCapabilitiesKHR", &PhysicalDevice::getSurfaceCapabilitiesKHR, py::arg("surface"))
+		//.def("getSurfaceFormatsKHR", &PhysicalDevice::getSurfaceFormatsKHR, py::arg("surface"))
+		//.def("getSurfacePresentModeKHR", &PhysicalDevice::getSurfacePresentModeKHR, py::arg("surface"))
+		.def("getProperties2", &PhysicalDevice::getProperties2, py::arg("properties2") = nullptr)
+		.def("__repr__", &PhysicalDevice::toString)
+		.def_property_readonly("isValid", &PhysicalDevice::isValid)
+		.def_property_readonly("properties", &PhysicalDevice::getProperties)
+		.def_property_readonly("queueFamilyProperties", &PhysicalDevice::getQueueFamilyProperties);
 
 	//py::class_<Device>(m, "Device")
 	//	.def(py::init<PhysicalDevice&, py::dict>(), py::arg("physicalDevice"), py::arg("createInfo"))
@@ -140,11 +133,42 @@ PYBIND11_MODULE(_vk, m)
 		.def_property("enabledLayerNames", &InstanceCreateInfo::getLayerNames, &InstanceCreateInfo::setLayerNames)
 		.def_property("enabledExtensionNames", &InstanceCreateInfo::getExtensionNames, &InstanceCreateInfo::setExtensionNames);
 
-	//py::class_<VkDebugUtilsMessengerCreateInfoEXT>(m, "DebugUtilsMessengerCreateInfoEXT")
-	//	.def(py::init<>())
-	//	.def_readwrite("messageSeverity", &VkDebugUtilsMessengerCreateInfoEXT::messageSeverity)
-	//	.def_readwrite("messageType", &VkDebugUtilsMessengerCreateInfoEXT::messageType)
-	//	.def_property("", []() { return nullptr; }, [](VkDebugUtilsMessengerCreateInfoEXT &info, std::function<VKAPI_ATTR VkBool32 VKAPI_CALL(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT *, void *)> &f) { info.pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT*)f; });
+	py::class_<VkPhysicalDeviceProperties>(m, "PhysicalDeviceProperties")
+		.def(py::init<>())
+		.def_readwrite("apiVersion", &VkPhysicalDeviceProperties::apiVersion)
+		.def_readwrite("driverVersion", &VkPhysicalDeviceProperties::driverVersion)
+		.def_readwrite("vendorID", &VkPhysicalDeviceProperties::vendorID)
+		.def_readwrite("deviceID", &VkPhysicalDeviceProperties::deviceID)
+		.def_readwrite("deviceType", &VkPhysicalDeviceProperties::deviceType)
+		.def_property_readonly("deviceName", [](VkPhysicalDeviceProperties &self) { return py::str(self.deviceName); })
+		.def_property_readonly("pipelineCacheUUID", [](VkPhysicalDeviceProperties &self) { std::vector<uint8_t> ids(VK_UUID_SIZE); for (int i = 0; i < VK_UUID_SIZE; i++) ids[i] = self.pipelineCacheUUID[i]; return ids; })
+		.def_readwrite("limits", &VkPhysicalDeviceProperties::limits)
+		.def_readwrite("sparseProperties", &VkPhysicalDeviceProperties::sparseProperties);
+
+	py::class_<VkPhysicalDeviceProperties2>(m, "PhysicalDeviceProperties2")
+		.def(py::init([]() { VkPhysicalDeviceProperties2 out = {}; out.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2; return out; }))
+		.def_readwrite("properties", &VkPhysicalDeviceProperties2::properties)
+		.def_property("pNext", [](VkPhysicalDeviceProperties2 &self) { return self.pNext; }, [](VkPhysicalDeviceProperties2 &self, void* pNext) { self.pNext = pNext; });
+
+	py::class_<VkPhysicalDeviceRayTracingPropertiesNV>(m, "PhysicalDeviceRayTracingPropertiesNV")
+		.def(py::init([]() { VkPhysicalDeviceRayTracingPropertiesNV out = {}; out.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV; return out; }))
+		.def_readwrite("shaderGroupHandleSize", &VkPhysicalDeviceRayTracingPropertiesNV::shaderGroupHandleSize)
+		.def_readwrite("maxRecursionDepth", &VkPhysicalDeviceRayTracingPropertiesNV::maxRecursionDepth)
+		.def_readwrite("maxShaderGroupStride", &VkPhysicalDeviceRayTracingPropertiesNV::maxShaderGroupStride)
+		.def_readwrite("shaderGroupBaseAlignment", &VkPhysicalDeviceRayTracingPropertiesNV::shaderGroupBaseAlignment)
+		.def_readwrite("maxGeometryCount", &VkPhysicalDeviceRayTracingPropertiesNV::maxGeometryCount)
+		.def_readwrite("maxInstanceCount", &VkPhysicalDeviceRayTracingPropertiesNV::maxInstanceCount)
+		.def_readwrite("maxTriangleCount", &VkPhysicalDeviceRayTracingPropertiesNV::maxTriangleCount)
+		.def_readwrite("maxDescriptorSetAccelerationStructures", &VkPhysicalDeviceRayTracingPropertiesNV::maxDescriptorSetAccelerationStructures)
+		.def_property("pNext", [](VkPhysicalDeviceRayTracingPropertiesNV &self) { return self.pNext; }, [](VkPhysicalDeviceRayTracingPropertiesNV &self, void* pNext) { self.pNext = pNext; });
+
+	py::class_<VkQueueFamilyProperties>(m, "QueueFamilyProperties")
+		.def(py::init<>())
+		.def_readwrite("queueFlags", &VkQueueFamilyProperties::queueFlags)
+		.def_readwrite("queueCount", &VkQueueFamilyProperties::queueCount)
+		.def_readwrite("timestampValidBits", &VkQueueFamilyProperties::timestampValidBits)
+		.def_readwrite("minImageTransferGranularity", &VkQueueFamilyProperties::minImageTransferGranularity);
+	
 	py::class_<DebugUtilsMessengerCreateInfoEXT>(m, "DebugUtilsMessengerCreateInfoEXT")
 		.def(py::init<>())
 		.def_property("messageSeverity", &DebugUtilsMessengerCreateInfoEXT::getMessageSeverity, [](DebugUtilsMessengerCreateInfoEXT &self, VkDebugUtilsMessageSeverityFlagBitsEXT ms) { self.setMessageSeverity(ms); })

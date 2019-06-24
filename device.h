@@ -41,29 +41,29 @@ public:
 
 	std::string toString();
 
-	py::dict getProperties();
-	py::dict getProperties2();
-	py::list layerProperties();
-	py::list extensionProperties(const char* layerName = nullptr);
-	py::list getQueueFamilyProperties();
-	VkBool32 getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex);
-	VkSurfaceCapabilitiesKHR getSurfaceCapabilitiesKHR(SurfaceKHR &surface);
-	std::vector<VkSurfaceFormatKHR> getSurfaceFormatsKHR(SurfaceKHR &surface);
-	std::vector<VkPresentModeKHR> getSurfacePresentModeKHR(SurfaceKHR &surface);
+	VkPhysicalDeviceProperties getProperties();
+	VkPhysicalDeviceProperties2 getProperties2(VkPhysicalDeviceProperties2* properties2 = nullptr);
+	std::vector<VkLayerProperties> layerProperties();
+	std::vector<VkExtensionProperties> extensionProperties(const char* layerName = nullptr);
+	std::vector<VkQueueFamilyProperties> getQueueFamilyProperties();
+	//VkBool32 getSurfaceSupportKHR(SurfaceKHR &surface, uint32_t queueFamilyIndex);
+	//VkSurfaceCapabilitiesKHR getSurfaceCapabilitiesKHR(SurfaceKHR &surface);
+	//std::vector<VkSurfaceFormatKHR> getSurfaceFormatsKHR(SurfaceKHR &surface);
+	//std::vector<VkPresentModeKHR> getSurfacePresentModeKHR(SurfaceKHR &surface);
 
 	VkInstance _instance;
 	VkPhysicalDevice vkHandle = VK_NULL_HANDLE;
 
-private:
-	PFN_vkEnumerateDeviceExtensionProperties _vkEnumerateDeviceExtensionProperties = nullptr;
-	PFN_vkEnumerateDeviceLayerProperties _vkEnumerateDeviceLayerProperties = nullptr;
-	PFN_vkGetPhysicalDeviceProperties _vkGetPhysicalDeviceProperties = nullptr;
-	PFN_vkGetPhysicalDeviceProperties2 _vkGetPhysicalDeviceProperties2 = nullptr;
-	PFN_vkGetPhysicalDeviceQueueFamilyProperties _vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
-	PFN_vkGetPhysicalDeviceSurfaceSupportKHR _vkGetPhysicalDeviceSurfaceSupportKHR = nullptr;
-	PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR _vkGetPhysicalDeviceSurfaceCapabilitiesKHR = nullptr;
-	PFN_vkGetPhysicalDeviceSurfaceFormatsKHR _vkGetPhysicalDeviceSurfaceFormatsKHR = nullptr;
-	PFN_vkGetPhysicalDeviceSurfacePresentModesKHR _vkGetPhysicalDeviceSurfacePresentModesKHR = nullptr;
+//private:
+//	PFN_vkEnumerateDeviceExtensionProperties _vkEnumerateDeviceExtensionProperties = nullptr;
+//	PFN_vkEnumerateDeviceLayerProperties _vkEnumerateDeviceLayerProperties = nullptr;
+//	PFN_vkGetPhysicalDeviceProperties _vkGetPhysicalDeviceProperties = nullptr;
+//	PFN_vkGetPhysicalDeviceProperties2 _vkGetPhysicalDeviceProperties2 = nullptr;
+//	PFN_vkGetPhysicalDeviceQueueFamilyProperties _vkGetPhysicalDeviceQueueFamilyProperties = nullptr;
+//	PFN_vkGetPhysicalDeviceSurfaceSupportKHR _vkGetPhysicalDeviceSurfaceSupportKHR = nullptr;
+//	PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR _vkGetPhysicalDeviceSurfaceCapabilitiesKHR = nullptr;
+//	PFN_vkGetPhysicalDeviceSurfaceFormatsKHR _vkGetPhysicalDeviceSurfaceFormatsKHR = nullptr;
+//	PFN_vkGetPhysicalDeviceSurfacePresentModesKHR _vkGetPhysicalDeviceSurfacePresentModesKHR = nullptr;
 };
 
 
