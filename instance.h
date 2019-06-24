@@ -36,7 +36,7 @@ public:
 	void destroy();
 
 	DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT &info);
-	//SurfaceKHR* createSurface(py::dict createInfo);
+	SurfaceKHR* createWin32Surface(long winId);
 	py::list getPhysicalDevices();
 
 	bool isValid();
@@ -47,10 +47,6 @@ public:
 
 	
 	VkInstance vkHandle = VK_NULL_HANDLE;
-private:
-	void getInstanceFuncPointers();
-
-	//SurfaceKHR *_surfaceKHR = nullptr;
 };
 
 

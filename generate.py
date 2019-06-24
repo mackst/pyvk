@@ -96,7 +96,7 @@ def structsBinding(structs, vktypes):
     for name in structs:
         struct = structs[name]
         mtypes = []
-        memberNames = []
+        memberNames = {}
         for member in struct.iter('member'):
             mtype = member.find('type')
             mname = member.find('name')
@@ -106,7 +106,11 @@ def structsBinding(structs, vktypes):
                 ctype += mtype.tail.strip()
 
             mtypes.append(ctype)
-            memberNames.append(mname.text)
+            #if ctype == 'VkStructureType':
+            if mname.text == 'sType':
+                memberNames[mname.text] = member.get('values')
+            else:
+                memberNames[mname.text] = None
 
         okToBind = False
         allGoodType = all([i in alltypes for i in mtypes])
@@ -120,7 +124,24 @@ def structsBinding(structs, vktypes):
                 else:
                     code += '\n\t.def_readwrite("{}", &{}::{})'.format(mname, name, mname)
             code += ';\n\n'
+        else:
+            #if name == 'VkPhysicalDeviceProperties2':
+            code += cppTemp.format(name, name[2:])
+            if 'sType' in memberNames:
+                code += '\n\t.def(py::init([]() { ' + '{} out '.format(name)
+                code += '= {}; ' + 'out.sType = {}; '.format(memberNames['sType']) + 'return out; }))'
+            else:
+                code += '\n\t.def(py::init<>())'
 
+            for i, mname in enumerate(memberNames):
+                if mname == 'pNext':
+                    code += '\n\t.def_property("{}", []({} &self) '.format(mname, name)
+                    code += '{ return self.pNext; }, ' + '[]({} &self, void* pNext) '.format(name) + '{ self.pNext = pNext; })'
+                elif mtypes[i] in arraytypes:
+                    code += '\n\t.def_readonly("{}", &{}::{})'.format(mname, name, mname)
+                else:
+                    code += '\n\t.def_readwrite("{}", &{}::{})'.format(mname, name, mname)
+            code += ';\n\n'
     return code
 
 if __name__ == "__main__":

@@ -250,15 +250,11 @@ DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(DebugUtilsMesseng
 	return new DebugUtilsMessengerEXT(vkHandle, info);
 }
 
+SurfaceKHR* Instance::createWin32Surface(long winId)
+{
+	return new SurfaceKHR(vkHandle, winId);
+}
 
-//
-//SurfaceKHR * Instance::createSurface(py::dict createInfo)
-//{
-//	_surfaceKHR = new SurfaceKHR(vkHandle, createInfo);
-//	return _surfaceKHR;
-//	//return new SurfaceKHR(vkHandle, createInfo);
-//}
-//
 py::list Instance::getPhysicalDevices()
 {
 	py::list devices;
@@ -323,10 +319,6 @@ std::vector<VkExtensionProperties> Instance::extensionProperties(const char* lay
 	return properties;
 }
 
-void Instance::getInstanceFuncPointers()
-{
-
-}
 
 void initvk()
 {

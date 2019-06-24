@@ -7,10 +7,6 @@
 //#endif
 
 
-//#include <pybind11/pybind11.h>
-//#include <pybind11/stl.h>
-
-
 #include "createInfo.h"
 
 
@@ -32,31 +28,19 @@ class DebugUtilsMessengerEXT
 public:
 	DebugUtilsMessengerEXT();
 	DebugUtilsMessengerEXT(VkInstance &instance, DebugUtilsMessengerCreateInfoEXT &info);
-	//DebugUtilsMessengerEXT(VkInstance &instance, int messageSeverity, int messageType, py::function userCallback);
 	~DebugUtilsMessengerEXT();
 
 	void destroy();
 
 	bool isValid();
 
-	//static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
-
-
 private:
 	VkInstance _instance = VK_NULL_HANDLE;
 
 	VkDebugUtilsMessengerEXT vkHandle = VK_NULL_HANDLE;
-	//VkDebugUtilsMessengerCreateInfoEXT _createInfo = {};
 	DebugUtilsMessengerCreateInfoEXT _createInfo;
 
 	bool _isValid = false;
-
-	// python function callback
-	//static py::function pycallback;
-
-	// function pointer
-	//PFN_vkCreateDebugUtilsMessengerEXT _vkCreateDebugUtilsMessengerEXT = nullptr;
-	//PFN_vkDestroyDebugUtilsMessengerEXT _vkDestroyDebugUtilsMessengerEXT = nullptr;
 };
 
 
@@ -64,10 +48,10 @@ class SurfaceKHR
 {
 public:
 	SurfaceKHR();
-	SurfaceKHR(VkInstance &instance, py::dict createInfo);
+	SurfaceKHR(VkInstance &instance, long winId);
 	~SurfaceKHR();
 
-	bool create(py::dict createInfo);
+	bool create(long winId);
 	void destroy();
 
 	bool isValid();
@@ -75,12 +59,6 @@ public:
 	VkSurfaceKHR vkHandle = VK_NULL_HANDLE;
 private:
 	VkInstance _instance = VK_NULL_HANDLE;
-
-	//bool _isValid = false;
-
-	// function pointer
-	PFN_vkCreateWin32SurfaceKHR _createWin32Surface = nullptr;
-	PFN_vkDestroySurfaceKHR _destroySurfaceKHR = nullptr;
 };
 
 

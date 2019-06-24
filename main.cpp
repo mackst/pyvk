@@ -23,12 +23,10 @@ PYBIND11_MODULE(_vk, m)
 		//.def("create", &Instance::create, py::arg("createInfo"))
 		//.def("create2", &Instance::create2, py::arg("createInfo"))
 		.def("destroy", &Instance::destroy)
-		.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, py::arg("createInfo"), py::return_value_policy::take_ownership)
-		//.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, 
-		//	py::arg("messageSeverity"), py::arg("messageType"), py::arg("userCallback"),
-		//	py::return_value_policy::reference)
-		//.def("createSurface", &Instance::createSurface, py::arg("createInfo"), 
-		//	py::return_value_policy::reference)
+		.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, py::arg("createInfo"), 
+			py::return_value_policy::take_ownership)
+		.def("createWin32Surface", &Instance::createWin32Surface, py::arg("winId"), 
+			py::return_value_policy::take_ownership)
 		.def("getPhysicalDevices", &Instance::getPhysicalDevices)
 		.def_property_readonly("isValid", &Instance::isValid)
 		.def_static("version", &Instance::version)
@@ -37,12 +35,12 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<PhysicalDevice>(m, "PhysicalDevice")
 		.def(py::init<>())
-		//.def("getSurfaceSupportKHR", &PhysicalDevice::getSurfaceSupportKHR, py::arg("surface"), py::arg("queueFamilyIndex"))
+		.def("getSurfaceSupportKHR", &PhysicalDevice::getSurfaceSupportKHR, py::arg("surface"), py::arg("queueFamilyIndex"))
 		.def("getLayerProperties", &PhysicalDevice::layerProperties)
 		.def("getExtensionProperties", &PhysicalDevice::extensionProperties, py::arg("layerName") = nullptr)
-		//.def("getSurfaceCapabilitiesKHR", &PhysicalDevice::getSurfaceCapabilitiesKHR, py::arg("surface"))
-		//.def("getSurfaceFormatsKHR", &PhysicalDevice::getSurfaceFormatsKHR, py::arg("surface"))
-		//.def("getSurfacePresentModeKHR", &PhysicalDevice::getSurfacePresentModeKHR, py::arg("surface"))
+		.def("getSurfaceCapabilitiesKHR", &PhysicalDevice::getSurfaceCapabilitiesKHR, py::arg("surface"))
+		.def("getSurfaceFormatsKHR", &PhysicalDevice::getSurfaceFormatsKHR, py::arg("surface"))
+		.def("getSurfacePresentModeKHR", &PhysicalDevice::getSurfacePresentModeKHR, py::arg("surface"))
 		.def("getProperties2", &PhysicalDevice::getProperties2, py::arg("properties2") = nullptr)
 		.def("__repr__", &PhysicalDevice::toString)
 		.def_property_readonly("isValid", &PhysicalDevice::isValid)
@@ -105,6 +103,9 @@ PYBIND11_MODULE(_vk, m)
 		//.def(py::init<DebugUtilsMessengerCreateInfoEXT&>(), py::arg("createInfo"))
 		.def_property_readonly("isValid", &DebugUtilsMessengerEXT::isValid);
 
+	py::class_<SurfaceKHR>(m, "SurfaceKHR")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &SurfaceKHR::isValid);
 	//
 
 	py::class_<ApplicationInfo>(m, "ApplicationInfo")
@@ -183,9 +184,27 @@ PYBIND11_MODULE(_vk, m)
 		.def_readonly("messageIdName", &VkDebugUtilsMessengerCallbackDataEXT::pMessageIdName)
 		.def_readonly("message", &VkDebugUtilsMessengerCallbackDataEXT::pMessage)
 		.def_readwrite("messageIdNumber", &VkDebugUtilsMessengerCallbackDataEXT::messageIdNumber)
-		.def_property_readonly("queueLabels", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsLabelEXT> labels(data.queueLabelCount); for (auto i = 0; i < data.queueLabelCount; i++) { labels[i] = *data.pQueueLabels; data.pQueueLabels++; } return labels; })
-		.def_property_readonly("cmdBufLabels", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsLabelEXT> labels(data.cmdBufLabelCount); for (auto i = 0; i < data.cmdBufLabelCount; i++) { labels[i] = *data.pCmdBufLabels; data.pCmdBufLabels++; } return labels; })
-		.def_property_readonly("objects", [](VkDebugUtilsMessengerCallbackDataEXT &data) { std::vector<VkDebugUtilsObjectNameInfoEXT> labels(data.objectCount); for (auto i = 0; i < data.objectCount; i++) { labels[i] = *data.pObjects; data.pObjects++; } return labels; });
+		.def_property_readonly("queueLabels", [](VkDebugUtilsMessengerCallbackDataEXT &data) { 
+		std::vector<VkDebugUtilsLabelEXT> labels(data.queueLabelCount); 
+		for (auto i = 0; i < data.queueLabelCount; i++) { 
+			labels[i] = *data.pQueueLabels;
+			data.pQueueLabels++; 
+		} 
+		return labels; })
+		.def_property_readonly("cmdBufLabels", [](VkDebugUtilsMessengerCallbackDataEXT &data) { 
+		std::vector<VkDebugUtilsLabelEXT> labels(data.cmdBufLabelCount); 
+		for (auto i = 0; i < data.cmdBufLabelCount; i++) { 
+			labels[i] = *data.pCmdBufLabels; 
+			data.pCmdBufLabels++; 
+		} 
+		return labels; })
+		.def_property_readonly("objects", [](VkDebugUtilsMessengerCallbackDataEXT &data) { 
+		std::vector<VkDebugUtilsObjectNameInfoEXT> labels(data.objectCount); 
+		for (auto i = 0; i < data.objectCount; i++) { 
+			labels[i] = *data.pObjects; 
+			data.pObjects++; 
+		} 
+		return labels; });
 
 	py::class_<VkDebugUtilsLabelEXT>(m, "DebugUtilsLabelEXT")
 		.def(py::init<>())
@@ -248,6 +267,24 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("height", &VkViewport::height)
 		.def_readwrite("minDepth", &VkViewport::minDepth)
 		.def_readwrite("maxDepth", &VkViewport::maxDepth);
+
+	py::class_<VkSurfaceCapabilitiesKHR>(m, "SurfaceCapabilitiesKHR")
+		.def(py::init<>())
+		.def_readwrite("minImageCount", &VkSurfaceCapabilitiesKHR::minImageCount)
+		.def_readwrite("maxImageCount", &VkSurfaceCapabilitiesKHR::maxImageCount)
+		.def_readwrite("currentExtent", &VkSurfaceCapabilitiesKHR::currentExtent)
+		.def_readwrite("minImageExtent", &VkSurfaceCapabilitiesKHR::minImageExtent)
+		.def_readwrite("maxImageExtent", &VkSurfaceCapabilitiesKHR::maxImageExtent)
+		.def_readwrite("maxImageArrayLayers", &VkSurfaceCapabilitiesKHR::maxImageArrayLayers)
+		.def_readwrite("supportedTransforms", &VkSurfaceCapabilitiesKHR::supportedTransforms)
+		.def_readwrite("currentTransform", &VkSurfaceCapabilitiesKHR::currentTransform)
+		.def_readwrite("supportedCompositeAlpha", &VkSurfaceCapabilitiesKHR::supportedCompositeAlpha)
+		.def_readwrite("supportedUsageFlags", &VkSurfaceCapabilitiesKHR::supportedUsageFlags);
+
+	py::class_<VkSurfaceFormatKHR>(m, "SurfaceFormatKHR")
+		.def(py::init<>())
+		.def_readwrite("format", &VkSurfaceFormatKHR::format)
+		.def_readwrite("colorSpace", &VkSurfaceFormatKHR::colorSpace);
 
 	py::class_<VkExtensionProperties>(m, "ExtensionProperties")
 		.def(py::init<>())
