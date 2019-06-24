@@ -94,29 +94,7 @@ Instance::Instance(InstanceCreateInfo &info)
 	if (vkGetInstanceProcAddr == nullptr)
 		initvk();
 
-	VkApplicationInfo appInfo;
-	info.appInfo.getVKStruct(&appInfo);
-
-	VkInstanceCreateInfo createInfo;
-	info.getVKStruct(&createInfo);
-	createInfo.pApplicationInfo = &appInfo;
-
-	VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
-	debugInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	debugInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-								VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-								VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
-								VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
-	debugInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-							VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-							VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-	debugInfo.pfnUserCallback = instance_debug_callback;
-
-	auto func = (PFN_vkCreateInstance)vkGetInstanceProcAddr(nullptr, "vkCreateInstance");
-	if (func != nullptr)
-	{
-		checkVKResult(func(&createInfo, nullptr, &vkHandle));
-	}
+	create(info);
 }
 
 Instance::~Instance()
@@ -211,41 +189,41 @@ Instance::~Instance()
 //	return true;
 //}
 
-//bool Instance::create2(InstanceCreateInfo &info)
-//{
-//	auto _appInfo = info.getAppInfo();
-//	VkApplicationInfo appInfo = {};
-//	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-//	appInfo.apiVersion = _appInfo->getApiVersion();
-//	appInfo.applicationVersion = _appInfo->getApplicationVersion();
-//	appInfo.engineVersion = _appInfo->getEngineVersion();
-//	appInfo.pApplicationName = _appInfo->getApplicationName().c_str();
-//	appInfo.pEngineName = _appInfo->getEngineName().c_str();
-//
-//	VkInstanceCreateInfo createInfo = {};
-//	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-//	createInfo.pApplicationInfo = &appInfo;
-//	std::vector<std::string> layerNames = info.getLayerNames();
-//	auto lnames = vecStrToVecChar(layerNames);
-//	createInfo.enabledLayerCount = static_cast<uint32_t>(layerNames.size());
-//	createInfo.ppEnabledLayerNames = lnames.data();
-//	auto extNames = info.getExtensionNames();
-//	auto eNames = vecStrToVecChar(extNames);
-//	createInfo.enabledExtensionCount = static_cast<uint32_t>(extNames.size());
-//	createInfo.ppEnabledExtensionNames = eNames.data();
-//
-//	auto func = (PFN_vkCreateInstance)vkGetInstanceProcAddr(nullptr, "vkCreateInstance");
-//	if (func != nullptr)
-//	{
-//		checkVKResult(func(&createInfo, nullptr, &vkHandle));
-//	}
-//	//else
-//	//	checkVKResult(vkCreateInstance(&createInfo, nullptr, &vkHandle));
-//
-//	getInstanceFuncPointers();
-//
-//	return true;
-//}
+bool Instance::create(InstanceCreateInfo &info)
+{
+	VkApplicationInfo appInfo = {};
+	info.appInfo.getVKStruct(&appInfo);
+
+	VkInstanceCreateInfo createInfo = {};
+	info.getVKStruct(&createInfo);
+	createInfo.pApplicationInfo = &appInfo;
+
+	if (info.pNext)
+	{
+		VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
+		info.pNext->getVKStruct(&debugInfo);
+		createInfo.pNext = &debugInfo;
+		py::print("setup VkDebugUtilsMessengerCreateInfoEXT");
+	}
+
+	//VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
+	//debugInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	//debugInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	//debugInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+	//	VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+	//	VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	//debugInfo.pfnUserCallback = instance_debug_callback;
+	//createInfo.pNext = &debugInfo;
+
+	auto result = vkCreateInstance(&createInfo, nullptr, &vkHandle);
+	py::print(result);
+	checkVKResult(result);
+
+	return true;
+}
 
 
 void Instance::destroy()

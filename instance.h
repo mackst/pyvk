@@ -31,7 +31,7 @@ public:
 	~Instance();
 
 	//bool create();
-	//bool create(InstanceCreateInfo &);
+	bool create(InstanceCreateInfo &);
 	//bool create(py::dict);
 	void destroy();
 

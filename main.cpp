@@ -126,17 +126,24 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<ApplicationInfo &, std::vector<std::string> &, std::vector<std::string> &>(),
 			py::arg("appInfo"), py::arg("layerNames"), py::arg("extentsionNames"))
 		.def_readwrite("applicationInfo", &InstanceCreateInfo::appInfo)
-		.def_readwrite("enabledExtensionNames", &InstanceCreateInfo::extensionNames)
-		.def_readwrite("enabledLayerNames", &InstanceCreateInfo::layerNames);
-		/*.def_property("applicationInfo", &InstanceCreateInfo::getApplicationInfo, &InstanceCreateInfo::setApplicationInfo)
-		.def_property("enabledLayerNames", &InstanceCreateInfo::getApplicationInfo, &InstanceCreateInfo::setEnabledLayerNames)
-		.def_property("enabledExtensionNames", &InstanceCreateInfo::getApplicationInfo, &InstanceCreateInfo::setEnabledExtensionNames);*/
+		.def_property("pNext", &InstanceCreateInfo::getpNext, &InstanceCreateInfo::setpNext)
+		//.def_readwrite("enabledLayerNames", &InstanceCreateInfo::layerNames);
+		.def_property("enabledLayerNames", &InstanceCreateInfo::getLayerNames, &InstanceCreateInfo::setLayerNames)
+		.def_property("enabledExtensionNames", &InstanceCreateInfo::getExtensionNames, &InstanceCreateInfo::setExtensionNames);
 
 	//py::class_<VkDebugUtilsMessengerCreateInfoEXT>(m, "DebugUtilsMessengerCreateInfoEXT")
 	//	.def(py::init<>())
 	//	.def_readwrite("messageSeverity", &VkDebugUtilsMessengerCreateInfoEXT::messageSeverity)
 	//	.def_readwrite("messageType", &VkDebugUtilsMessengerCreateInfoEXT::messageType)
 	//	.def_property("", []() { return nullptr; }, [](VkDebugUtilsMessengerCreateInfoEXT &info, std::function<VKAPI_ATTR VkBool32 VKAPI_CALL(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT *, void *)> &f) { info.pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT*)f; });
+	py::class_<DebugUtilsMessengerCreateInfoEXT>(m, "DebugUtilsMessengerCreateInfoEXT")
+		.def(py::init<>())
+		.def_property("messageSeverity", &DebugUtilsMessengerCreateInfoEXT::getMessageSeverity, [](DebugUtilsMessengerCreateInfoEXT &self, VkDebugUtilsMessageSeverityFlagBitsEXT ms) { self.setMessageSeverity(ms); })
+		.def_property("messageSeverity", &DebugUtilsMessengerCreateInfoEXT::getMessageSeverity, [](DebugUtilsMessengerCreateInfoEXT &self, uint32_t ms) { self.setMessageSeverity(ms); })
+		.def_property("messageType", &DebugUtilsMessengerCreateInfoEXT::getMessageType, [](DebugUtilsMessengerCreateInfoEXT &self, VkDebugUtilsMessageTypeFlagsEXT mt) { self.setMessageType(mt); })
+		.def_property("messageType", &DebugUtilsMessengerCreateInfoEXT::getMessageType, [](DebugUtilsMessengerCreateInfoEXT &self, uint32_t mt) { self.setMessageType(mt); })
+		.def_property("userCallback", &DebugUtilsMessengerCreateInfoEXT::getUserCallback, &DebugUtilsMessengerCreateInfoEXT::setUserCallback)
+		.def_property("userData", &DebugUtilsMessengerCreateInfoEXT::getUserData, &DebugUtilsMessengerCreateInfoEXT::setUserData);
 
 	py::class_<VkDebugUtilsMessengerCallbackDataEXT>(m, "DebugUtilsMessengerCallbackDataEXT")
 		.def(py::init<>())

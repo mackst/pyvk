@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+
 #include "volk.h"
 
 namespace py = pybind11;
@@ -28,48 +29,72 @@ public:
 };
 
 
-class InstanceCreateInfo
+class DebugUtilsMessengerUserData
 {
 public:
-	InstanceCreateInfo();
-	InstanceCreateInfo(ApplicationInfo &appInfo, std::vector<std::string> &layerNames, std::vector<std::string> &extentsionNames);
-	~InstanceCreateInfo();
+	DebugUtilsMessengerUserData();
+	~DebugUtilsMessengerUserData();
 
-	void setLayerNames(std::vector<std::string> &names);
-	std::vector<std::string> getLayerNames() { return layerNames; };
-	void setExtensionNames(std::vector<std::string> &names);
-	std::vector<std::string> getExtensionNames() { return extensionNames; };
-
-	void getVKStruct(VkInstanceCreateInfo *info);
-
-	ApplicationInfo appInfo;
-	std::vector<std::string> layerNames = {};
-	std::vector<std::string> extensionNames = {};
-	std::vector<const char*> lnames = {};
-	std::vector<const char*> enames = {};
+	py::function pycallback = py::none();
+	py::dict data;
 };
 
 
+ class DebugUtilsMessengerCreateInfoEXT
+ {
+ public:
+ 	DebugUtilsMessengerCreateInfoEXT();
+ 	~DebugUtilsMessengerCreateInfoEXT();
 
-//static VKAPI_ATTR VkBool32 VKAPI_CALL debugUtilsUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+	py::function getUserCallback() { return userData.pycallback; }
+	void setUserCallback(py::function func) { userData.pycallback = func; }
+
+	py::dict getUserData() { return userData.data; }
+	void setUserData(py::dict data) { userData.data = data; }
+
+	void setMessageSeverity(VkDebugUtilsMessageSeverityFlagBitsEXT ms) { messageSeverity = ms; }
+	void setMessageSeverity(uint32_t ms) { messageSeverity = (VkDebugUtilsMessageSeverityFlagBitsEXT)ms; }
+	VkDebugUtilsMessageSeverityFlagBitsEXT getMessageSeverity() { return messageSeverity; }
+
+	//void setMessageType(VkDebugUtilsMessageTypeFlagsEXT mt) { messageType = mt; }
+	void setMessageType(uint32_t mt) { messageType = (VkDebugUtilsMessageTypeFlagsEXT)mt; }
+	VkDebugUtilsMessageTypeFlagsEXT getMessageType() { return messageType; }
+
+ 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+
+ 	void getVKStruct(VkDebugUtilsMessengerCreateInfoEXT *info);
+
+ 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity;
+ 	VkDebugUtilsMessageTypeFlagsEXT messageType;
+
+	DebugUtilsMessengerUserData userData;
+ };
 
 
-// class DebugUtilsMessengerCreateInfoEXT
-// {
-// public:
-// 	DebugUtilsMessengerCreateInfoEXT();
-// 	~DebugUtilsMessengerCreateInfoEXT();
+ class InstanceCreateInfo
+ {
+ public:
+	 InstanceCreateInfo();
+	 InstanceCreateInfo(ApplicationInfo &appInfo, std::vector<std::string> &layerNames, std::vector<std::string> &extentsionNames);
+	 ~InstanceCreateInfo();
 
-// 	//static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+	 void setLayerNames(std::vector<std::string> &names);
+	 std::vector<std::string> getLayerNames() { return layerNames; }
+	 void setExtensionNames(std::vector<std::string> &names);
+	 std::vector<std::string> getExtensionNames() { return extensionNames; }
+	 void setpNext(DebugUtilsMessengerCreateInfoEXT *info) { pNext = info; }
+	 DebugUtilsMessengerCreateInfoEXT * getpNext() { return pNext; }
 
-// 	void getVKStruct(VkDebugUtilsMessengerCreateInfoEXT *info);
+	 void getVKStruct(VkInstanceCreateInfo *info);
 
-// 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity;
-// 	VkDebugUtilsMessageTypeFlagsEXT messageTypes;
-	
-// 	py::function pycallback;
-// };
+	 ApplicationInfo appInfo;
+	 std::vector<std::string> layerNames = {};
+	 std::vector<std::string> extensionNames = {};
+	 std::vector<const char*> lnames = {};
+	 std::vector<const char*> enames = {};
 
+	 DebugUtilsMessengerCreateInfoEXT *pNext = nullptr;
+ };
 
 
 #endif // !CREATEINFO_H
