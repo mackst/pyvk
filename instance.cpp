@@ -203,7 +203,6 @@ bool Instance::create(InstanceCreateInfo &info)
 		VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
 		info.pNext->getVKStruct(&debugInfo);
 		createInfo.pNext = &debugInfo;
-		py::print("setup VkDebugUtilsMessengerCreateInfoEXT");
 	}
 
 	//VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
@@ -219,7 +218,7 @@ bool Instance::create(InstanceCreateInfo &info)
 	//createInfo.pNext = &debugInfo;
 
 	auto result = vkCreateInstance(&createInfo, nullptr, &vkHandle);
-	py::print(result);
+	//py::print(result);
 	checkVKResult(result);
 
 	return true;
@@ -295,13 +294,7 @@ uint32_t Instance::version()
 		initvk();
 
 	uint32_t version;
-	auto func = (PFN_vkEnumerateInstanceVersion)vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion");
-	if (func != nullptr)
-	{
-		func(&version);
-	}
-	//else
-	//	vkEnumerateInstanceVersion(&version);
+	vkEnumerateInstanceVersion(&version);
 	return version;
 }
 
@@ -310,36 +303,12 @@ std::vector<VkLayerProperties> Instance::layerProperties()
 	if (vkGetInstanceProcAddr == nullptr)
 		initvk();
 
-	//py::list properties;
 	std::vector<VkLayerProperties> layerProperties;
 	uint32_t propertieCount;
 
-	auto func = (PFN_vkEnumerateInstanceLayerProperties)vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceLayerProperties");
-	if (func != nullptr)
-	{
-		checkVKResult(func(&propertieCount, nullptr));
-		layerProperties.resize(propertieCount);
-		checkVKResult(func(&propertieCount, layerProperties.data()));
-	}
-	//else
-	//{
-	//	checkVKResult(vkEnumerateInstanceLayerProperties(&propertieCount, nullptr));
-	//	layerProperties.resize(propertieCount);
-	//	checkVKResult(vkEnumerateInstanceLayerProperties(&propertieCount, layerProperties.data()));
-	//}
-
-	//for (auto item : layerProperties)
-	//{
-	//	py::dict lp;
-	//	lp["layerName"] = py::str(item.layerName);
-	//	lp["specVersion"] = py::int_(item.specVersion);
-	//	lp["implementationVersion"] = py::int_(item.implementationVersion);
-	//	lp["description"] = py::str(item.description);
-
-	//	properties.append(lp);
-	//}
-
-	//return properties;
+	checkVKResult(vkEnumerateInstanceLayerProperties(&propertieCount, nullptr));
+	layerProperties.resize(propertieCount);
+	checkVKResult(vkEnumerateInstanceLayerProperties(&propertieCount, layerProperties.data()));
 
 	return layerProperties;
 }
@@ -349,37 +318,13 @@ std::vector<VkExtensionProperties> Instance::extensionProperties(const char* lay
 	if (vkGetInstanceProcAddr == nullptr)
 		initvk();
 
-	//py::list extProperties;
 	uint32_t propertyCount;
 	std::vector<VkExtensionProperties> properties;
 
-	auto func = (PFN_vkEnumerateInstanceExtensionProperties)vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceExtensionProperties");
+	checkVKResult(vkEnumerateInstanceExtensionProperties(layerName, &propertyCount, nullptr));
+	properties.resize(propertyCount);
+	checkVKResult(vkEnumerateInstanceExtensionProperties(layerName, &propertyCount, properties.data()));
 
-	if (func != nullptr)
-	{
-		checkVKResult(func(layerName, &propertyCount, nullptr));
-		properties.resize(propertyCount);
-		checkVKResult(func(layerName, &propertyCount, properties.data()));
-	}
-	else
-		throw std::runtime_error("failed to get vkEnumerateInstanceExtensionProperties function pointer.");
-	//else
-	//{
-	//	checkVKResult(vkEnumerateInstanceExtensionProperties(layerName, &propertyCount, nullptr));
-	//	properties.resize(propertyCount);
-	//	checkVKResult(vkEnumerateInstanceExtensionProperties(layerName, &propertyCount, properties.data()));
-	//}
-
-	//for (auto item : properties)
-	//{
-	//	py::dict prop;
-	//	prop["extensionName"] = py::str(item.extensionName);
-	//	prop["specVersion"] = py::int_(item.specVersion);
-
-	//	extProperties.append(prop);
-	//}
-
-	//return extProperties;
 	return properties;
 }
 
