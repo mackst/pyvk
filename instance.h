@@ -35,8 +35,7 @@ public:
 	//bool create(py::dict);
 	void destroy();
 
-	DebugUtilsMessengerEXT createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT &info);
-	//DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback);
+	DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT &info);
 	//SurfaceKHR* createSurface(py::dict createInfo);
 	//py::list getPhysicalDevices();
 
@@ -51,8 +50,7 @@ public:
 private:
 	void getInstanceFuncPointers();
 
-	DebugUtilsMessengerEXT *_debugMessenger = nullptr;
-	SurfaceKHR *_surfaceKHR = nullptr;
+	//SurfaceKHR *_surfaceKHR = nullptr;
 };
 
 

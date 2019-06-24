@@ -226,18 +226,12 @@ bool Instance::create(InstanceCreateInfo &info)
 
 
 void Instance::destroy()
-{
-	if (_debugMessenger != nullptr)
-	{
-		_debugMessenger->destroy();
-		_debugMessenger = nullptr;
-	}
-		
-	if (_surfaceKHR != nullptr)
-	{
-		_surfaceKHR->destroy();
-		_surfaceKHR = nullptr;
-	}
+{		
+	//if (_surfaceKHR != nullptr)
+	//{
+	//	_surfaceKHR->destroy();
+	//	_surfaceKHR = nullptr;
+	//}
 
 	if (vkHandle == VK_NULL_HANDLE)
 		return;
@@ -251,18 +245,12 @@ void Instance::destroy()
 	//py::print("instance destroyed.");
 }
 
-DebugUtilsMessengerEXT Instance::createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT & info)
+DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT & info)
 {
-	DebugUtilsMessengerEXT dum(vkHandle, info);
-	return dum;
-	//return new DebugUtilsMessengerEXT(vkHandle, info);
+	return new DebugUtilsMessengerEXT(vkHandle, info);
 }
 
-//DebugUtilsMessengerEXT* Instance::createDebugUtilsMessengerEXT(int messageSeverity, int messageType, py::function userCallback)
-//{
-//	_debugMessenger = new DebugUtilsMessengerEXT(vkHandle, messageSeverity, messageType, userCallback);
-//	return _debugMessenger;
-//}
+
 //
 //SurfaceKHR * Instance::createSurface(py::dict createInfo)
 //{

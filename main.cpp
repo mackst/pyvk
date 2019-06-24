@@ -23,7 +23,7 @@ PYBIND11_MODULE(_vk, m)
 		//.def("create", &Instance::create, py::arg("createInfo"))
 		//.def("create2", &Instance::create2, py::arg("createInfo"))
 		.def("destroy", &Instance::destroy)
-		.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, py::arg("createInfo"))//, py::return_value_policy::reference)
+		.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, py::arg("createInfo"), py::return_value_policy::take_ownership)
 		//.def("createDebugUtilsMessengerEXT", &Instance::createDebugUtilsMessengerEXT, 
 		//	py::arg("messageSeverity"), py::arg("messageType"), py::arg("userCallback"),
 		//	py::return_value_policy::reference)

@@ -18,6 +18,7 @@ DebugUtilsMessengerEXT::DebugUtilsMessengerEXT(VkInstance & instance, DebugUtils
 		throw ExtensionNotPresent("VK_EXT_debug_report not present.");
 
 	VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
+	//info.getVKStruct(&createInfo);
 	_createInfo.getVKStruct(&createInfo);
 
 	checkVKResult(vkCreateDebugUtilsMessengerEXT(_instance, &createInfo, nullptr, &vkHandle));
@@ -52,11 +53,10 @@ DebugUtilsMessengerEXT::~DebugUtilsMessengerEXT()
 
 void DebugUtilsMessengerEXT::destroy()
 {
-	if (vkHandle != VK_NULL_HANDLE)
+	if (isValid())
 	{
 		vkDestroyDebugUtilsMessengerEXT(_instance, vkHandle, nullptr);
 		//py::print("DebugUtilsMessengerEXT destroyed.");
-		//DebugUtilsMessengerEXT::pycallback = {};
 		_createInfo = {};
 		_instance = VK_NULL_HANDLE;
 		vkHandle = VK_NULL_HANDLE;
@@ -66,7 +66,7 @@ void DebugUtilsMessengerEXT::destroy()
 
 bool DebugUtilsMessengerEXT::isValid()
 {
-	return _isValid;
+	return vkHandle != VK_NULL_HANDLE;
 }
 
 
