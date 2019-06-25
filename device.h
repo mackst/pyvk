@@ -8,12 +8,8 @@
 
 #include <vector>
 #include <string>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
-
-#include "volk.h"
-
+#include "createInfo.h"
 #include "image.h"
 #include "pipeline.h"
 
@@ -35,6 +31,7 @@ class PhysicalDevice
 public:
 	PhysicalDevice();
 	PhysicalDevice(VkInstance &instance, VkPhysicalDevice &device);
+	//PhysicalDevice(PhysicalDevice& device);
 	~PhysicalDevice();
 
 	bool isValid();
@@ -61,10 +58,10 @@ public:
 class Device
 {
 public:
-	Device(PhysicalDevice &physicalDevice, py::dict createInfo);
+	Device(PhysicalDevice &physicalDevice, DeviceCreateInfo &createInfo);
 	~Device();
 
-	bool create(py::dict createInfo);
+	bool create(DeviceCreateInfo &createInfo);
 	void destroy();
 
 	bool isValid();
@@ -79,25 +76,25 @@ public:
 	//std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> createInfos);
 	std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, py::list createInfos);
 
+
 	VkDevice vkHandle = VK_NULL_HANDLE;
+	VolkDeviceTable table;
 
-protected:
-	PFN_vkCreateDevice _vkCreateDevice = nullptr;
-	PFN_vkDestroyDevice _vkDestroyDevice = nullptr;
-	PFN_vkGetDeviceQueue _vkGetDeviceQueue = nullptr;
-	PFN_vkCreateImageView _vkCreateImageView = nullptr;
-	PFN_vkDestroyImageView _vkDestroyImageView = nullptr;
-	PFN_vkCreateGraphicsPipelines _vkCreateGraphicsPipelines = nullptr;
-	PFN_vkDestroyPipeline _vkDestroyPipeline = nullptr;
-
-private:
 	PhysicalDevice _physicalDevice;
-
-	void getFuncPointers();
 };
 
 
+class DeviceQueue
+{
+public:
+	DeviceQueue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex);
+	~DeviceQueue();
 
+	bool isValid();
+
+
+	VkQueue vkHandle = VK_NULL_HANDLE;
+};
 
 
 #endif // !DEVICE_H

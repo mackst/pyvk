@@ -2,8 +2,6 @@
 #include "utils.h"
 #include "exception.h"
 #include "extensions.h"
-#include "deviceQueue.h"
-#include "createInfo.h"
 
 
 PhysicalDevice::PhysicalDevice()
@@ -13,6 +11,12 @@ PhysicalDevice::PhysicalDevice()
 PhysicalDevice::PhysicalDevice(VkInstance & instance, VkPhysicalDevice & device) : _instance(instance), vkHandle(device)
 {
 }
+
+//PhysicalDevice::PhysicalDevice(PhysicalDevice & device)
+//{
+//	_instance = device._instance;
+//	vkHandle = device.vkHandle;
+//}
 
 PhysicalDevice::~PhysicalDevice()
 {
@@ -144,11 +148,8 @@ std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModeKHR(SurfaceKH
 }
 
 
-Device::Device(PhysicalDevice &physicalDevice, py::dict createInfo) : _physicalDevice(physicalDevice)
-{
-	_vkCreateDevice = (PFN_vkCreateDevice)vkGetInstanceProcAddr(_physicalDevice._instance, "vkCreateDevice");
-	
-
+Device::Device(PhysicalDevice &physicalDevice, DeviceCreateInfo &createInfo) : _physicalDevice(physicalDevice)
+{	
 	create(createInfo);
 }
 
@@ -158,72 +159,15 @@ Device::~Device()
 	destroy();
 }
 
-bool Device::create(py::dict createInfo)
+bool Device::create(DeviceCreateInfo &createInfo)
 {
-	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	py::list queueCreateInfo = createInfo["queueCreateInfos"].cast<py::list>();
-
-	for (auto item : queueCreateInfo)
-	{
-		std::vector<float> queuePrioritieList = item["queuePriorities"].cast<std::vector<float>>();
-		std::vector<float> queuePriorities = vecFloatToVecFloat(queuePrioritieList);
-		//std::vector<float> queuePriorities;
-		//for (auto item : queuePrioritieList)
-			//queuePriorities.emplace_back((float)item);
-
-		VkDeviceQueueCreateInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		info.pQueuePriorities = queuePriorities.data();
-		info.queueCount = item["queueCount"].cast<uint32_t>();
-		info.queueFamilyIndex = item["queueFamilyIndex"].cast<uint32_t>();
-		
-		queueCreateInfos.emplace_back(info);
-
-		// debug
-		//std::cout << queuePriorities[0] << std::endl;
-		//py::print(queuePriorities);
-		//py::print(info.queueCount);
-		//py::print(info.queueFamilyIndex);
-	}
-
-	std::vector<std::string> enabledLayerNamesList = createInfo["enabledLayerNames"].cast<std::vector<std::string>>();
-	std::vector<const char*> enabledLayerNames = vecStrToVecChar(enabledLayerNamesList);
-
-	std::vector<std::string> enabledExtensionNamesList = createInfo["enabledExtensionNames"].cast<std::vector<std::string>>();
-	std::vector<const char*> enabledExtensionNames = vecStrToVecChar(enabledExtensionNamesList);
-
 	VkDeviceCreateInfo _createInfo = {};
-	_createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	_createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-	_createInfo.pQueueCreateInfos = queueCreateInfos.data();
+	createInfo.getVKStruct(&_createInfo);
 	
-	auto enabledLayerCount = static_cast<uint32_t>(enabledLayerNames.size());
-	if (enabledLayerCount > 0)
-	{
-		_createInfo.enabledLayerCount = enabledLayerCount;
-		_createInfo.ppEnabledLayerNames = enabledLayerNames.data();
-	}
-	else
-		_createInfo.enabledLayerCount = 0;
+	checkVKResult(vkCreateDevice(_physicalDevice.vkHandle, &_createInfo, nullptr, &vkHandle));
 
-	auto enabledExtensionCount = static_cast<uint32_t>(enabledExtensionNames.size());
-	if (enabledExtensionCount > 0)
-	{
-		_createInfo.enabledExtensionCount = enabledExtensionCount;
-		_createInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
-	}
-	else
-	{
-		_createInfo.enabledExtensionCount = 0;
-	}
-
-	//VkPhysicalDeviceFeatures deviceFeatures = {};
-	VkPhysicalDeviceFeatures deviceFeatures = createInfo["deviceFeatures"].cast<VkPhysicalDeviceFeatures>();
-	_createInfo.pEnabledFeatures = &deviceFeatures;
-
-	checkVKResult(_vkCreateDevice(_physicalDevice.vkHandle, &_createInfo, nullptr, &vkHandle));
-
-	getFuncPointers();
+	// load device functions
+	volkLoadDeviceTable(&table, vkHandle);
 
 	return isValid();
 }
@@ -232,7 +176,7 @@ void Device::destroy()
 {
 	if (isValid())
 	{
-		_vkDestroyDevice(vkHandle, nullptr);
+		table.vkDestroyDevice(vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
 		_physicalDevice = {};
 	}
@@ -358,15 +302,20 @@ std::vector<Pipeline> Device::createGraphicsPipelines(PipelineCache & cache, py:
 //	return out;
 //}
 
-void Device::getFuncPointers()
+
+
+DeviceQueue::DeviceQueue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex)
 {
-	_vkDestroyDevice = (PFN_vkDestroyDevice)vkGetDeviceProcAddr(vkHandle, "vkDestroyDevice");
-	_vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vkGetDeviceProcAddr(vkHandle, "vkGetDeviceQueue");
-	_vkCreateImageView = (PFN_vkCreateImageView)vkGetDeviceProcAddr(vkHandle, "vkCreateImageView");
-	_vkCreateGraphicsPipelines = (PFN_vkCreateGraphicsPipelines)vkGetDeviceProcAddr(vkHandle, "vkCreateGraphicsPipelines");
-	_vkDestroyPipeline = (PFN_vkDestroyPipeline)vkGetDeviceProcAddr(vkHandle, "vkDestroyPipeline");
+	device->table.vkGetDeviceQueue(device->vkHandle, queueFamilyIndex, queueIndex, &vkHandle);
 }
 
+DeviceQueue::~DeviceQueue()
+{
+	vkHandle = VK_NULL_HANDLE;
+}
 
-
+bool DeviceQueue::isValid()
+{
+	return vkHandle != VK_NULL_HANDLE;
+}
 

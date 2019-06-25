@@ -45,10 +45,11 @@ PYBIND11_MODULE(_vk, m)
 		.def("__repr__", &PhysicalDevice::toString)
 		.def_property_readonly("isValid", &PhysicalDevice::isValid)
 		.def_property_readonly("properties", &PhysicalDevice::getProperties)
-		.def_property_readonly("queueFamilyProperties", &PhysicalDevice::getQueueFamilyProperties);
+		.def_property_readonly("queueFamilyProperties", &PhysicalDevice::getQueueFamilyProperties)
+		.def("createDevice", [](PhysicalDevice &self, DeviceCreateInfo &info) { return new Device(self, info); });// , py::return_value_policy::take_ownership);
 
-	//py::class_<Device>(m, "Device")
-	//	.def(py::init<PhysicalDevice&, py::dict>(), py::arg("physicalDevice"), py::arg("createInfo"))
+	py::class_<Device>(m, "Device")
+		.def(py::init<PhysicalDevice&, DeviceCreateInfo&>(), py::arg("physicalDevice"), py::arg("createInfo"))
 	//	.def("getQueue", &Device::getQueue)
 	//	.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
 	//	.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
@@ -57,7 +58,8 @@ PYBIND11_MODULE(_vk, m)
 	//	.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo").noconvert())
 	//	.def("createRenderPass", &Device::createRenderPass, py::arg("createInfo"))
 	//	.def("createGraphicsPipelines", &Device::createGraphicsPipelines, py::arg("cache"), py::arg("createInfos"))
-	//	.def_property_readonly("isValid", &Device::isValid);
+		.def_readonly("physicalDevice", &Device::_physicalDevice)
+		.def_property_readonly("isValid", &Device::isValid);
 
 	//py::class_<DeviceQueue>(m, "DeviceQueue")
 	//	.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
@@ -169,6 +171,23 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("queueCount", &VkQueueFamilyProperties::queueCount)
 		.def_readwrite("timestampValidBits", &VkQueueFamilyProperties::timestampValidBits)
 		.def_readwrite("minImageTransferGranularity", &VkQueueFamilyProperties::minImageTransferGranularity);
+
+	py::class_<DeviceCreateInfo>(m, "DeviceCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](DeviceCreateInfo &self) { return self.pNext; }, [](DeviceCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &DeviceCreateInfo::flags)
+		.def_readwrite("enabledFeatures", &DeviceCreateInfo::enabledFeatures)
+		.def_property("enabledExtensionNames", &DeviceCreateInfo::getExtensionNames, &DeviceCreateInfo::setExtensionNames)
+		.def_property("enabledLayerNames", &DeviceCreateInfo::getLayerNames, &DeviceCreateInfo::setLayerNames)
+		.def_property("queueCreateInfos", &DeviceCreateInfo::getQueueCreateInfos, &DeviceCreateInfo::setQueueCreateInfos);
+
+	py::class_<DeviceQueueCreateInfo>(m, "DeviceQueueCreateInfo")
+		.def(py::init<>())
+		.def(py::init<uint32_t , std::vector<float> &>(), py::arg("queueFamilyIndex"), py::arg("queuePriorities"))
+		.def_property("pNext", [](DeviceQueueCreateInfo &self) { return self.pNext; }, [](DeviceQueueCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &DeviceQueueCreateInfo::flags)
+		.def_readwrite("queueFamilyIndex", &DeviceQueueCreateInfo::queueFamilyIndex)
+		.def_readwrite("queuePriorities", &DeviceQueueCreateInfo::queuePriorities);
 	
 	py::class_<DebugUtilsMessengerCreateInfoEXT>(m, "DebugUtilsMessengerCreateInfoEXT")
 		.def(py::init<>())

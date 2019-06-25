@@ -113,3 +113,79 @@ DebugUtilsMessengerUserData::~DebugUtilsMessengerUserData()
 	pycallback = py::none();
 	//data.clear();
 }
+
+DeviceCreateInfo::DeviceCreateInfo()
+{
+}
+
+DeviceCreateInfo::~DeviceCreateInfo()
+{
+}
+
+void DeviceCreateInfo::setLayerNames(std::vector<std::string>& names)
+{
+	layerNames = names;
+	lnames = vecStrToVecChar(layerNames);
+}
+
+void DeviceCreateInfo::setExtensionNames(std::vector<std::string>& names)
+{
+	extensionNames = names;
+	enames = vecStrToVecChar(extensionNames);
+}
+
+void DeviceCreateInfo::setQueueCreateInfos(std::vector<DeviceQueueCreateInfo> infos)
+{
+	queueCreateInfos = infos;
+	for (auto info : queueCreateInfos)
+	{
+		VkDeviceQueueCreateInfo _info = {};
+		info.getVKStruct(&_info);
+		_queueCreateInfos.emplace_back(_info);
+	}
+}
+
+void DeviceCreateInfo::getVKStruct(VkDeviceCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->pEnabledFeatures = &enabledFeatures;
+	info->enabledExtensionCount = static_cast<uint32_t>(enames.size());
+	if (info->enabledExtensionCount > 0)
+		info->ppEnabledExtensionNames = enames.data();
+	info->enabledLayerCount = static_cast<uint32_t>(lnames.size());
+	if (info->enabledLayerCount > 0)
+		info->ppEnabledLayerNames = lnames.data();
+	info->queueCreateInfoCount = static_cast<uint32_t>(_queueCreateInfos.size());
+	if (info->queueCreateInfoCount > 0)
+		info->pQueueCreateInfos = _queueCreateInfos.data();
+}
+
+DeviceQueueCreateInfo::DeviceQueueCreateInfo()
+{
+}
+
+DeviceQueueCreateInfo::DeviceQueueCreateInfo(uint32_t _queueFamilyIndex, std::vector<float>& _queuePriorities)
+	:queueFamilyIndex(_queueFamilyIndex), queuePriorities(_queuePriorities)
+{
+}
+
+DeviceQueueCreateInfo::~DeviceQueueCreateInfo()
+{
+}
+
+//void DeviceQueueCreateInfo::setQueuePriorities(std::vector<float>& _queuePriorities)
+//{
+//}
+
+void DeviceQueueCreateInfo::getVKStruct(VkDeviceQueueCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->queueFamilyIndex = queueFamilyIndex;
+	info->queueCount = static_cast<uint32_t>(queuePriorities.size());
+	if (info->queueCount > 0)
+		info->pQueuePriorities = queuePriorities.data();
+}
