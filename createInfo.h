@@ -8,6 +8,11 @@
 
 namespace py = pybind11;
 
+
+class SurfaceKHR;
+class SwapchainKHR;
+
+
 #ifndef CREATEINFO_H
 #define CREATEINFO_H
 
@@ -144,6 +149,34 @@ public:
 	VkPhysicalDeviceFeatures enabledFeatures;
 	void* pNext = nullptr;
 };
+
+
+class SwapchainCreateInfoKHR
+{
+public:
+	SwapchainCreateInfoKHR();
+	~SwapchainCreateInfoKHR();
+
+	void getVKStruct(VkSwapchainCreateInfoKHR *info);
+
+	const void* pNext = nullptr;
+	VkSwapchainCreateFlagsKHR flags = 0;
+	SurfaceKHR *surface = nullptr;
+	uint32_t minImageCount = 0;
+	VkFormat imageFormat = VK_FORMAT_UNDEFINED;
+	VkColorSpaceKHR imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+	VkExtent2D imageExtent;
+	uint32_t imageArrayLayers = 1;
+	VkImageUsageFlags imageUsage;
+	VkSharingMode imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	std::vector<uint32_t> queueFamilyIndices = {};
+	VkSurfaceTransformFlagBitsKHR preTransform;
+	VkCompositeAlphaFlagBitsKHR compositeAlpha;
+	VkPresentModeKHR presentMode;
+	VkBool32 clipped = false;
+	SwapchainKHR *oldSwapchain = nullptr;
+};
+
 
 
 

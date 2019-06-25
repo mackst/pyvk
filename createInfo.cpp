@@ -1,4 +1,5 @@
 #include "createInfo.h"
+#include "extensions.h"
 #include "utils.h"
 
 ApplicationInfo::ApplicationInfo()
@@ -188,4 +189,44 @@ void DeviceQueueCreateInfo::getVKStruct(VkDeviceQueueCreateInfo * info)
 	info->queueCount = static_cast<uint32_t>(queuePriorities.size());
 	if (info->queueCount > 0)
 		info->pQueuePriorities = queuePriorities.data();
+}
+
+SwapchainCreateInfoKHR::SwapchainCreateInfoKHR()
+{
+}
+
+SwapchainCreateInfoKHR::~SwapchainCreateInfoKHR()
+{
+	pNext = nullptr;
+	surface = nullptr;
+	oldSwapchain = nullptr;
+}
+
+void SwapchainCreateInfoKHR::getVKStruct(VkSwapchainCreateInfoKHR * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	info->clipped = clipped;
+	info->compositeAlpha = compositeAlpha;
+	info->flags = flags;
+	info->imageArrayLayers = imageArrayLayers;
+	info->imageColorSpace = imageColorSpace;
+	info->imageExtent = imageExtent;
+	info->imageFormat = imageFormat;
+	info->imageSharingMode = imageSharingMode;
+	info->imageUsage = imageUsage;
+	info->minImageCount = minImageCount;
+	info->pNext = pNext;
+	info->presentMode = presentMode;
+	info->preTransform = preTransform;
+	info->queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
+	if (info->queueFamilyIndexCount > 0)
+		info->pQueueFamilyIndices = queueFamilyIndices.data();
+	if (surface)
+		info->surface = surface->vkHandle;
+	else
+		info->surface = VK_NULL_HANDLE;
+	if (oldSwapchain)
+		info->oldSwapchain = oldSwapchain->vkHandle;
+	else
+		info->oldSwapchain = VK_NULL_HANDLE;
 }

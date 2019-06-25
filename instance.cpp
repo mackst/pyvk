@@ -255,9 +255,9 @@ SurfaceKHR* Instance::createWin32Surface(long winId)
 	return new SurfaceKHR(vkHandle, winId);
 }
 
-py::list Instance::getPhysicalDevices()
+std::vector<PhysicalDevice> Instance::getPhysicalDevices()
 {
-	py::list devices;
+	std::vector<PhysicalDevice> devices;
 	
 	uint32_t deviceCount;
 	checkVKResult(vkEnumeratePhysicalDevices(vkHandle, &deviceCount, nullptr));
@@ -268,7 +268,7 @@ py::list Instance::getPhysicalDevices()
 	for (auto item : physicalDevices)
 	{
 		PhysicalDevice device(vkHandle, item);
-		devices.append(device);
+		devices.emplace_back(device);
 	}
 
 	return devices;

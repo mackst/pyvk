@@ -50,7 +50,7 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<Device>(m, "Device")
 		.def(py::init<PhysicalDevice&, DeviceCreateInfo&>(), py::arg("physicalDevice"), py::arg("createInfo"))
-	//	.def("getQueue", &Device::getQueue)
+		.def("getQueue", &Device::getQueue)
 	//	.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
 	//	.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
 	//	.def("createImageView", &Device::createImageView, py::arg("createInfo"))
@@ -61,9 +61,9 @@ PYBIND11_MODULE(_vk, m)
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
 
-	//py::class_<DeviceQueue>(m, "DeviceQueue")
-	//	.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
-	//	.def_property_readonly("isValid", &DeviceQueue::isValid);
+	py::class_<DeviceQueue>(m, "DeviceQueue")
+		.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
+		.def_property_readonly("isValid", &DeviceQueue::isValid);
 
 	//py::class_<SwapchainKHR>(m, "SwapchainKHR")
 	//	.def(py::init<Device*, py::dict>())
@@ -119,11 +119,6 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("applicationVersion", &ApplicationInfo::appVersion)
 		.def_readwrite("engineName", &ApplicationInfo::engineName)
 		.def_readwrite("engineVersion", &ApplicationInfo::engineVersion);
-		//.def_property("engineVersion", &ApplicationInfo::getEngineVersion, &ApplicationInfo::setEngineVersion)
-		//.def_property("engineName", &ApplicationInfo::getEngineName, &ApplicationInfo::setEngineName)
-		//.def_property("applicationVersion", &ApplicationInfo::getApplicationVersion, &ApplicationInfo::setApplicationVersion)
-		//.def_property("applicationName", &ApplicationInfo::getApplicationName, &ApplicationInfo::setApplicationName)
-		//.def_property("apiVersion", &ApplicationInfo::getApiVersion, &ApplicationInfo::setApiVersion)
 		//.def("__repr__", &ApplicationInfo::toString);
 
 	py::class_<InstanceCreateInfo>(m, "InstanceCreateInfo")
@@ -135,6 +130,25 @@ PYBIND11_MODULE(_vk, m)
 		//.def_readwrite("enabledLayerNames", &InstanceCreateInfo::layerNames);
 		.def_property("enabledLayerNames", &InstanceCreateInfo::getLayerNames, &InstanceCreateInfo::setLayerNames)
 		.def_property("enabledExtensionNames", &InstanceCreateInfo::getExtensionNames, &InstanceCreateInfo::setExtensionNames);
+
+	py::class_<SwapchainCreateInfoKHR>(m, "SwapchainCreateInfoKHR")
+		.def(py::init<>())
+		.def_property("pNext", [](SwapchainCreateInfoKHR &self) { return self.pNext; }, [](SwapchainCreateInfoKHR &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &SwapchainCreateInfoKHR::flags)
+		.def_readwrite("minImageCount", &SwapchainCreateInfoKHR::minImageCount)
+		.def_readwrite("imageFormat", &SwapchainCreateInfoKHR::imageFormat)
+		.def_readwrite("imageColorSpace", &SwapchainCreateInfoKHR::imageColorSpace)
+		.def_readwrite("imageExtent", &SwapchainCreateInfoKHR::imageExtent)
+		.def_readwrite("imageArrayLayers", &SwapchainCreateInfoKHR::imageArrayLayers)
+		.def_readwrite("imageUsage", &SwapchainCreateInfoKHR::imageUsage)
+		.def_readwrite("imageSharingMode", &SwapchainCreateInfoKHR::imageSharingMode)
+		.def_readwrite("queueFamilyIndices", &SwapchainCreateInfoKHR::queueFamilyIndices)
+		.def_readwrite("preTransform", &SwapchainCreateInfoKHR::preTransform)
+		.def_readwrite("compositeAlpha", &SwapchainCreateInfoKHR::compositeAlpha)
+		.def_readwrite("presentMode", &SwapchainCreateInfoKHR::presentMode)
+		.def_readwrite("clipped", &SwapchainCreateInfoKHR::clipped)
+		.def_property("surface", [](SwapchainCreateInfoKHR &self) { return self.surface; }, [](SwapchainCreateInfoKHR &self, SurfaceKHR *surface) { self.surface = surface; })
+		.def_property("oldSwapchain", [](SwapchainCreateInfoKHR &self) { return self.oldSwapchain; }, [](SwapchainCreateInfoKHR &self, SwapchainKHR *oldSwapchain) { self.oldSwapchain = oldSwapchain; });
 
 	py::class_<VkPhysicalDeviceProperties>(m, "PhysicalDeviceProperties")
 		.def(py::init<>())

@@ -37,7 +37,7 @@ public:
 
 	DebugUtilsMessengerEXT* createDebugUtilsMessengerEXT(DebugUtilsMessengerCreateInfoEXT &info);
 	SurfaceKHR* createWin32Surface(long winId);
-	py::list getPhysicalDevices();
+	std::vector<PhysicalDevice> getPhysicalDevices();
 
 	bool isValid();
 

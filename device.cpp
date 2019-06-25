@@ -12,11 +12,11 @@ PhysicalDevice::PhysicalDevice(VkInstance & instance, VkPhysicalDevice & device)
 {
 }
 
-//PhysicalDevice::PhysicalDevice(PhysicalDevice & device)
-//{
-//	_instance = device._instance;
-//	vkHandle = device.vkHandle;
-//}
+PhysicalDevice::PhysicalDevice(PhysicalDevice & device)
+{
+	_instance = device._instance;
+	vkHandle = device.vkHandle;
+}
 
 PhysicalDevice::~PhysicalDevice()
 {

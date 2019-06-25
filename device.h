@@ -31,7 +31,7 @@ class PhysicalDevice
 public:
 	PhysicalDevice();
 	PhysicalDevice(VkInstance &instance, VkPhysicalDevice &device);
-	//PhysicalDevice(PhysicalDevice& device);
+	PhysicalDevice(PhysicalDevice& device);
 	~PhysicalDevice();
 
 	bool isValid();
