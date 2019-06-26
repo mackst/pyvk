@@ -1,16 +1,14 @@
 #include "shadermodule.h"
 #include "exception.h"
 #include "utils.h"
+#include "device.h"
 
 ShaderModule::ShaderModule()
 {
 }
 
-ShaderModule::ShaderModule(VkDevice device, const std::string & filename) : _device(device)
+ShaderModule::ShaderModule(Device *device, const std::string & filename) : _device(device)
 {
-	_vkCreateShaderModule = (PFN_vkCreateShaderModule)vkGetDeviceProcAddr(_device, "vkCreateShaderModule");
-	_vkDestroyShaderModule = (PFN_vkDestroyShaderModule)vkGetDeviceProcAddr(_device, "vkDestroyShaderModule");
-
 	auto code = readFile(filename);
 
 	VkShaderModuleCreateInfo createInfo = {};
@@ -18,25 +16,14 @@ ShaderModule::ShaderModule(VkDevice device, const std::string & filename) : _dev
 	createInfo.codeSize = code.size();
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-	checkVKResult(_vkCreateShaderModule(_device, &createInfo, nullptr, &vkHandle));
+	checkVKResult(_device->table.vkCreateShaderModule(_device->vkHandle, &createInfo, nullptr, &vkHandle));
 }
-
-//ShaderModule::ShaderModule(ShaderModule & other)
-//{
-//	if (other.isValid())
-//	{
-//		vkHandle = other.vkHandle;
-//		_device = other._device;
-//		_vkCreateShaderModule = other._vkCreateShaderModule;
-//		_vkDestroyShaderModule = other._vkDestroyShaderModule;
-//	}
-//}
 
 ShaderModule::~ShaderModule()
 {
-	if (isValid() || _vkDestroyShaderModule != nullptr)
+	if (isValid())
 	{
-		_vkDestroyShaderModule(_device, vkHandle, nullptr);
+		_device->table.vkDestroyShaderModule(_device->vkHandle, vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
 		_device = VK_NULL_HANDLE;
 	}

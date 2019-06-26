@@ -8,6 +8,9 @@
 namespace py = pybind11;
 
 
+class Device;
+
+
 #ifndef SHADERMODULE_H
 #define SHADERMODULE_H
 
@@ -17,17 +20,14 @@ class ShaderModule
 {
 public:
 	ShaderModule();
-	ShaderModule(VkDevice device, const std::string &filename);
-	//ShaderModule(ShaderModule &other);
+	ShaderModule(Device *device, const std::string &filename);
 	~ShaderModule();
 
 	bool isValid();
 
 	VkShaderModule vkHandle = VK_NULL_HANDLE;
 private:
-	VkDevice _device = VK_NULL_HANDLE;
-	PFN_vkCreateShaderModule _vkCreateShaderModule = nullptr;
-	PFN_vkDestroyShaderModule _vkDestroyShaderModule = nullptr;
+	Device *_device = VK_NULL_HANDLE;
 };
 
 

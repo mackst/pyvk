@@ -12,12 +12,6 @@ PhysicalDevice::PhysicalDevice(VkInstance & instance, VkPhysicalDevice & device)
 {
 }
 
-PhysicalDevice::PhysicalDevice(PhysicalDevice & device)
-{
-	_instance = device._instance;
-	vkHandle = device.vkHandle;
-}
-
 PhysicalDevice::~PhysicalDevice()
 {
 	_instance = VK_NULL_HANDLE;
@@ -192,24 +186,24 @@ DeviceQueue * Device::getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex)
 	return new DeviceQueue(this, queueFamilyIndex, queueIndex);
 }
 
-//SwapchainKHR * Device::createSwapchainKHR(py::dict createInfo)
-//{
-//	return new SwapchainKHR(this, createInfo);
-//}
-//
-//py::list Device::getSwapchainImagesKHR(SwapchainKHR & swapchain)
-//{
-//	return swapchain.getImagesKHR();
-//}
-
-ImageView* Device::createImageView(py::dict createInfo)
+SwapchainKHR * Device::createSwapchainKHR(SwapchainCreateInfoKHR &createInfo)
 {
-	return new ImageView(vkHandle, createInfo);
+	return new SwapchainKHR(this, createInfo);
+}
+
+py::list Device::getSwapchainImagesKHR(SwapchainKHR & swapchain)
+{
+	return swapchain.getImagesKHR();
+}
+
+ImageView* Device::createImageView(ImageViewCreateInfo &createInfo)
+{
+	return new ImageView(this, createInfo);
 }
 
 ShaderModule * Device::createShaderModule(const std::string &filename)
 {
-	return new ShaderModule(vkHandle, filename);
+	return new ShaderModule(this, filename);
 }
 
 PipelineLayout * Device::createPipelineLayout(py::dict createInfo)

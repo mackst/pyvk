@@ -1,5 +1,7 @@
 #include "createInfo.h"
 #include "extensions.h"
+#include "image.h"
+#include "shadermodule.h"
 #include "utils.h"
 
 ApplicationInfo::ApplicationInfo()
@@ -229,4 +231,93 @@ void SwapchainCreateInfoKHR::getVKStruct(VkSwapchainCreateInfoKHR * info)
 		info->oldSwapchain = oldSwapchain->vkHandle;
 	else
 		info->oldSwapchain = VK_NULL_HANDLE;
+}
+
+ImageViewCreateInfo::ImageViewCreateInfo()
+{
+}
+
+ImageViewCreateInfo::~ImageViewCreateInfo()
+{
+	image = nullptr;
+}
+
+void ImageViewCreateInfo::getVKStruct(VkImageViewCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->image = image->vkHandle;
+	info->viewType = viewType;
+	info->format = format;
+	info->components = components;
+	info->subresourceRange = subresourceRange;
+}
+
+PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo()
+{
+}
+
+PipelineShaderStageCreateInfo::PipelineShaderStageCreateInfo(VkShaderStageFlagBits shaderStage, ShaderModule *shaderModule, std::string &funcName)
+	:stage(shaderStage), module(shaderModule), name(funcName)
+{
+}
+
+
+PipelineShaderStageCreateInfo::~PipelineShaderStageCreateInfo()
+{
+	module = nullptr;
+	pNext = nullptr;
+}
+
+void PipelineShaderStageCreateInfo::getVKStruct(VkPipelineShaderStageCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	info->module = module->vkHandle;
+	info->pName = name.c_str();
+	info->stage = stage;
+	info->pNext = pNext;
+}
+
+
+PipelineVertexInputStateCreateInfo::PipelineVertexInputStateCreateInfo()
+{
+}
+
+PipelineVertexInputStateCreateInfo::~PipelineVertexInputStateCreateInfo()
+{
+	pNext = nullptr;
+}
+
+void PipelineVertexInputStateCreateInfo::getVKStruct(VkPipelineVertexInputStateCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	info->pNext = pNext;
+	info->vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexAttributeDescriptions.size());
+	if (info->vertexAttributeDescriptionCount > 0)
+		info->pVertexAttributeDescriptions = vertexAttributeDescriptions.data();
+	info->vertexBindingDescriptionCount = static_cast<uint32_t>(vertexBindingDescriptions.size());
+	if (info->vertexBindingDescriptionCount > 0)
+		info->pVertexBindingDescriptions = vertexBindingDescriptions.data();
+}
+
+PipelineViewportStateCreateInfo::PipelineViewportStateCreateInfo()
+{
+}
+
+PipelineViewportStateCreateInfo::~PipelineViewportStateCreateInfo()
+{
+	pNext = nullptr;
+}
+
+void PipelineViewportStateCreateInfo::getVKStruct(VkPipelineViewportStateCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	info->pNext = pNext;
+	info->scissorCount = static_cast<uint32_t>(scissors.size());
+	if (info->scissorCount > 0)
+		info->pScissors = scissors.data();
+	info->viewportCount = static_cast<uint32_t>(viewports.size());
+	if (info->viewportCount > 0)
+		info->pViewports = viewports.data();
 }

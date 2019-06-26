@@ -8,6 +8,10 @@
 namespace py = pybind11;
 
 
+class Device;
+class ImageViewCreateInfo;
+
+
 #ifndef VKTYPES_H
 #define VKTYPES_H
 
@@ -16,10 +20,10 @@ class ImageView
 {
 public:
 	ImageView();
-	ImageView(VkDevice device, py::dict creatInfo);
+	ImageView(Device * device, ImageViewCreateInfo &createInfo);
 	~ImageView();
 
-	bool create(py::dict creatInfo);
+	bool create(ImageViewCreateInfo &createInfo);
 
 	bool isValid();
 
@@ -27,9 +31,7 @@ public:
 
 	
 private:
-	VkDevice _device = VK_NULL_HANDLE;
-	PFN_vkCreateImageView _vkCreateImageView = nullptr;
-	PFN_vkDestroyImageView _vkDestroyImageView = nullptr;
+	Device *_device = nullptr;
 };
 
 
@@ -43,8 +45,6 @@ public:
 	bool isValid();
 
 	VkImage vkHandle = VK_NULL_HANDLE;
-private:
-
 };
 
 

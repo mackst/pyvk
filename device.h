@@ -31,7 +31,6 @@ class PhysicalDevice
 public:
 	PhysicalDevice();
 	PhysicalDevice(VkInstance &instance, VkPhysicalDevice &device);
-	PhysicalDevice(PhysicalDevice& device);
 	~PhysicalDevice();
 
 	bool isValid();
@@ -66,9 +65,9 @@ public:
 
 	bool isValid();
 	DeviceQueue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
-	SwapchainKHR* createSwapchainKHR(py::dict createInfo);
+	SwapchainKHR* createSwapchainKHR(SwapchainCreateInfoKHR &createInfo);
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
-	ImageView* createImageView(py::dict createInfo);
+	ImageView* createImageView(ImageViewCreateInfo &creatInfo);
 	ShaderModule* createShaderModule(const std::string &filename);
 	PipelineLayout* createPipelineLayout(py::dict createInfo);
 	//PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);

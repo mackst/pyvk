@@ -6,7 +6,7 @@
 #include "instance.h"
 //#include "deviceQueue.h"
 //#include "descriptors.h"
-//#include "vktypes.h"
+#include "vktypes.h"
 //#include "createInfo.h"
 
 
@@ -51,10 +51,10 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<Device>(m, "Device")
 		.def(py::init<PhysicalDevice&, DeviceCreateInfo&>(), py::arg("physicalDevice"), py::arg("createInfo"))
 		.def("getQueue", &Device::getQueue)
-	//	.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
-	//	.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
-	//	.def("createImageView", &Device::createImageView, py::arg("createInfo"))
-	//	.def("createShaderModule", &Device::createShaderModule, py::arg("filename"))
+		.def("createSwapchainKHR", &Device::createSwapchainKHR, py::arg("createInfo"))
+		.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
+		.def("createImageView", &Device::createImageView, py::arg("createInfo"))
+		.def("createShaderModule", &Device::createShaderModule, py::arg("filename"))
 	//	.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo").noconvert())
 	//	.def("createRenderPass", &Device::createRenderPass, py::arg("createInfo"))
 	//	.def("createGraphicsPipelines", &Device::createGraphicsPipelines, py::arg("cache"), py::arg("createInfos"))
@@ -65,22 +65,35 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
 		.def_property_readonly("isValid", &DeviceQueue::isValid);
 
-	//py::class_<SwapchainKHR>(m, "SwapchainKHR")
-	//	.def(py::init<Device*, py::dict>())
-	//	.def("getImagesKHR", &SwapchainKHR::getImagesKHR)
-	//	.def_property_readonly("isValid", &SwapchainKHR::isValid);
+	py::class_<Image>(m, "Image")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Image::isValid);
 
-	//py::class_<Image>(m, "Image")
-	//	.def(py::init<>())
-	//	.def_property_readonly("isValid", &Image::isValid);
+	py::class_<ImageView>(m, "ImageView")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &ImageView::isValid);
 
-	//py::class_<ImageView>(m, "ImageView")
-	//	.def(py::init<>())
-	//	.def_property_readonly("isValid", &ImageView::isValid);
+	py::class_<ImageViewCreateInfo>(m, "ImageViewCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](ImageViewCreateInfo &self) { return self.pNext; }, [](ImageViewCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &ImageViewCreateInfo::flags)
+		.def_property("image", [](ImageViewCreateInfo &self) { return self.image; }, [](ImageViewCreateInfo &self, Image *im) { self.image = im; })
+		.def_readwrite("viewType", &ImageViewCreateInfo::viewType)
+		.def_readwrite("format", &ImageViewCreateInfo::format)
+		.def_readwrite("components", &ImageViewCreateInfo::components)
+		.def_readwrite("subresourceRange", &ImageViewCreateInfo::subresourceRange);
 
-	//py::class_<ShaderModule>(m, "ShaderModule")
-	//	.def(py::init<>())
-	//	.def_property_readonly("isValid", &ShaderModule::isValid);
+	py::class_<ShaderModule>(m, "ShaderModule")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &ShaderModule::isValid);
+
+	py::class_<PipelineShaderStageCreateInfo>(m, "PipelineShaderStageCreateInfo")
+		.def(py::init<>())
+		.def(py::init<VkShaderStageFlagBits, ShaderModule*, std::string &>())
+		.def_property("pNext", [](PipelineShaderStageCreateInfo &self) { return self.pNext; }, [](PipelineShaderStageCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("module", [](PipelineShaderStageCreateInfo &self) { return self.module; }, [](PipelineShaderStageCreateInfo &self, ShaderModule* sm) { self.module = sm; })
+		.def_readwrite("stage", &PipelineShaderStageCreateInfo::stage)
+		.def_readwrite("name", &PipelineShaderStageCreateInfo::name);
 
 	//py::class_<PipelineLayout>(m, "PipelineLayout")
 	//	.def(py::init<>())
@@ -108,6 +121,11 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<SurfaceKHR>(m, "SurfaceKHR")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &SurfaceKHR::isValid);
+
+	py::class_<SwapchainKHR>(m, "SwapchainKHR")
+		.def(py::init<Device*, SwapchainCreateInfoKHR&>())
+		.def("getImagesKHR", &SwapchainKHR::getImagesKHR)
+		.def_property_readonly("isValid", &SwapchainKHR::isValid);
 	//
 
 	py::class_<ApplicationInfo>(m, "ApplicationInfo")
@@ -149,6 +167,12 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("clipped", &SwapchainCreateInfoKHR::clipped)
 		.def_property("surface", [](SwapchainCreateInfoKHR &self) { return self.surface; }, [](SwapchainCreateInfoKHR &self, SurfaceKHR *surface) { self.surface = surface; })
 		.def_property("oldSwapchain", [](SwapchainCreateInfoKHR &self) { return self.oldSwapchain; }, [](SwapchainCreateInfoKHR &self, SwapchainKHR *oldSwapchain) { self.oldSwapchain = oldSwapchain; });
+
+	py::class_<PipelineVertexInputStateCreateInfo>(m, "PipelineVertexInputStateCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](PipelineVertexInputStateCreateInfo &self) { return self.pNext; }, [](PipelineVertexInputStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("vertexBindingDescriptions", &PipelineVertexInputStateCreateInfo::vertexBindingDescriptions)
+		.def_readwrite("vertexAttributeDescriptions", &PipelineVertexInputStateCreateInfo::vertexAttributeDescriptions);
 
 	py::class_<VkPhysicalDeviceProperties>(m, "PhysicalDeviceProperties")
 		.def(py::init<>())
@@ -270,27 +294,91 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init([](VkBool32 v) { VkPerformanceValueDataINTEL out; out.valueBool = v; return out; }), py::arg("value"))
 		.def(py::init([](const char* v) { VkPerformanceValueDataINTEL out; out.valueString = v; return out; }), py::arg("value"));
 
+	py::class_<VkVertexInputBindingDescription>(m, "VertexInputBindingDescription")
+		.def(py::init<>())
+		.def_readwrite("binding", &VkVertexInputBindingDescription::binding)
+		.def_readwrite("stride", &VkVertexInputBindingDescription::stride)
+		.def_readwrite("inputRate", &VkVertexInputBindingDescription::inputRate);
+
+	py::class_<VkVertexInputAttributeDescription>(m, "VertexInputAttributeDescription")
+		.def(py::init<>())
+		.def_readwrite("location", &VkVertexInputAttributeDescription::location)
+		.def_readwrite("binding", &VkVertexInputAttributeDescription::binding)
+		.def_readwrite("format", &VkVertexInputAttributeDescription::format)
+		.def_readwrite("offset", &VkVertexInputAttributeDescription::offset);
+
+	py::class_<VkPipelineInputAssemblyStateCreateInfo>(m, "PipelineInputAssemblyStateCreateInfo")
+		.def(py::init([]() { VkPipelineInputAssemblyStateCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkPipelineInputAssemblyStateCreateInfo::sType)
+		.def_property("pNext", [](VkPipelineInputAssemblyStateCreateInfo &self) { return self.pNext; }, [](VkPipelineInputAssemblyStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkPipelineInputAssemblyStateCreateInfo::flags)
+		.def_readwrite("topology", &VkPipelineInputAssemblyStateCreateInfo::topology)
+		.def_readwrite("primitiveRestartEnable", &VkPipelineInputAssemblyStateCreateInfo::primitiveRestartEnable);
+
+	py::class_<VkPipelineRasterizationStateCreateInfo>(m, "PipelineRasterizationStateCreateInfo")
+		.def(py::init([]() { VkPipelineRasterizationStateCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkPipelineRasterizationStateCreateInfo::sType)
+		.def_property("pNext", [](VkPipelineRasterizationStateCreateInfo &self) { return self.pNext; }, [](VkPipelineRasterizationStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkPipelineRasterizationStateCreateInfo::flags)
+		.def_readwrite("depthClampEnable", &VkPipelineRasterizationStateCreateInfo::depthClampEnable)
+		.def_readwrite("rasterizerDiscardEnable", &VkPipelineRasterizationStateCreateInfo::rasterizerDiscardEnable)
+		.def_readwrite("polygonMode", &VkPipelineRasterizationStateCreateInfo::polygonMode)
+		.def_readwrite("cullMode", &VkPipelineRasterizationStateCreateInfo::cullMode)
+		.def_readwrite("frontFace", &VkPipelineRasterizationStateCreateInfo::frontFace)
+		.def_readwrite("depthBiasEnable", &VkPipelineRasterizationStateCreateInfo::depthBiasEnable)
+		.def_readwrite("depthBiasConstantFactor", &VkPipelineRasterizationStateCreateInfo::depthBiasConstantFactor)
+		.def_readwrite("depthBiasClamp", &VkPipelineRasterizationStateCreateInfo::depthBiasClamp)
+		.def_readwrite("depthBiasSlopeFactor", &VkPipelineRasterizationStateCreateInfo::depthBiasSlopeFactor)
+		.def_readwrite("lineWidth", &VkPipelineRasterizationStateCreateInfo::lineWidth);
+
+	py::class_<VkPipelineMultisampleStateCreateInfo>(m, "PipelineMultisampleStateCreateInfo")
+		.def(py::init([]() { VkPipelineMultisampleStateCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkPipelineMultisampleStateCreateInfo::sType)
+		.def_property("pNext", [](VkPipelineMultisampleStateCreateInfo &self) { return self.pNext; }, [](VkPipelineMultisampleStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkPipelineMultisampleStateCreateInfo::flags)
+		.def_readwrite("rasterizationSamples", &VkPipelineMultisampleStateCreateInfo::rasterizationSamples)
+		.def_readwrite("sampleShadingEnable", &VkPipelineMultisampleStateCreateInfo::sampleShadingEnable)
+		.def_readwrite("minSampleShading", &VkPipelineMultisampleStateCreateInfo::minSampleShading)
+		.def_readwrite("pSampleMask", &VkPipelineMultisampleStateCreateInfo::pSampleMask)
+		.def_readwrite("alphaToCoverageEnable", &VkPipelineMultisampleStateCreateInfo::alphaToCoverageEnable)
+		.def_readwrite("alphaToOneEnable", &VkPipelineMultisampleStateCreateInfo::alphaToOneEnable);
+
+	py::class_<VkComponentMapping>(m, "ComponentMapping")
+		.def(py::init<>())
+		.def_readwrite("r", &VkComponentMapping::r)
+		.def_readwrite("g", &VkComponentMapping::g)
+		.def_readwrite("b", &VkComponentMapping::b)
+		.def_readwrite("a", &VkComponentMapping::a);
+
 	py::class_<VkOffset2D>(m, "Offset2D")
 		.def(py::init<>())
+		.def(py::init(&getOffset2D))
 		.def_readwrite("x", &VkOffset2D::x)
-		.def_readwrite("y", &VkOffset2D::y);
+		.def_readwrite("y", &VkOffset2D::y)
+		.def("__repr__", &offset2DToString);
 
 	py::class_<VkOffset3D>(m, "Offset3D")
 		.def(py::init<>())
+		.def(py::init(&getOffset3D))
 		.def_readwrite("x", &VkOffset3D::x)
 		.def_readwrite("y", &VkOffset3D::y)
-		.def_readwrite("z", &VkOffset3D::z);
+		.def_readwrite("z", &VkOffset3D::z)
+		.def("__repr__", &offset3DToString);
 
 	py::class_<VkExtent2D>(m, "Extent2D")
 		.def(py::init<>())
+		.def(py::init(&getExtent2D))
 		.def_readwrite("width", &VkExtent2D::width)
-		.def_readwrite("height", &VkExtent2D::height);
+		.def_readwrite("height", &VkExtent2D::height)
+		.def("__repr__", &extent2DToString);
 
 	py::class_<VkExtent3D>(m, "Extent3D")
 		.def(py::init<>())
+		.def(py::init(&getExtent3D))
 		.def_readwrite("width", &VkExtent3D::width)
 		.def_readwrite("height", &VkExtent3D::height)
-		.def_readwrite("depth", &VkExtent3D::depth);
+		.def_readwrite("depth", &VkExtent3D::depth)
+		.def("__repr__", &extent3DToString);
 
 	py::class_<VkViewport>(m, "Viewport")
 		.def(py::init<>())

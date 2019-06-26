@@ -11,6 +11,8 @@ namespace py = pybind11;
 
 class SurfaceKHR;
 class SwapchainKHR;
+class Image;
+class ShaderModule;
 
 
 #ifndef CREATEINFO_H
@@ -178,6 +180,66 @@ public:
 };
 
 
+class ImageViewCreateInfo
+{
+public:
+	ImageViewCreateInfo();
+	~ImageViewCreateInfo();
+
+	void getVKStruct(VkImageViewCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkImageViewCreateFlags flags = 0;
+	Image *image = nullptr;
+	VkImageViewType viewType;
+	VkFormat format;
+	VkComponentMapping components;
+	VkImageSubresourceRange subresourceRange;
+};
+
+
+class PipelineShaderStageCreateInfo
+{
+public:
+	PipelineShaderStageCreateInfo();
+	PipelineShaderStageCreateInfo(VkShaderStageFlagBits shaderStage, ShaderModule *shaderModule, std::string &funcName);
+	~PipelineShaderStageCreateInfo();
+
+	void getVKStruct(VkPipelineShaderStageCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkShaderStageFlagBits stage;
+	ShaderModule *module = nullptr;
+	std::string name;
+};
+
+
+class PipelineVertexInputStateCreateInfo
+{
+public:
+	PipelineVertexInputStateCreateInfo();
+	~PipelineVertexInputStateCreateInfo();
+
+	void getVKStruct(VkPipelineVertexInputStateCreateInfo *info);
+
+	const void* pNext = nullptr;
+	std::vector<VkVertexInputBindingDescription> vertexBindingDescriptions;
+	std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions;
+};
+
+
+class PipelineViewportStateCreateInfo
+{
+public:
+	PipelineViewportStateCreateInfo();
+	~PipelineViewportStateCreateInfo();
+
+	void getVKStruct(VkPipelineViewportStateCreateInfo *info);
+
+	const void* pNext = nullptr;
+	std::vector<VkViewport> viewports;
+	std::vector<VkRect2D> scissors;
+};
 
 
 #endif // !CREATEINFO_H
