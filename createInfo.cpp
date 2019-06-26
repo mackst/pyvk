@@ -3,6 +3,7 @@
 #include "image.h"
 #include "shadermodule.h"
 #include "utils.h"
+#include "descriptors.h"
 
 ApplicationInfo::ApplicationInfo()
 {
@@ -320,4 +321,117 @@ void PipelineViewportStateCreateInfo::getVKStruct(VkPipelineViewportStateCreateI
 	info->viewportCount = static_cast<uint32_t>(viewports.size());
 	if (info->viewportCount > 0)
 		info->pViewports = viewports.data();
+}
+
+
+PipelineColorBlendStateCreateInfo::PipelineColorBlendStateCreateInfo()
+{
+}
+
+PipelineColorBlendStateCreateInfo::~PipelineColorBlendStateCreateInfo()
+{
+	pNext = nullptr;
+}
+
+void PipelineColorBlendStateCreateInfo::getVKStruct(VkPipelineColorBlendStateCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	info->pNext = pNext;
+	info->logicOp = logicOp;
+	info->logicOpEnable = logicOpEnable;
+	info->attachmentCount = static_cast<uint32_t>(attachments.size());
+	if (info->attachmentCount > 0)
+		info->pAttachments = attachments.data();
+	info->blendConstants[0] = blendConstants[0];
+	info->blendConstants[1] = blendConstants[1];
+	info->blendConstants[2] = blendConstants[2];
+	info->blendConstants[3] = blendConstants[3];
+}
+
+
+PipelineLayoutCreateInfo::PipelineLayoutCreateInfo()
+{
+}
+
+PipelineLayoutCreateInfo::~PipelineLayoutCreateInfo()
+{
+	pNext = nullptr;
+	setLayouts = {};
+	_setLayouts = {};
+}
+
+void PipelineLayoutCreateInfo::setSetLayouts(std::vector<DescriptorSetLayout>& layouts)
+{
+	setLayouts = layouts;
+	for (auto setLayout : setLayouts)
+	{
+		_setLayouts.emplace_back(setLayout.vkHandle);
+	}
+}
+
+void PipelineLayoutCreateInfo::getVKStruct(VkPipelineLayoutCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	info->pNext = pNext;
+	info->setLayoutCount = static_cast<uint32_t>(setLayouts.size());
+	if (info->setLayoutCount > 0)
+		info->pSetLayouts = _setLayouts.data();
+	info->pushConstantRangeCount = static_cast<uint32_t>(pushConstantRanges.size());
+	if (info->pushConstantRangeCount > 0)
+		info->pPushConstantRanges = pushConstantRanges.data();
+}
+
+GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
+{
+}
+
+GraphicsPipelineCreateInfo::~GraphicsPipelineCreateInfo()
+{
+	pNext = nullptr;
+	inputAssemblyState = nullptr;
+	tessellationState = nullptr;
+	rasterizationState = nullptr;
+	multisampleState = nullptr;
+	depthStencilState = nullptr;
+	layout = nullptr;
+	renderPass = nullptr;
+	basePipelineHandle = nullptr;
+	stages = {};
+	_stages = {};
+}
+
+void GraphicsPipelineCreateInfo::setStages(std::vector<PipelineShaderStageCreateInfo*>& infos)
+{
+	stages = infos;
+	for (auto i : stages)
+	{
+		VkPipelineShaderStageCreateInfo info = {};
+		i->getVKStruct(&info);
+		_stages.emplace_back(info);
+	}
+}
+
+void GraphicsPipelineCreateInfo::getVKStruct(VkGraphicsPipelineCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	info->pNext = pNext;
+	info->stageCount = static_cast<uint32_t>(stages.size());
+	if (info->stageCount > 0)
+		info->pStages = _stages.data();
+
+	info->pVertexInputState = &_vertexInputState;
+	info->pInputAssemblyState = inputAssemblyState;
+	info->pTessellationState = tessellationState;
+	info->pViewportState = &_viewportState;
+	info->pRasterizationState = rasterizationState;
+	info->pMultisampleState = multisampleState;
+	info->pDepthStencilState = depthStencilState;
+	info->pColorBlendState = &_colorBlendState;
+	info->layout = layout->vkHandle;
+	info->renderPass = renderPass->vkHandle;
+	info->basePipelineIndex = basePipelineIndex;
+	if (basePipelineHandle)
+		info->basePipelineHandle = basePipelineHandle->vkHandle;
+	else
+		info->basePipelineHandle = VK_NULL_HANDLE;
 }

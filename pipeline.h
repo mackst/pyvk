@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
 
 #include "volk.h"
 #include "shadermodule.h"
@@ -10,42 +10,10 @@
 
 namespace py = pybind11;
 
+class PipelineLayoutCreateInfo;
 
 #ifndef PIPELINE_H
 #define PIPELINE_H
-
-
-
-
-
-class PipelineColorBlendStateCreateInfo
-{
-public:
-	PipelineColorBlendStateCreateInfo();
-	//PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateInfo &other);
-	~PipelineColorBlendStateCreateInfo();
-
-	VkPipelineColorBlendStateCreateInfo to_vktype();
-
-	VkBool32 logicOpEnable;
-	VkLogicOp logicOp;
-	std::vector<VkPipelineColorBlendAttachmentState> attachments;
-	std::vector<float> blendConstants;
-};
-
-
-class PipelineLayoutCreateInfo
-{
-public:
-	PipelineLayoutCreateInfo();
-	~PipelineLayoutCreateInfo();
-
-	VkPipelineLayoutCreateInfo to_vktype();
-
-	py::list setLayouts;
-	std::vector<VkPushConstantRange> pushConstantRanges;
-};
-
 
 
 
@@ -99,33 +67,6 @@ public:
 
 	VkPipelineCache vkHandle = VK_NULL_HANDLE;
 };
-
-
-
-
-class GraphicsPipelineCreateInfo
-{
-public:
-	GraphicsPipelineCreateInfo();
-	~GraphicsPipelineCreateInfo();
-
-	VkGraphicsPipelineCreateInfo to_vktype();
-
-	std::vector<PipelineShaderStageCreateInfo*> stages;
-	PipelineVertexInputStateCreateInfo *vertexInputState = nullptr;
-	PipelineInputAssemblyStateCreateInfo *inputAssemblyState = nullptr;
-	PipelineViewportStateCreateInfo *viewportState = nullptr;
-	PipelineRasterizationStateCreateInfo *rasterizationState = nullptr;
-	PipelineMultisampleStateCreateInfo *multisampleState = nullptr;
-	PipelineColorBlendStateCreateInfo *colorBlendState = nullptr;
-	PipelineLayout *layout = nullptr;
-	RenderPass *renderPass = nullptr;
-	uint32_t subpass;
-	Pipeline *basePipelineHandle = nullptr;
-	int32_t basePipelineIndex;
-};
-
-
 
 
 

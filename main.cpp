@@ -174,6 +174,44 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("vertexBindingDescriptions", &PipelineVertexInputStateCreateInfo::vertexBindingDescriptions)
 		.def_readwrite("vertexAttributeDescriptions", &PipelineVertexInputStateCreateInfo::vertexAttributeDescriptions);
 
+	py::class_<PipelineViewportStateCreateInfo>(m, "PipelineViewportStateCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](PipelineViewportStateCreateInfo &self) { return self.pNext; }, [](PipelineViewportStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("scissors", &PipelineViewportStateCreateInfo::scissors)
+		.def_readwrite("viewports", &PipelineViewportStateCreateInfo::viewports);
+
+	py::class_<PipelineColorBlendStateCreateInfo>(m, "PipelineColorBlendStateCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](PipelineColorBlendStateCreateInfo &self) { return self.pNext; }, [](PipelineColorBlendStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("attachments", &PipelineColorBlendStateCreateInfo::attachments)
+		.def_readwrite("blendConstants", &PipelineColorBlendStateCreateInfo::blendConstants)
+		.def_readwrite("logicOp", &PipelineColorBlendStateCreateInfo::logicOp)
+		.def_readwrite("logicOpEnable", &PipelineColorBlendStateCreateInfo::logicOpEnable);
+
+	py::class_<PipelineLayoutCreateInfo>(m, "PipelineLayoutCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](PipelineLayoutCreateInfo &self) { return self.pNext; }, [](PipelineLayoutCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("setLayouts", &PipelineLayoutCreateInfo::getSetLayouts, &PipelineLayoutCreateInfo::setSetLayouts)
+		.def_readwrite("pushConstantRanges", &PipelineLayoutCreateInfo::pushConstantRanges);
+
+	py::class_<GraphicsPipelineCreateInfo>(m, "GraphicsPipelineCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](GraphicsPipelineCreateInfo &self) { return self.pNext; }, [](GraphicsPipelineCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("stages", &GraphicsPipelineCreateInfo::getStages, &GraphicsPipelineCreateInfo::setStages)
+		.def_property("vertexInputState", &GraphicsPipelineCreateInfo::getVertexInputState, &GraphicsPipelineCreateInfo::setVertexInputState)
+		.def_property("viewportState", &GraphicsPipelineCreateInfo::getViewportState, &GraphicsPipelineCreateInfo::setViewportState)
+		.def_property("colorBlendState", &GraphicsPipelineCreateInfo::getColorBlendState, &GraphicsPipelineCreateInfo::setColorBlendState)
+		.def_property("inputAssemblyState", [](GraphicsPipelineCreateInfo &self) { return self.inputAssemblyState; }, [](GraphicsPipelineCreateInfo &self, VkPipelineInputAssemblyStateCreateInfo* info) { self.inputAssemblyState = info; })
+		.def_property("tessellationState", [](GraphicsPipelineCreateInfo &self) { return self.tessellationState; }, [](GraphicsPipelineCreateInfo &self, VkPipelineTessellationStateCreateInfo* info) { self.tessellationState = info; })
+		.def_property("rasterizationState", [](GraphicsPipelineCreateInfo &self) { return self.rasterizationState; }, [](GraphicsPipelineCreateInfo &self, VkPipelineRasterizationStateCreateInfo* info) { self.rasterizationState = info; })
+		.def_property("multisampleState", [](GraphicsPipelineCreateInfo &self) { return self.multisampleState; }, [](GraphicsPipelineCreateInfo &self, VkPipelineMultisampleStateCreateInfo* info) { self.multisampleState = info; })
+		.def_property("depthStencilState", [](GraphicsPipelineCreateInfo &self) { return self.depthStencilState; }, [](GraphicsPipelineCreateInfo &self, VkPipelineDepthStencilStateCreateInfo* info) { self.depthStencilState = info; })
+		.def_property("layout", [](GraphicsPipelineCreateInfo &self) { return self.layout; }, [](GraphicsPipelineCreateInfo &self, PipelineLayout* info) { self.layout = info; })
+		.def_property("renderPass", [](GraphicsPipelineCreateInfo &self) { return self.renderPass; }, [](GraphicsPipelineCreateInfo &self, RenderPass* info) { self.renderPass = info; })
+		.def_property("basePipelineHandle", [](GraphicsPipelineCreateInfo &self) { return self.basePipelineHandle; }, [](GraphicsPipelineCreateInfo &self, Pipeline* info) { self.basePipelineHandle = info; })
+		.def_readwrite("subpass", &GraphicsPipelineCreateInfo::subpass)
+		.def_readwrite("basePipelineIndex", &GraphicsPipelineCreateInfo::basePipelineIndex);
+
 	py::class_<VkPhysicalDeviceProperties>(m, "PhysicalDeviceProperties")
 		.def(py::init<>())
 		.def_readwrite("apiVersion", &VkPhysicalDeviceProperties::apiVersion)
@@ -315,6 +353,13 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("topology", &VkPipelineInputAssemblyStateCreateInfo::topology)
 		.def_readwrite("primitiveRestartEnable", &VkPipelineInputAssemblyStateCreateInfo::primitiveRestartEnable);
 
+	py::class_<VkPipelineTessellationStateCreateInfo>(m, "PipelineTessellationStateCreateInfo")
+		.def(py::init([]() { VkPipelineTessellationStateCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkPipelineTessellationStateCreateInfo::sType)
+		.def_property("pNext", [](VkPipelineTessellationStateCreateInfo &self) { return self.pNext; }, [](VkPipelineTessellationStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkPipelineTessellationStateCreateInfo::flags)
+		.def_readwrite("patchControlPoints", &VkPipelineTessellationStateCreateInfo::patchControlPoints);
+
 	py::class_<VkPipelineRasterizationStateCreateInfo>(m, "PipelineRasterizationStateCreateInfo")
 		.def(py::init([]() { VkPipelineRasterizationStateCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO; return out; }))
 		.def_readwrite("sType", &VkPipelineRasterizationStateCreateInfo::sType)
@@ -342,6 +387,42 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("pSampleMask", &VkPipelineMultisampleStateCreateInfo::pSampleMask)
 		.def_readwrite("alphaToCoverageEnable", &VkPipelineMultisampleStateCreateInfo::alphaToCoverageEnable)
 		.def_readwrite("alphaToOneEnable", &VkPipelineMultisampleStateCreateInfo::alphaToOneEnable);
+
+	py::class_<VkPipelineColorBlendAttachmentState>(m, "PipelineColorBlendAttachmentState")
+		.def(py::init<>())
+		.def_readwrite("blendEnable", &VkPipelineColorBlendAttachmentState::blendEnable)
+		.def_readwrite("srcColorBlendFactor", &VkPipelineColorBlendAttachmentState::srcColorBlendFactor)
+		.def_readwrite("dstColorBlendFactor", &VkPipelineColorBlendAttachmentState::dstColorBlendFactor)
+		.def_readwrite("colorBlendOp", &VkPipelineColorBlendAttachmentState::colorBlendOp)
+		.def_readwrite("srcAlphaBlendFactor", &VkPipelineColorBlendAttachmentState::srcAlphaBlendFactor)
+		.def_readwrite("dstAlphaBlendFactor", &VkPipelineColorBlendAttachmentState::dstAlphaBlendFactor)
+		.def_readwrite("alphaBlendOp", &VkPipelineColorBlendAttachmentState::alphaBlendOp)
+		.def_readwrite("colorWriteMask", &VkPipelineColorBlendAttachmentState::colorWriteMask);
+
+	py::class_<VkStencilOpState>(m, "StencilOpState")
+		.def(py::init<>())
+		.def_readwrite("failOp", &VkStencilOpState::failOp)
+		.def_readwrite("passOp", &VkStencilOpState::passOp)
+		.def_readwrite("depthFailOp", &VkStencilOpState::depthFailOp)
+		.def_readwrite("compareOp", &VkStencilOpState::compareOp)
+		.def_readwrite("compareMask", &VkStencilOpState::compareMask)
+		.def_readwrite("writeMask", &VkStencilOpState::writeMask)
+		.def_readwrite("reference", &VkStencilOpState::reference);
+
+	py::class_<VkPipelineDepthStencilStateCreateInfo>(m, "PipelineDepthStencilStateCreateInfo")
+		.def(py::init([]() { VkPipelineDepthStencilStateCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkPipelineDepthStencilStateCreateInfo::sType)
+		.def_property("pNext", [](VkPipelineDepthStencilStateCreateInfo &self) { return self.pNext; }, [](VkPipelineDepthStencilStateCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkPipelineDepthStencilStateCreateInfo::flags)
+		.def_readwrite("depthTestEnable", &VkPipelineDepthStencilStateCreateInfo::depthTestEnable)
+		.def_readwrite("depthWriteEnable", &VkPipelineDepthStencilStateCreateInfo::depthWriteEnable)
+		.def_readwrite("depthCompareOp", &VkPipelineDepthStencilStateCreateInfo::depthCompareOp)
+		.def_readwrite("depthBoundsTestEnable", &VkPipelineDepthStencilStateCreateInfo::depthBoundsTestEnable)
+		.def_readwrite("stencilTestEnable", &VkPipelineDepthStencilStateCreateInfo::stencilTestEnable)
+		.def_readwrite("front", &VkPipelineDepthStencilStateCreateInfo::front)
+		.def_readwrite("back", &VkPipelineDepthStencilStateCreateInfo::back)
+		.def_readwrite("minDepthBounds", &VkPipelineDepthStencilStateCreateInfo::minDepthBounds)
+		.def_readwrite("maxDepthBounds", &VkPipelineDepthStencilStateCreateInfo::maxDepthBounds);
 
 	py::class_<VkComponentMapping>(m, "ComponentMapping")
 		.def(py::init<>())

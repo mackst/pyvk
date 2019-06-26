@@ -64,73 +64,10 @@ void PipelineLayout::getFuncPointers()
 
 
 
-PipelineColorBlendStateCreateInfo::PipelineColorBlendStateCreateInfo()
-{
-}
 
-//PipelineColorBlendStateCreateInfo::PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateInfo & other)
-//{
-//	logicOpEnable = other.logicOpEnable;
-//	logicOp = other.logicOp;
-//	attachments = other.attachments;
-//	blendConstants = other.blendConstants;
-//}
 
-PipelineColorBlendStateCreateInfo::~PipelineColorBlendStateCreateInfo()
-{
-}
 
-VkPipelineColorBlendStateCreateInfo PipelineColorBlendStateCreateInfo::to_vktype()
-{
-	VkPipelineColorBlendStateCreateInfo out = {};
-	out.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	out.logicOpEnable = logicOpEnable;
-	out.logicOp = logicOp;
-	out.blendConstants[0] = blendConstants[0];
-	out.blendConstants[1] = blendConstants[1];
-	out.blendConstants[2] = blendConstants[2];
-	out.blendConstants[3] = blendConstants[3];
 
-	uint32_t attachmentCount = static_cast<uint32_t>(attachments.size());
-	if (attachmentCount > 0)
-	{
-		out.attachmentCount = attachmentCount;
-		out.pAttachments = attachments.data();
-	}
-	else
-	{
-		out.attachmentCount = 0;
-	}
-	return out;
-}
-
-PipelineLayoutCreateInfo::PipelineLayoutCreateInfo()
-{
-}
-
-PipelineLayoutCreateInfo::~PipelineLayoutCreateInfo()
-{
-}
-
-VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo::to_vktype()
-{
-	VkPipelineLayoutCreateInfo out = {};
-	out.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	out.setLayoutCount = 0;
-	
-	uint32_t pushConstantRangeCount = static_cast<uint32_t>(pushConstantRanges.size());
-	if (pushConstantRangeCount > 0)
-	{
-		out.pushConstantRangeCount = pushConstantRangeCount;
-		out.pPushConstantRanges = pushConstantRanges.data();
-	}
-	else
-	{
-		out.pushConstantRangeCount = 0;
-	}
-
-	return out;
-}
 
 Pipeline::Pipeline()
 {
@@ -162,58 +99,6 @@ bool Pipeline::isValid()
 	return vkHandle != VK_NULL_HANDLE;
 }
 
-GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
-{
-}
-
-GraphicsPipelineCreateInfo::~GraphicsPipelineCreateInfo()
-{
-}
-
-VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo::to_vktype()
-{
-	VkGraphicsPipelineCreateInfo out = {};
-	out.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	if (vertexInputState != nullptr)
-		out.pVertexInputState = &vertexInputState->to_vktype();
-	if (inputAssemblyState != nullptr)
-		out.pInputAssemblyState = &inputAssemblyState->to_vktype();
-	if (viewportState != nullptr)
-	{
-		auto vps = viewportState->to_vktype();
-		py::print((int)vps.sType);
-		out.pViewportState = &vps;
-		py::print((int)out.pViewportState->sType);
-	}
-	if (rasterizationState != nullptr)
-		out.pRasterizationState = &rasterizationState->to_vktype();
-	if (multisampleState != nullptr)
-		out.pMultisampleState = &multisampleState->to_vktype();
-	if (colorBlendState != nullptr)
-		out.pColorBlendState = &colorBlendState->to_vktype();
-	out.layout = layout->vkHandle;
-	out.renderPass = renderPass->vkHandle;
-	if (basePipelineHandle != nullptr)
-		out.basePipelineHandle = basePipelineHandle->vkHandle;
-	else
-		out.basePipelineHandle = VK_NULL_HANDLE;
-	out.subpass = subpass;
-	out.basePipelineIndex = basePipelineIndex;
-
-	uint32_t stageCount = static_cast<uint32_t>(stages.size());
-	if (stageCount > 0)
-	{
-		out.stageCount = stageCount;
-		std::vector<VkPipelineShaderStageCreateInfo> _stages;
-		for (auto item : stages)
-			_stages.emplace_back(item->to_vktype());
-		out.pStages = _stages.data();
-	}
-	else
-		out.stageCount = 0;
-
-	return out;
-}
 
 PipelineCache::PipelineCache()
 {

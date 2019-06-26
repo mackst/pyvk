@@ -5,6 +5,7 @@
 
 
 #include "volk.h"
+#include "pipeline.h"
 
 namespace py = pybind11;
 
@@ -13,6 +14,7 @@ class SurfaceKHR;
 class SwapchainKHR;
 class Image;
 class ShaderModule;
+class DescriptorSetLayout;
 
 
 #ifndef CREATEINFO_H
@@ -241,5 +243,77 @@ public:
 	std::vector<VkRect2D> scissors;
 };
 
+
+class PipelineColorBlendStateCreateInfo
+{
+public:
+	PipelineColorBlendStateCreateInfo();
+	~PipelineColorBlendStateCreateInfo();
+
+	void getVKStruct(VkPipelineColorBlendStateCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkBool32 logicOpEnable;
+	VkLogicOp logicOp;
+	std::vector<VkPipelineColorBlendAttachmentState> attachments;
+	std::vector<float> blendConstants;
+};
+
+
+class PipelineLayoutCreateInfo
+{
+public:
+	PipelineLayoutCreateInfo();
+	~PipelineLayoutCreateInfo();
+
+	std::vector<DescriptorSetLayout> getSetLayouts() { return setLayouts; }
+	void setSetLayouts(std::vector<DescriptorSetLayout> &layouts);
+
+	void getVKStruct(VkPipelineLayoutCreateInfo *info);
+
+	const void* pNext = nullptr;
+	std::vector<DescriptorSetLayout> setLayouts;
+	std::vector<VkDescriptorSetLayout> _setLayouts;
+	std::vector<VkPushConstantRange> pushConstantRanges;
+};
+
+
+class GraphicsPipelineCreateInfo
+{
+public:
+	GraphicsPipelineCreateInfo();
+	~GraphicsPipelineCreateInfo();
+
+	void setStages(std::vector<PipelineShaderStageCreateInfo*> &infos);
+	std::vector<PipelineShaderStageCreateInfo*> getStages() { return stages; }
+	void setVertexInputState(PipelineVertexInputStateCreateInfo &info);
+	PipelineVertexInputStateCreateInfo getVertexInputState() { return vertexInputState; }
+	void setViewportState(PipelineViewportStateCreateInfo &info);
+	PipelineViewportStateCreateInfo getViewportState() { return viewportState; }
+	void setColorBlendState(PipelineColorBlendStateCreateInfo &info);
+	PipelineColorBlendStateCreateInfo getColorBlendState() { return colorBlendState; }
+
+	void getVKStruct(VkGraphicsPipelineCreateInfo *info);
+
+	const void* pNext = nullptr;
+	std::vector<PipelineShaderStageCreateInfo*> stages;
+	std::vector<VkPipelineShaderStageCreateInfo> _stages;
+	PipelineVertexInputStateCreateInfo vertexInputState;
+	VkPipelineVertexInputStateCreateInfo _vertexInputState = {};
+	const VkPipelineInputAssemblyStateCreateInfo *inputAssemblyState = nullptr;
+	const VkPipelineTessellationStateCreateInfo *tessellationState = nullptr;
+	PipelineViewportStateCreateInfo viewportState;
+	VkPipelineViewportStateCreateInfo _viewportState = {};
+	const VkPipelineRasterizationStateCreateInfo *rasterizationState = nullptr;
+	const VkPipelineMultisampleStateCreateInfo *multisampleState = nullptr;
+	const VkPipelineDepthStencilStateCreateInfo *depthStencilState = nullptr;
+	PipelineColorBlendStateCreateInfo colorBlendState;
+	VkPipelineColorBlendStateCreateInfo _colorBlendState = {};
+	PipelineLayout *layout = nullptr;
+	RenderPass *renderPass = nullptr;
+	uint32_t subpass;
+	Pipeline *basePipelineHandle = nullptr;
+	int32_t basePipelineIndex = 0;
+};
 
 #endif // !CREATEINFO_H
