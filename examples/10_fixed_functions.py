@@ -68,12 +68,14 @@ class HelloTriangleApplication(QtGui.QWindow):
         self.__swapChainImageFormat = None
         self.__swapChainExtent = None
         self.__swapChainImageViews = []
+        self.__pipelineLayout = None
 
         self.__indices = QueueFamilyIndices()
 
         self.initVulkan()
 
     def __del__(self):
+        del self.__pipelineLayout
         del self.__swapChainImageViews
         del self.__swapChain
         del self.__device
@@ -250,6 +252,56 @@ class HelloTriangleApplication(QtGui.QWindow):
         fragShaderStageInfo.name = 'main'
 
         shaderStages = [vertShaderStageInfo, fragShaderStageInfo]
+
+        vertexInputInfo = _vk.PipelineVertexInputStateCreateInfo()
+        
+        inputAssembly = _vk.PipelineInputAssemblyStateCreateInfo()
+        inputAssembly.topology = _vk.VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+        inputAssembly.primitiveRestartEnable = False
+
+        viewport = _vk.Viewport()
+        viewport.x = 0.0
+        viewport.y = 0.0
+        viewport.width = float(self.__swapChainExtent.width)
+        viewport.height = float(self.__swapChainExtent.height)
+        viewport.minDepth= 0.0
+        viewport.maxDepth = 1.0
+
+        scissor = _vk.Rect2D()
+        scissor.offset = _vk.Offset2D(0, 0)
+        scissor.extent = self.__swapChainExtent
+
+        viewportState = _vk.PipelineViewportStateCreateInfo()
+        viewportState.viewports = [viewport, ]
+        viewportState.scissors = [scissor, ]
+
+        rasterizer = _vk.PipelineRasterizationStateCreateInfo()
+        rasterizer.depthClampEnable = False
+        rasterizer.rasterizerDiscardEnable = False
+        rasterizer.polygonMode = _vk.VK_POLYGON_MODE_FILL
+        rasterizer.lineWidth = 1.0
+        rasterizer.cullMode = _vk.VK_CULL_MODE_BACK_BIT
+        rasterizer.frontFace = _vk.VK_FRONT_FACE_CLOCKWISE
+        rasterizer.depthBiasEnable = False
+
+        multisampling = _vk.PipelineMultisampleStateCreateInfo()
+        multisampling.sampleShadingEnable = False
+        multisampling.rasterizationSamples = _vk.VK_SAMPLE_COUNT_1_BIT
+
+        colorBlendAttachment = _vk.PipelineColorBlendAttachmentState()
+        colorBlendAttachment.colorWriteMask = _vk.VK_COLOR_COMPONENT_R_BIT | _vk.VK_COLOR_COMPONENT_G_BIT | _vk.VK_COLOR_COMPONENT_B_BIT | _vk.VK_COLOR_COMPONENT_A_BIT
+        colorBlendAttachment.blendEnable = False
+
+        colorBlending = _vk.PipelineColorBlendStateCreateInfo()
+        colorBlending.logicOpEnable = False
+        colorBlending.logicOp = _vk.VK_LOGIC_OP_COPY
+        colorBlending.attachments = [colorBlendAttachment, ]
+        colorBlending.blendConstants = [0.0, 0.0, 0.0, 0.0]
+
+        pipelineLayoutInfo = _vk.PipelineLayoutCreateInfo()
+        
+        self.__pipelineLayout = self.__device.createPipelineLayout(pipelineLayoutInfo)
+        print("pipeline layout is valid: {}".format(self.__pipelineLayout.isValid))
 
         del vertShaderModule
         del fragShaderModule
