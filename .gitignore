@@ -1,6 +1,7 @@
 *.vcxproj
 *.filters
 *.user
+*.sln
 
 build.bat
 py_binding.txt
@@ -8,3 +9,4 @@ py_binding.txt
 build/
 .vscode/
 x64/
+.vs/

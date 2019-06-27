@@ -1,5 +1,6 @@
 #include "renderpass.h"
 #include "exception.h"
+#include "device.h"
 
 SubpassDescription::SubpassDescription()
 {
@@ -9,51 +10,48 @@ SubpassDescription::~SubpassDescription()
 {
 }
 
-VkSubpassDescription SubpassDescription::to_vktype()
+void SubpassDescription::getVKStruct(VkSubpassDescription *info)
 {
-	VkSubpassDescription out = {};
-	out.pipelineBindPoint = pipelineBindPoint;
+	info->pipelineBindPoint = pipelineBindPoint;
 
 	uint32_t inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size());
 	if (inputAttachmentCount > 0)
 	{
-		out.inputAttachmentCount = inputAttachmentCount;
-		out.pInputAttachments = inputAttachments.data();
+		info->inputAttachmentCount = inputAttachmentCount;
+		info->pInputAttachments = inputAttachments.data();
 	}
 	else
 	{
-		out.inputAttachmentCount = 0;
+		info->inputAttachmentCount = 0;
 	}
 
 	uint32_t colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
 	if (colorAttachmentCount > 0)
 	{
-		out.colorAttachmentCount = colorAttachmentCount;
-		out.pColorAttachments = colorAttachments.data();
+		info->colorAttachmentCount = colorAttachmentCount;
+		info->pColorAttachments = colorAttachments.data();
 	}
 	else
 	{
-		out.colorAttachmentCount = 0;
+		info->colorAttachmentCount = 0;
 	}
 
 	if (resolveAttachments.size() > 0)
-		out.pResolveAttachments = resolveAttachments.data();
+		info->pResolveAttachments = resolveAttachments.data();
 	
 	if (depthStencilAttachment != nullptr)
-		out.pDepthStencilAttachment = depthStencilAttachment;
+		info->pDepthStencilAttachment = depthStencilAttachment;
 
 	uint32_t preserveAttachmentCount = static_cast<uint32_t>(preserveAttachments.size());
 	if (preserveAttachmentCount > 0)
 	{
-		out.preserveAttachmentCount = preserveAttachmentCount;
-		out.pPreserveAttachments = preserveAttachments.data();
+		info->preserveAttachmentCount = preserveAttachmentCount;
+		info->pPreserveAttachments = preserveAttachments.data();
 	}
 	else
 	{
-		out.preserveAttachmentCount = 0;
+		info->preserveAttachmentCount = 0;
 	}
-
-	return out;
 }
 
 RenderPassCreateInfo::RenderPassCreateInfo()
@@ -62,84 +60,76 @@ RenderPassCreateInfo::RenderPassCreateInfo()
 
 RenderPassCreateInfo::~RenderPassCreateInfo()
 {
+	pNext = nullptr;
 }
 
-VkRenderPassCreateInfo RenderPassCreateInfo::to_vktype()
+void RenderPassCreateInfo::setSubpasses(std::vector<SubpassDescription>& descriptions)
 {
-	VkRenderPassCreateInfo out = {};
-	out.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	subpasses = descriptions;
+	for (auto i : subpasses)
+	{
+		VkSubpassDescription description = {};
+		i.getVKStruct(&description);
+		_subpasses.emplace_back(description);
+	}
+}
+
+void RenderPassCreateInfo::getVKStruct(VkRenderPassCreateInfo *info)
+{
+	info->sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	info->pNext = pNext;
 
 	uint32_t attachmentCount = static_cast<uint32_t>(attachments.size());
 	if (attachmentCount > 0)
 	{
-		out.attachmentCount = attachmentCount;
-		out.pAttachments = attachments.data();
+		info->attachmentCount = attachmentCount;
+		info->pAttachments = attachments.data();
 	}
 	else
 	{
-		out.attachmentCount = 0;
+		info->attachmentCount = 0;
 	}
 
-	uint32_t subpassCount = static_cast<uint32_t>(subpasses.size());
+	uint32_t subpassCount = static_cast<uint32_t>(_subpasses.size());
 	if (subpassCount > 0)
 	{
-		out.subpassCount = subpassCount;
-
-		std::vector<VkSubpassDescription> _subpasses(subpassCount);
-		for (auto item : subpasses)
-			_subpasses.push_back(item.to_vktype());
-		out.pSubpasses = _subpasses.data();
+		info->subpassCount = subpassCount;
+		info->pSubpasses = _subpasses.data();
 	}
 	else
 	{
-		out.subpassCount = 0;
+		info->subpassCount = 0;
 	}
 
 	uint32_t dependencyCount = static_cast<uint32_t>(dependencies.size());
 	if (dependencyCount > 0)
 	{
-		out.dependencyCount = dependencyCount;
-		out.pDependencies = dependencies.data();
+		info->dependencyCount = dependencyCount;
+		info->pDependencies = dependencies.data();
 	}
 	else
 	{
-		out.dependencyCount = 0;
+		info->dependencyCount = 0;
 	}
-
-	return out;
 }
 
 RenderPass::RenderPass()
 {
 }
 
-RenderPass::RenderPass(VkDevice device, RenderPassCreateInfo & createInfo): _device(device)
+RenderPass::RenderPass(Device *device, RenderPassCreateInfo & createInfo): _device(device)
 {
-	if (_device == VK_NULL_HANDLE)
-		throw std::runtime_error("VKDevice has been destroyed");
-	_vkCreateRenderPass = (PFN_vkCreateRenderPass)vkGetDeviceProcAddr(_device, "vkCreateRenderPass");
-	_vkDestroyRenderPass = (PFN_vkDestroyRenderPass)vkGetDeviceProcAddr(_device, "vkDestroyRenderPass");
-
-	auto _createInfo = createInfo.to_vktype();
-	checkVKResult(_vkCreateRenderPass(_device, &_createInfo, nullptr, &vkHandle));
+	VkRenderPassCreateInfo _createInfo = {};
+	createInfo.getVKStruct(&_createInfo);
+	checkVKResult(_device->table.vkCreateRenderPass(_device->vkHandle, &_createInfo, nullptr, &vkHandle));
 }
 
-RenderPass::RenderPass(RenderPass & other)
-{
-	if (other.isValid())
-	{
-		vkHandle = other.vkHandle;
-		_device = other._device;
-		_vkCreateRenderPass = other._vkCreateRenderPass;
-		_vkDestroyRenderPass = other._vkDestroyRenderPass;
-	}
-}
 
 RenderPass::~RenderPass()
 {
 	if (isValid())
 	{
-		_vkDestroyRenderPass(_device, vkHandle, nullptr);
+		_device->table.vkDestroyRenderPass(_device->vkHandle, vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
 		_device = VK_NULL_HANDLE;
 	}

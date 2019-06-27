@@ -7,6 +7,10 @@
 
 namespace py = pybind11;
 
+
+class Device;
+
+
 #ifndef RENDERPASS_H
 #define RENDERPASS_H
 
@@ -18,7 +22,7 @@ public:
 	SubpassDescription();
 	~SubpassDescription();
 
-	VkSubpassDescription to_vktype();
+	void getVKStruct(VkSubpassDescription *info);
 
 	VkPipelineBindPoint pipelineBindPoint;
 	std::vector<VkAttachmentReference> inputAttachments;
@@ -35,10 +39,15 @@ public:
 	RenderPassCreateInfo();
 	~RenderPassCreateInfo();
 
-	VkRenderPassCreateInfo to_vktype();
+	void setSubpasses(std::vector<SubpassDescription> &descriptions);
+	std::vector<SubpassDescription> getSubpasses() { return subpasses; }
 
+	void getVKStruct(VkRenderPassCreateInfo *info);
+
+	const void* pNext = nullptr;
 	std::vector<VkAttachmentDescription> attachments;
 	std::vector<SubpassDescription> subpasses;
+	std::vector<VkSubpassDescription> _subpasses = {};
 	std::vector<VkSubpassDependency> dependencies;
 };
 
@@ -47,18 +56,14 @@ class RenderPass
 {
 public:
 	RenderPass();
-	RenderPass(VkDevice device, RenderPassCreateInfo &createInfo);
-	RenderPass(RenderPass &other);
+	RenderPass(Device *device, RenderPassCreateInfo &createInfo);
 	~RenderPass();
 
 	bool isValid();
 
 	VkRenderPass vkHandle = VK_NULL_HANDLE;
-private:
-	VkDevice _device = VK_NULL_HANDLE;
+	Device *_device = nullptr;
 
-	PFN_vkCreateRenderPass _vkCreateRenderPass = nullptr;
-	PFN_vkDestroyRenderPass _vkDestroyRenderPass = nullptr;
 };
 
 

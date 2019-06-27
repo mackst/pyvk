@@ -219,7 +219,7 @@ PipelineLayout* Device::createPipelineLayout(PipelineLayoutCreateInfo & createIn
 
 RenderPass * Device::createRenderPass(RenderPassCreateInfo & createInfo)
 {
-	return new RenderPass(vkHandle, createInfo);
+	return new RenderPass(this, createInfo);
 }
 
 

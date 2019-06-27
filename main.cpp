@@ -9,9 +9,6 @@
 #include "vktypes.h"
 //#include "createInfo.h"
 
-// msbuild cmd
-// msbuild /p:Configuration=Release /p:Platform=x64 /m:6 pyvk.sln /p:PreferredToolArchitecture=x64
-
 
 PYBIND11_MODULE(_vk, m)
 {
@@ -59,8 +56,8 @@ PYBIND11_MODULE(_vk, m)
 		.def("createImageView", &Device::createImageView, py::arg("createInfo"))
 		.def("createShaderModule", &Device::createShaderModule, py::arg("filename"))
 		.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo"))
-	//	.def("createRenderPass", &Device::createRenderPass, py::arg("createInfo"))
-	//	.def("createGraphicsPipelines", &Device::createGraphicsPipelines, py::arg("cache"), py::arg("createInfos"))
+		.def("createRenderPass", &Device::createRenderPass, py::arg("createInfo"))
+		.def("createGraphicsPipelines", &Device::createGraphicsPipelines, py::arg("cache"), py::arg("createInfos"))
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
 
@@ -102,18 +99,18 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<>())
 		.def_property_readonly("isValid", &PipelineLayout::isValid);
 
-	//py::class_<RenderPass>(m, "RenderPass")
-	//	.def(py::init<>())
-	//	.def_property_readonly("isValid", &RenderPass::isValid);
+	py::class_<RenderPass>(m, "RenderPass")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &RenderPass::isValid);
 
-	//py::class_<SubpassDescription>(m, "SubpassDescription")
-	//	.def(py::init<>())
-	//	.def_readwrite("colorAttachments", &SubpassDescription::colorAttachments)
-	//	.def_readwrite("depthStencilAttachment", &SubpassDescription::depthStencilAttachment)
-	//	.def_readwrite("inputAttachments", &SubpassDescription::inputAttachments)
-	//	.def_readwrite("pipelineBindPoint", &SubpassDescription::pipelineBindPoint)
-	//	.def_readwrite("preserveAttachments", &SubpassDescription::preserveAttachments)
-	//	.def_readwrite("resolveAttachments", &SubpassDescription::resolveAttachments);
+	py::class_<SubpassDescription>(m, "SubpassDescription")
+		.def(py::init<>())
+		.def_readwrite("colorAttachments", &SubpassDescription::colorAttachments)
+		.def_property("depthStencilAttachment", [](SubpassDescription &self) { return self.depthStencilAttachment; }, [](SubpassDescription &self, VkAttachmentReference* attachment) { self.depthStencilAttachment = attachment; })
+		.def_readwrite("inputAttachments", &SubpassDescription::inputAttachments)
+		.def_readwrite("pipelineBindPoint", &SubpassDescription::pipelineBindPoint)
+		.def_readwrite("preserveAttachments", &SubpassDescription::preserveAttachments)
+		.def_readwrite("resolveAttachments", &SubpassDescription::resolveAttachments);
 
 	// extension classes
 	py::class_<DebugUtilsMessengerEXT>(m, "DebugUtilsMessengerEXT")
@@ -587,6 +584,29 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<>())
 		.def_readwrite("depth", &VkClearDepthStencilValue::depth)
 		.def_readwrite("stencil", &VkClearDepthStencilValue::stencil);
+
+	py::class_<VkClearAttachment>(m, "ClearAttachment")
+		.def(py::init<>())
+		.def_readwrite("aspectMask", &VkClearAttachment::aspectMask)
+		.def_readwrite("colorAttachment", &VkClearAttachment::colorAttachment)
+		.def_readwrite("clearValue", &VkClearAttachment::clearValue);
+
+	py::class_<VkAttachmentDescription>(m, "AttachmentDescription")
+		.def(py::init<>())
+		.def_readwrite("flags", &VkAttachmentDescription::flags)
+		.def_readwrite("format", &VkAttachmentDescription::format)
+		.def_readwrite("samples", &VkAttachmentDescription::samples)
+		.def_readwrite("loadOp", &VkAttachmentDescription::loadOp)
+		.def_readwrite("storeOp", &VkAttachmentDescription::storeOp)
+		.def_readwrite("stencilLoadOp", &VkAttachmentDescription::stencilLoadOp)
+		.def_readwrite("stencilStoreOp", &VkAttachmentDescription::stencilStoreOp)
+		.def_readwrite("initialLayout", &VkAttachmentDescription::initialLayout)
+		.def_readwrite("finalLayout", &VkAttachmentDescription::finalLayout);
+
+	py::class_<VkAttachmentReference>(m, "AttachmentReference")
+		.def(py::init<>())
+		.def_readwrite("attachment", &VkAttachmentReference::attachment)
+		.def_readwrite("layout", &VkAttachmentReference::layout);
 
 	py::class_<VkSubpassDependency>(m, "SubpassDependency")
 		.def(py::init<>())
