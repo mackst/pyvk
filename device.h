@@ -69,11 +69,9 @@ public:
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 	ImageView* createImageView(ImageViewCreateInfo &creatInfo);
 	ShaderModule* createShaderModule(const std::string &filename);
-	PipelineLayout* createPipelineLayout(py::dict createInfo);
-	//PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
+	PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
 	RenderPass* createRenderPass(RenderPassCreateInfo &createInfo);
-	//std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> createInfos);
-	std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, py::list createInfos);
+	std::vector<Pipeline> createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos);
 
 
 	VkDevice vkHandle = VK_NULL_HANDLE;

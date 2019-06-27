@@ -206,95 +206,51 @@ ShaderModule * Device::createShaderModule(const std::string &filename)
 	return new ShaderModule(this, filename);
 }
 
-PipelineLayout * Device::createPipelineLayout(py::dict createInfo)
+PipelineLayout* Device::createPipelineLayout(PipelineLayoutCreateInfo & createInfo)
 {
-	return new PipelineLayout(vkHandle, createInfo);
+	//return new PipelineLayout(this, createInfo);
+	PipelineLayout *layout = new PipelineLayout();
+	VkPipelineLayoutCreateInfo _createInfo = {};
+	createInfo.getVKStruct(&_createInfo);
+	checkVKResult(table.vkCreatePipelineLayout(vkHandle, &_createInfo, nullptr, &layout->vkHandle));
+	layout->_device = this;
+	return layout;
 }
-
-//PipelineLayout * Device::createPipelineLayout(PipelineLayoutCreateInfo & createInfo)
-//{
-//	return new PipelineLayout(vkHandle, createInfo);
-//}
 
 RenderPass * Device::createRenderPass(RenderPassCreateInfo & createInfo)
 {
 	return new RenderPass(vkHandle, createInfo);
 }
 
-std::vector<Pipeline> Device::createGraphicsPipelines(PipelineCache & cache, py::list createInfos)
+
+std::vector<Pipeline> Device::createGraphicsPipelines(PipelineCache & cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos)
 {
 	std::vector<Pipeline> out;
 	std::vector<VkPipeline> _pipelines;
+	
 	uint32_t count = static_cast<uint32_t>(createInfos.size());
-	//std::vector<VkGraphicsPipelineCreateInfo> _createInfos(count);
-	//int i = 0;
-	//for (auto item : createInfos)
-	//{
-	//	auto _createInfo = dictToVkGraphicsPipelineCreateInfo(item.cast<py::dict>());
-	//	//_createInfos.emplace_back(_createInfo);
-	//	_createInfos[i] = _createInfo;
-	//	i++;
-	//}
+	std::vector<VkGraphicsPipelineCreateInfo> _createInfos;
+	for (auto item : createInfos)
+	{
+		VkGraphicsPipelineCreateInfo info = {};
+		item->getVKStruct(&info);
+		_createInfos.emplace_back(info);
+	}
+		
 
-	////uint32_t count = static_cast<uint32_t>(createInfos.size());
-	//py::print("resize VkPipeline list.");
-	//py::print(count);
 	_pipelines.resize(count);
-	//py::print("create VkPipeline");
-	//auto _createInfos = dictToVkGraphicsPipelineCreateInfo(createInfos);
-	//py::print(_createInfos.size());
-	//py::print(_createInfos[0].pVertexInputState->vertexAttributeDescriptionCount);
-	//py::print(_createInfos[0].pVertexInputState->vertexBindingDescriptionCount);
+	checkVKResult(table.vkCreateGraphicsPipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data()));
 
-	//checkVKResult(_vkCreateGraphicsPipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data()));
-	//
-	//py::print("VkPipeline created!!!!!!!!!!!");
-	//for (auto item : _pipelines) 
-	//{
-	//	Pipeline p;
-	//	p.vkHandle = item;
-	//	p._device = vkHandle;
-	//	p._vkDestroyPipeline = _vkDestroyPipeline;
-	//	out.emplace_back(p);
-	//}
+	for (auto item : _pipelines) 
+	{
+		Pipeline p;
+		p.vkHandle = item;
+		p._device = this;
+		out.emplace_back(p);
+	}
 
-	//return out;
+	return out;
 }
-
-//std::vector<Pipeline> Device::createGraphicsPipelines(PipelineCache & cache, std::vector<GraphicsPipelineCreateInfo*> createInfos)
-//{
-//	std::vector<Pipeline> out;
-//	std::vector<VkPipeline> _pipelines;
-//	
-//	uint32_t count = static_cast<uint32_t>(createInfos.size());
-//	//auto to_vktype = [](GraphicsPipelineCreateInfo* info) { return info->to_vktype(); };
-//	std::vector<VkGraphicsPipelineCreateInfo> _createInfos;
-//	//py::print("start transform GraphicsPipelineCreateInfo to VkGraphicsPipelineCreateInfo");
-//	//std::transform(createInfos.begin(), createInfos.end(), _createInfos.begin(), to_vktype);
-//	//py::print("done.");
-//	for (auto item : createInfos)
-//	{
-//		auto info = item->to_vktype();
-//		_createInfos.emplace_back(info);
-//	}
-//		
-//
-//	py::print((int)_createInfos[0].pViewportState->sType);
-//	_pipelines.resize(count);
-//	checkVKResult(_vkCreateGraphicsPipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data()));
-//
-//	//out.resize(_pipelines.size());
-//	for (auto item : _pipelines) 
-//	{
-//		Pipeline p;
-//		p.vkHandle = item;
-//		p._device = vkHandle;
-//		p._vkDestroyPipeline = _vkDestroyPipeline;
-//		out.emplace_back(p);
-//	}
-//
-//	return out;
-//}
 
 
 

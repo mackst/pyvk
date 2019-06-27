@@ -3,7 +3,6 @@
 #include "image.h"
 #include "shadermodule.h"
 #include "utils.h"
-#include "descriptors.h"
 
 ApplicationInfo::ApplicationInfo()
 {
@@ -409,6 +408,24 @@ void GraphicsPipelineCreateInfo::setStages(std::vector<PipelineShaderStageCreate
 		i->getVKStruct(&info);
 		_stages.emplace_back(info);
 	}
+}
+
+void GraphicsPipelineCreateInfo::setVertexInputState(PipelineVertexInputStateCreateInfo & info)
+{
+	vertexInputState = info;
+	vertexInputState.getVKStruct(&_vertexInputState);
+}
+
+void GraphicsPipelineCreateInfo::setViewportState(PipelineViewportStateCreateInfo & info)
+{
+	viewportState = info;
+	viewportState.getVKStruct(&_viewportState);
+}
+
+void GraphicsPipelineCreateInfo::setColorBlendState(PipelineColorBlendStateCreateInfo & info)
+{
+	colorBlendState = info;
+	colorBlendState.getVKStruct(&_colorBlendState);
 }
 
 void GraphicsPipelineCreateInfo::getVKStruct(VkGraphicsPipelineCreateInfo * info)

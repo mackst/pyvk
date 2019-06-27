@@ -9,6 +9,9 @@
 #include "vktypes.h"
 //#include "createInfo.h"
 
+// msbuild cmd
+// msbuild /p:Configuration=Release /p:Platform=x64 /m:6 pyvk.sln /p:PreferredToolArchitecture=x64
+
 
 PYBIND11_MODULE(_vk, m)
 {
@@ -55,7 +58,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("getSwapchainImagesKHR", &Device::getSwapchainImagesKHR, py::arg("swapchain"))
 		.def("createImageView", &Device::createImageView, py::arg("createInfo"))
 		.def("createShaderModule", &Device::createShaderModule, py::arg("filename"))
-	//	.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo").noconvert())
+		.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo"))
 	//	.def("createRenderPass", &Device::createRenderPass, py::arg("createInfo"))
 	//	.def("createGraphicsPipelines", &Device::createGraphicsPipelines, py::arg("cache"), py::arg("createInfos"))
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
@@ -95,9 +98,9 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("stage", &PipelineShaderStageCreateInfo::stage)
 		.def_readwrite("name", &PipelineShaderStageCreateInfo::name);
 
-	//py::class_<PipelineLayout>(m, "PipelineLayout")
-	//	.def(py::init<>())
-	//	.def_property_readonly("isValid", &PipelineLayout::isValid);
+	py::class_<PipelineLayout>(m, "PipelineLayout")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &PipelineLayout::isValid);
 
 	//py::class_<RenderPass>(m, "RenderPass")
 	//	.def(py::init<>())
@@ -469,6 +472,17 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("height", &VkViewport::height)
 		.def_readwrite("minDepth", &VkViewport::minDepth)
 		.def_readwrite("maxDepth", &VkViewport::maxDepth);
+
+	py::class_<VkRect2D>(m, "Rect2D")
+		.def(py::init<>())
+		.def_readwrite("offset", &VkRect2D::offset)
+		.def_readwrite("extent", &VkRect2D::extent);
+
+	py::class_<VkClearRect>(m, "ClearRect")
+		.def(py::init<>())
+		.def_readwrite("rect", &VkClearRect::rect)
+		.def_readwrite("baseArrayLayer", &VkClearRect::baseArrayLayer)
+		.def_readwrite("layerCount", &VkClearRect::layerCount);
 
 	py::class_<VkSurfaceCapabilitiesKHR>(m, "SurfaceCapabilitiesKHR")
 		.def(py::init<>())

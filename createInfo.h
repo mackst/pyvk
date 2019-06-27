@@ -6,6 +6,7 @@
 
 #include "volk.h"
 #include "pipeline.h"
+#include "descriptors.h"
 
 namespace py = pybind11;
 
@@ -14,7 +15,6 @@ class SurfaceKHR;
 class SwapchainKHR;
 class Image;
 class ShaderModule;
-class DescriptorSetLayout;
 
 
 #ifndef CREATEINFO_H

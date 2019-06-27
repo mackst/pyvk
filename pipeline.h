@@ -10,7 +10,11 @@
 
 namespace py = pybind11;
 
+
+class Device;
 class PipelineLayoutCreateInfo;
+
+
 
 #ifndef PIPELINE_H
 #define PIPELINE_H
@@ -21,23 +25,14 @@ class PipelineLayout
 {
 public:
 	PipelineLayout();
-	PipelineLayout(VkDevice device, py::dict createInfo);
-	PipelineLayout(VkDevice device, PipelineLayoutCreateInfo &createInfo);
-	//PipelineLayout(PipelineLayout &other);
+	//PipelineLayout(Device *device, PipelineLayoutCreateInfo &createInfo);
 	~PipelineLayout();
 
 	bool isValid();
 
 	VkPipelineLayout vkHandle = VK_NULL_HANDLE;
 
-protected:
-	void getFuncPointers();
-
-	PFN_vkCreatePipelineLayout _vkCreatePipelineLayout = nullptr;
-	PFN_vkDestroyPipelineLayout _vkDestroyPipelineLayout = nullptr;
-
-private:
-	VkDevice _device = VK_NULL_HANDLE;
+	Device *_device = nullptr;
 
 };
 
@@ -46,14 +41,12 @@ class Pipeline
 {
 public:
 	Pipeline();
-	//Pipeline(Pipeline &other);
 	~Pipeline();
 
 	bool isValid();
 
 	VkPipeline vkHandle = VK_NULL_HANDLE;
-	VkDevice _device = VK_NULL_HANDLE;
-	PFN_vkDestroyPipeline _vkDestroyPipeline = nullptr;
+	Device *_device = nullptr;
 };
 
 
