@@ -223,9 +223,9 @@ RenderPass * Device::createRenderPass(RenderPassCreateInfo & createInfo)
 }
 
 
-std::vector<Pipeline> Device::createGraphicsPipelines(PipelineCache & cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos)
+py::list Device::createGraphicsPipelines(PipelineCache & cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos)
 {
-	std::vector<Pipeline> out;
+	py::list out;
 	std::vector<VkPipeline> _pipelines;
 	
 	uint32_t count = static_cast<uint32_t>(createInfos.size());
@@ -235,20 +235,23 @@ std::vector<Pipeline> Device::createGraphicsPipelines(PipelineCache & cache, std
 		VkGraphicsPipelineCreateInfo info = {};
 		item->getVKStruct(&info);
 		_createInfos.emplace_back(info);
+		py::print("in createGraphicsPipelines. subpass:");
+		py::print(info.subpass);
 	}
 		
 
 	_pipelines.resize(count);
-	checkVKResult(table.vkCreateGraphicsPipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data()));
-
-	for (auto item : _pipelines) 
+	//checkVKResult(table.vkCreateGraphicsPipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data()));
+	auto result = table.vkCreateGraphicsPipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data());
+	py::print(result);
+	for (uint32_t i = 0; i < count; i++)
 	{
 		Pipeline p;
-		p.vkHandle = item;
+		p.vkHandle = _pipelines[i];
 		p._device = this;
-		out.emplace_back(p);
+		out.append(p);
 	}
-
+	py::print("doen with vkCreateGraphicsPipelines");
 	return out;
 }
 

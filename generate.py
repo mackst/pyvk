@@ -48,7 +48,7 @@ def defined(key):
     return 'defined(' + key + ')'
 
 
-def enumsBinding(enums):
+def enumsBinding(enums, extensions):
     code = '//' + '-' * 20 + ' enums binding ' + '-' * 180
     cppTemp = 'py::enum_<{}>(m, "{}", py::arithmetic())'
     for enum in enums:
@@ -78,7 +78,32 @@ def enumsBinding(enums):
                 mname = member.get('name')
                 code += '\n\t.value("{}", {}::{})'.format(mname, name, mname)
 
+            for ext in extensionEnums:
+                extends = ext.get('extends')
+                if extends:
+                    mname = ext.get('name')
+                    if extends == name:
+                        code += '\n\t.value("{}", {}::{})'.format(mname, name, mname)
+
             code += '\n\t.export_values();\n'
+
+    return code
+
+
+def extensionsBinding(extensions):
+    code = '//' + '-' * 20 + ' extensions constants binding ' + '-' * 180
+    ccodeTemp = 'm.attr("{}") = {}({});\n'
+    for ext in extensionEnums:
+        name = ext.get('name')
+        if name.endswith('VERSION'):
+            pydata = 'py::int_'
+        elif name.endswith('NAME'):
+            pydata = 'py::str'
+        else:
+            continue
+        code += ccodeTemp.format(name, pydata, name)
+
+        #code += '\n'
 
     return code
 
@@ -174,10 +199,12 @@ if __name__ == "__main__":
             unions[name] = type
 
     #enums = spec.findall('enums')
-    print(unions.keys())
+    extensionEnums = spec.findall('extensions/extension/require/enum')
+    #print(unions.keys())
     with open('py_binding.txt', 'w') as enumscpp:
         code = structsBinding(structs, vktypes)
-        code += enumsBinding(spec.findall('enums'))
+        code += enumsBinding(spec.findall('enums'), extensionEnums)
+        code += extensionsBinding(extensionEnums)
         enumscpp.write(code)
     #for enum in spec.findall('enums'):
     #    name = enum.get('name')

@@ -52,32 +52,32 @@ public:
 class DebugUtilsMessengerCreateInfoEXT
 {
 public:
-DebugUtilsMessengerCreateInfoEXT();
-DebugUtilsMessengerCreateInfoEXT(DebugUtilsMessengerCreateInfoEXT &info);
-~DebugUtilsMessengerCreateInfoEXT();
+	DebugUtilsMessengerCreateInfoEXT();
+	DebugUtilsMessengerCreateInfoEXT(DebugUtilsMessengerCreateInfoEXT &info);
+	~DebugUtilsMessengerCreateInfoEXT();
 
-py::function getUserCallback() { return userData.pycallback; }
-void setUserCallback(py::function func) { userData.pycallback = func; }
+	py::function getUserCallback() { return userData.pycallback; }
+	void setUserCallback(py::function func) { userData.pycallback = func; }
 
-py::dict getUserData() { return userData.data; }
-void setUserData(py::dict data) { userData.data = data; }
+	py::dict getUserData() { return userData.data; }
+	void setUserData(py::dict data) { userData.data = data; }
 
-void setMessageSeverity(VkDebugUtilsMessageSeverityFlagBitsEXT ms) { messageSeverity = ms; }
-void setMessageSeverity(uint32_t ms) { messageSeverity = (VkDebugUtilsMessageSeverityFlagBitsEXT)ms; }
-VkDebugUtilsMessageSeverityFlagBitsEXT getMessageSeverity() { return messageSeverity; }
+	void setMessageSeverity(VkDebugUtilsMessageSeverityFlagBitsEXT ms) { messageSeverity = ms; }
+	void setMessageSeverity(uint32_t ms) { messageSeverity = (VkDebugUtilsMessageSeverityFlagBitsEXT)ms; }
+	VkDebugUtilsMessageSeverityFlagBitsEXT getMessageSeverity() { return messageSeverity; }
 
-//void setMessageType(VkDebugUtilsMessageTypeFlagsEXT mt) { messageType = mt; }
-void setMessageType(uint32_t mt) { messageType = (VkDebugUtilsMessageTypeFlagsEXT)mt; }
-VkDebugUtilsMessageTypeFlagsEXT getMessageType() { return messageType; }
+	//void setMessageType(VkDebugUtilsMessageTypeFlagsEXT mt) { messageType = mt; }
+	void setMessageType(uint32_t mt) { messageType = (VkDebugUtilsMessageTypeFlagsEXT)mt; }
+	VkDebugUtilsMessageTypeFlagsEXT getMessageType() { return messageType; }
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 
-void getVKStruct(VkDebugUtilsMessengerCreateInfoEXT *info);
+	void getVKStruct(VkDebugUtilsMessengerCreateInfoEXT *info);
 
-VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity;
-VkDebugUtilsMessageTypeFlagsEXT messageType;
+	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity;
+	VkDebugUtilsMessageTypeFlagsEXT messageType;
 
-DebugUtilsMessengerUserData userData;
+	DebugUtilsMessengerUserData userData;
 };
 
 

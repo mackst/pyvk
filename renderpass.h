@@ -25,11 +25,11 @@ public:
 	void getVKStruct(VkSubpassDescription *info);
 
 	VkPipelineBindPoint pipelineBindPoint;
-	std::vector<VkAttachmentReference> inputAttachments;
-	std::vector<VkAttachmentReference> colorAttachments;
-	std::vector<VkAttachmentReference> resolveAttachments;
+	std::vector<VkAttachmentReference> inputAttachments = {};
+	std::vector<VkAttachmentReference> colorAttachments = {};
+	std::vector<VkAttachmentReference> resolveAttachments = {};
 	VkAttachmentReference* depthStencilAttachment = nullptr;
-	std::vector<uint32_t> preserveAttachments;
+	std::vector<uint32_t> preserveAttachments = {};
 };
 
 

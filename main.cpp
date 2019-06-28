@@ -99,9 +99,17 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<>())
 		.def_property_readonly("isValid", &PipelineLayout::isValid);
 
+	py::class_<Pipeline>(m, "Pipeline")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Pipeline::isValid);
+
 	py::class_<RenderPass>(m, "RenderPass")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &RenderPass::isValid);
+
+	py::class_<PipelineCache>(m, "PipelineCache")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &PipelineCache::isValid);
 
 	py::class_<SubpassDescription>(m, "SubpassDescription")
 		.def(py::init<>())
@@ -111,6 +119,13 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("pipelineBindPoint", &SubpassDescription::pipelineBindPoint)
 		.def_readwrite("preserveAttachments", &SubpassDescription::preserveAttachments)
 		.def_readwrite("resolveAttachments", &SubpassDescription::resolveAttachments);
+
+	py::class_<RenderPassCreateInfo>(m, "RenderPassCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](RenderPassCreateInfo &self) { return self.pNext; }, [](RenderPassCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("subpasses", &RenderPassCreateInfo::getSubpasses, &RenderPassCreateInfo::setSubpasses)
+		.def_readwrite("attachments", &RenderPassCreateInfo::attachments)
+		.def_readwrite("dependencies", &RenderPassCreateInfo::dependencies);
 
 	// extension classes
 	py::class_<DebugUtilsMessengerEXT>(m, "DebugUtilsMessengerEXT")
@@ -936,6 +951,12 @@ PYBIND11_MODULE(_vk, m)
 		.value("VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
 		.value("VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 		.value("VK_IMAGE_LAYOUT_PREINITIALIZED", VkImageLayout::VK_IMAGE_LAYOUT_PREINITIALIZED)
+		.value("VK_IMAGE_LAYOUT_PRESENT_SRC_KHR", VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+		.value("VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR", VkImageLayout::VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR)
+		.value("VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR)
+		.value("VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR", VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR)
+		.value("VK_IMAGE_LAYOUT_SHADING_RATE_OPTIMAL_NV", VkImageLayout::VK_IMAGE_LAYOUT_SHADING_RATE_OPTIMAL_NV)
+		.value("VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT", VkImageLayout::VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT)
 		.export_values();
 	py::enum_<VkAttachmentLoadOp>(m, "AttachmentLoadOp", py::arithmetic())
 		.value("VK_ATTACHMENT_LOAD_OP_LOAD", VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD)

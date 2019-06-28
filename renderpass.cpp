@@ -14,27 +14,13 @@ void SubpassDescription::getVKStruct(VkSubpassDescription *info)
 {
 	info->pipelineBindPoint = pipelineBindPoint;
 
-	uint32_t inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size());
-	if (inputAttachmentCount > 0)
-	{
-		info->inputAttachmentCount = inputAttachmentCount;
+	info->inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size());
+	if (info->inputAttachmentCount > 0)
 		info->pInputAttachments = inputAttachments.data();
-	}
-	else
-	{
-		info->inputAttachmentCount = 0;
-	}
 
-	uint32_t colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
-	if (colorAttachmentCount > 0)
-	{
-		info->colorAttachmentCount = colorAttachmentCount;
+	info->colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
+	if (info->colorAttachmentCount > 0)
 		info->pColorAttachments = colorAttachments.data();
-	}
-	else
-	{
-		info->colorAttachmentCount = 0;
-	}
 
 	if (resolveAttachments.size() > 0)
 		info->pResolveAttachments = resolveAttachments.data();
@@ -42,16 +28,9 @@ void SubpassDescription::getVKStruct(VkSubpassDescription *info)
 	if (depthStencilAttachment != nullptr)
 		info->pDepthStencilAttachment = depthStencilAttachment;
 
-	uint32_t preserveAttachmentCount = static_cast<uint32_t>(preserveAttachments.size());
-	if (preserveAttachmentCount > 0)
-	{
-		info->preserveAttachmentCount = preserveAttachmentCount;
+	info->preserveAttachmentCount = static_cast<uint32_t>(preserveAttachments.size());
+	if (info->preserveAttachmentCount > 0)
 		info->pPreserveAttachments = preserveAttachments.data();
-	}
-	else
-	{
-		info->preserveAttachmentCount = 0;
-	}
 }
 
 RenderPassCreateInfo::RenderPassCreateInfo()
@@ -79,38 +58,22 @@ void RenderPassCreateInfo::getVKStruct(VkRenderPassCreateInfo *info)
 	info->sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	info->pNext = pNext;
 
-	uint32_t attachmentCount = static_cast<uint32_t>(attachments.size());
-	if (attachmentCount > 0)
-	{
-		info->attachmentCount = attachmentCount;
+	info->attachmentCount = static_cast<uint32_t>(attachments.size());
+	if (info->attachmentCount > 0)
 		info->pAttachments = attachments.data();
-	}
-	else
-	{
-		info->attachmentCount = 0;
-	}
 
-	uint32_t subpassCount = static_cast<uint32_t>(_subpasses.size());
-	if (subpassCount > 0)
-	{
-		info->subpassCount = subpassCount;
+	info->subpassCount = static_cast<uint32_t>(_subpasses.size());
+	py::print("RenderPassCreateInfo subpassCount");
+	py::print(info->subpassCount);
+	if (info->subpassCount > 0)
 		info->pSubpasses = _subpasses.data();
-	}
-	else
-	{
-		info->subpassCount = 0;
-	}
 
-	uint32_t dependencyCount = static_cast<uint32_t>(dependencies.size());
-	if (dependencyCount > 0)
-	{
-		info->dependencyCount = dependencyCount;
+	py::print("in RenderPassCreateInfo. subpassCount:");
+	py::print(info->subpassCount);
+
+	info->dependencyCount = static_cast<uint32_t>(dependencies.size());
+	if (info->dependencyCount > 0)
 		info->pDependencies = dependencies.data();
-	}
-	else
-	{
-		info->dependencyCount = 0;
-	}
 }
 
 RenderPass::RenderPass()
