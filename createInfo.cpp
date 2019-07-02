@@ -451,11 +451,9 @@ void GraphicsPipelineCreateInfo::getVKStruct(VkGraphicsPipelineCreateInfo * info
 	if (basePipelineHandle != nullptr)
 	{
 		info->basePipelineHandle = basePipelineHandle->vkHandle;
-		py::print("basePipelineHandle not nullptr");
 	}
 	else
 	{
 		info->basePipelineHandle = VK_NULL_HANDLE;
-		py::print("basePipelineHandle is nullptr");
 	}
 }

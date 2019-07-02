@@ -71,8 +71,7 @@ public:
 	ShaderModule* createShaderModule(const std::string &filename);
 	PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
 	RenderPass* createRenderPass(RenderPassCreateInfo &createInfo);
-	py::list createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos);
-
+	std::vector<Pipeline*> createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 	VolkDeviceTable table;

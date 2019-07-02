@@ -26,8 +26,8 @@ ShaderModule::~ShaderModule()
 		_device->table.vkDestroyShaderModule(_device->vkHandle, vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
 		_device = VK_NULL_HANDLE;
+		py::print("destroy shader module.");
 	}
-	py::print("destroy shader module.");
 }
 
 bool ShaderModule::isValid()

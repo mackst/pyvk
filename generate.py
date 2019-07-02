@@ -49,7 +49,7 @@ def defined(key):
 
 
 def enumsBinding(enums, extensions):
-    code = '//' + '-' * 20 + ' enums binding ' + '-' * 180
+    code = '//' + '-' * 20 + ' enums binding ' + '-' * 180 + '\n'
     cppTemp = 'py::enum_<{}>(m, "{}", py::arithmetic())'
     for enum in enums:
         name = enum.get('name')
@@ -91,7 +91,7 @@ def enumsBinding(enums, extensions):
 
 
 def extensionsBinding(extensions):
-    code = '//' + '-' * 20 + ' extensions constants binding ' + '-' * 180
+    code = '//' + '-' * 20 + ' extensions constants binding ' + '-' * 180 + '\n'
     ccodeTemp = 'm.attr("{}") = {}({});\n'
     for ext in extensionEnums:
         name = ext.get('name')

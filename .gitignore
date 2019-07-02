@@ -4,6 +4,7 @@
 *.sln
 
 build.bat
+build*.bat
 py_binding.txt
 
 build/

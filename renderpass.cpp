@@ -63,13 +63,8 @@ void RenderPassCreateInfo::getVKStruct(VkRenderPassCreateInfo *info)
 		info->pAttachments = attachments.data();
 
 	info->subpassCount = static_cast<uint32_t>(_subpasses.size());
-	py::print("RenderPassCreateInfo subpassCount");
-	py::print(info->subpassCount);
 	if (info->subpassCount > 0)
 		info->pSubpasses = _subpasses.data();
-
-	py::print("in RenderPassCreateInfo. subpassCount:");
-	py::print(info->subpassCount);
 
 	info->dependencyCount = static_cast<uint32_t>(dependencies.size());
 	if (info->dependencyCount > 0)
