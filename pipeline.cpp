@@ -33,9 +33,7 @@ Pipeline::~Pipeline()
 {
 	if (isValid())
 	{
-		py::print("in Pipeline::~Pipeline()");
 		_device->table.vkDestroyPipeline(_device->vkHandle, vkHandle, nullptr);
-		py::print("vkDestroyPipeline called.");
 		vkHandle = VK_NULL_HANDLE;
 		_device = nullptr;
 	}
