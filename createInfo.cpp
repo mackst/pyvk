@@ -3,6 +3,7 @@
 #include "image.h"
 #include "shadermodule.h"
 #include "utils.h"
+#include "cmdBuffers.h"
 
 ApplicationInfo::ApplicationInfo()
 {
@@ -456,4 +457,49 @@ void GraphicsPipelineCreateInfo::getVKStruct(VkGraphicsPipelineCreateInfo * info
 	{
 		info->basePipelineHandle = VK_NULL_HANDLE;
 	}
+}
+
+ComputePipelineCreateInfo::ComputePipelineCreateInfo()
+{
+}
+
+ComputePipelineCreateInfo::~ComputePipelineCreateInfo()
+{
+	layout = nullptr;
+	basePipelineHandle = nullptr;
+}
+
+void ComputePipelineCreateInfo::setStage(PipelineShaderStageCreateInfo & info)
+{
+	stage = info;
+	stage.getVKStruct(&_stage);
+}
+
+void ComputePipelineCreateInfo::getVKStruct(VkComputePipelineCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	info->flags = flags;
+	info->stage = _stage;
+	info->layout = layout->vkHandle;
+	info->basePipelineHandle = basePipelineHandle->vkHandle;
+	info->basePipelineIndex = basePipelineIndex;
+}
+
+CommandBufferAllocateInfo::CommandBufferAllocateInfo()
+{
+}
+
+CommandBufferAllocateInfo::~CommandBufferAllocateInfo()
+{
+	pNext = nullptr;
+	commandPool = nullptr;
+}
+
+void CommandBufferAllocateInfo::getVKStruct(VkCommandBufferAllocateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	info->pNext = pNext;
+	info->commandBufferCount = commandBufferCount;
+	info->commandPool = commandPool->vkHandle;
+	info->level = level;
 }

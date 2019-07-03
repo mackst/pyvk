@@ -9,6 +9,7 @@ namespace py = pybind11;
 
 
 class Device;
+class ImageView;
 
 
 #ifndef RENDERPASS_H
@@ -65,6 +66,43 @@ public:
 	Device *_device = nullptr;
 
 };
+
+
+class FramebufferCreateInfo
+{
+public:
+	FramebufferCreateInfo();
+	~FramebufferCreateInfo();
+
+	void setAttachments(std::vector<ImageView*> &imageViews);
+	std::vector<ImageView*> getAttachments() { return attachments; }
+
+	void getVKStruct(VkFramebufferCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkFramebufferCreateFlags flags = 0;
+	RenderPass *renderPass = nullptr;
+	std::vector<ImageView*> attachments = {};
+	std::vector<VkImageView> _attachments = {};
+	uint32_t width = 0;
+	uint32_t height = 0;
+	uint32_t layers = 0;
+};
+
+
+class Framebuffer
+{
+public:
+	Framebuffer();
+	Framebuffer(Device *device, FramebufferCreateInfo &createInfo);
+	~Framebuffer();
+
+	bool isValid();
+
+	VkFramebuffer vkHandle = VK_NULL_HANDLE;
+	Device *_device = nullptr;
+};
+
 
 
 

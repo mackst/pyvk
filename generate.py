@@ -73,6 +73,7 @@ def enumsBinding(enums, extensions):
 
             code += '\n'
         else:
+            addedEnumNames = {}
             code += cppTemp.format(name, name[2:])
             for member in enum.iter('enum'):
                 mname = member.get('name')
@@ -82,8 +83,10 @@ def enumsBinding(enums, extensions):
                 extends = ext.get('extends')
                 if extends:
                     mname = ext.get('name')
+                    if mname in addedEnumNames: continue
                     if extends == name:
                         code += '\n\t.value("{}", {}::{})'.format(mname, name, mname)
+                    addedEnumNames[mname] = None
 
             code += '\n\t.export_values();\n'
 

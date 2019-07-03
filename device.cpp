@@ -251,6 +251,66 @@ std::vector<Pipeline*> Device::createGraphicsPipelines(PipelineCache & cache, st
 	return out;
 }
 
+std::vector<Pipeline*> Device::createComputePipelines(PipelineCache & cache, std::vector<ComputePipelineCreateInfo*>& infos)
+{
+	std::vector<Pipeline*> out;
+	std::vector<VkPipeline> _pipelines;
+
+	uint32_t count = static_cast<uint32_t>(infos.size());
+	std::vector<VkComputePipelineCreateInfo> _createInfos;
+	for (auto item : infos)
+	{
+		VkComputePipelineCreateInfo info = {};
+		item->getVKStruct(&info);
+		_createInfos.emplace_back(info);
+	}
+
+	_pipelines.resize(count);
+	checkVKResult(table.vkCreateComputePipelines(vkHandle, cache.vkHandle, count, _createInfos.data(), nullptr, _pipelines.data()));
+
+	for (uint32_t i = 0; i < count; i++)
+	{
+		Pipeline *p = new Pipeline();
+		p->vkHandle = _pipelines[i];
+		p->_device = this;
+		out.emplace_back(p);
+	}
+
+	return out;
+}
+
+Framebuffer * Device::createFramebuffer(FramebufferCreateInfo & createInfo)
+{
+	return new Framebuffer(this, createInfo);
+}
+
+CommandPool * Device::createCommandPool(VkCommandPoolCreateInfo & createInfo)
+{
+	return new CommandPool(this, createInfo);
+}
+
+std::vector<CommandBuffer*> Device::allocateCommandBuffers(CommandBufferAllocateInfo & createInfo)
+{
+	std::vector<CommandBuffer*> buffers;
+	std::vector<VkCommandBuffer> _cmdBuffers(createInfo.commandBufferCount);
+
+	VkCommandBufferAllocateInfo _createInfo = {};
+	createInfo.getVKStruct(&_createInfo);
+	checkVKResult(table.vkAllocateCommandBuffers(vkHandle, &_createInfo, _cmdBuffers.data()));
+
+	for (auto buffer : _cmdBuffers)
+	{
+		CommandBuffer *buf = new CommandBuffer();
+		buf->vkHandle = buffer;
+		buf->_cmdPool = createInfo.commandPool;
+		buf->_device = this;
+
+		buffers.emplace_back(buf);
+	}
+
+	return buffers;
+}
+
 
 
 DeviceQueue::DeviceQueue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex)

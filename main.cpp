@@ -4,7 +4,7 @@
 #include <pybind11/numpy.h>
 
 #include "instance.h"
-//#include "deviceQueue.h"
+#include "cmdBuffers.h"
 //#include "descriptors.h"
 #include "vktypes.h"
 //#include "createInfo.h"
@@ -58,6 +58,10 @@ PYBIND11_MODULE(_vk, m)
 		.def("createPipelineLayout", &Device::createPipelineLayout, py::arg("createInfo"))
 		.def("createRenderPass", &Device::createRenderPass, py::arg("createInfo"))
 		.def("createGraphicsPipelines", &Device::createGraphicsPipelines, py::arg("cache"), py::arg("createInfos"))
+		.def("createComputePipelines", &Device::createComputePipelines, py::arg("cache"), py::arg("createInfos"))
+		.def("createFramebuffer", &Device::createFramebuffer, py::arg("createInfo"))
+		.def("createCommandPool", &Device::createCommandPool, py::arg("createInfo"))
+		.def("allocateCommandBuffers", &Device::allocateCommandBuffers, py::arg("allocateInfo"))
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
 
@@ -107,9 +111,22 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<>())
 		.def_property_readonly("isValid", &RenderPass::isValid);
 
+	py::class_<Framebuffer>(m, "Framebuffer")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Framebuffer::isValid);
+
 	py::class_<PipelineCache>(m, "PipelineCache")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &PipelineCache::isValid);
+
+	py::class_<CommandPool>(m, "CommandPool")
+		.def(py::init<>())
+		.def("reset", &CommandPool::reset, py::arg("flags") = 0)
+		.def_property_readonly("isValid", &CommandPool::isValid);
+
+	py::class_<CommandBuffer>(m, "CommandBuffer")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &CommandBuffer::isValid);
 
 	py::class_<SubpassDescription>(m, "SubpassDescription")
 		.def(py::init<>())
@@ -126,6 +143,16 @@ PYBIND11_MODULE(_vk, m)
 		.def_property("subpasses", &RenderPassCreateInfo::getSubpasses, &RenderPassCreateInfo::setSubpasses)
 		.def_readwrite("attachments", &RenderPassCreateInfo::attachments)
 		.def_readwrite("dependencies", &RenderPassCreateInfo::dependencies);
+
+	py::class_<FramebufferCreateInfo>(m, "FramebufferCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](FramebufferCreateInfo &self) { return self.pNext; }, [](FramebufferCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("attachments", &FramebufferCreateInfo::getAttachments, &FramebufferCreateInfo::setAttachments)
+		.def_property("renderPass", [](FramebufferCreateInfo &self) { return self.renderPass; }, [](FramebufferCreateInfo &self, RenderPass *_renderPass) { self.renderPass = _renderPass; })
+		.def_readwrite("flags", &FramebufferCreateInfo::flags)
+		.def_readwrite("width", &FramebufferCreateInfo::width)
+		.def_readwrite("height", &FramebufferCreateInfo::height)
+		.def_readwrite("layers", &FramebufferCreateInfo::layers);
 
 	// extension classes
 	py::class_<DebugUtilsMessengerEXT>(m, "DebugUtilsMessengerEXT")
@@ -226,6 +253,15 @@ PYBIND11_MODULE(_vk, m)
 		.def_property("basePipelineHandle", [](GraphicsPipelineCreateInfo &self) { return self.basePipelineHandle; }, [](GraphicsPipelineCreateInfo &self, Pipeline* info) { self.basePipelineHandle = info; })
 		.def_readwrite("subpass", &GraphicsPipelineCreateInfo::subpass)
 		.def_readwrite("basePipelineIndex", &GraphicsPipelineCreateInfo::basePipelineIndex);
+
+	py::class_<ComputePipelineCreateInfo>(m, "ComputePipelineCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](ComputePipelineCreateInfo &self) { return self.pNext; }, [](ComputePipelineCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("basePipelineIndex", &ComputePipelineCreateInfo::basePipelineIndex)
+		.def_readwrite("flags", &ComputePipelineCreateInfo::flags)
+		.def_property("stage", &ComputePipelineCreateInfo::getStage, &ComputePipelineCreateInfo::setStage)
+		.def_property("basePipelineHandle", [](ComputePipelineCreateInfo &self) { return self.basePipelineHandle; }, [](ComputePipelineCreateInfo &self, Pipeline* info) { self.basePipelineHandle = info; })
+		.def_property("layout", [](ComputePipelineCreateInfo &self) { return self.layout; }, [](ComputePipelineCreateInfo &self, PipelineLayout* info) { self.layout = info; });
 
 	py::class_<VkPhysicalDeviceProperties>(m, "PhysicalDeviceProperties")
 		.def(py::init<>())
@@ -594,6 +630,20 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("stageFlags", &VkPushConstantRange::stageFlags)
 		.def_readwrite("offset", &VkPushConstantRange::offset)
 		.def_readwrite("size", &VkPushConstantRange::size);
+
+	py::class_<VkCommandPoolCreateInfo>(m, "CommandPoolCreateInfo")
+		.def(py::init([]() { VkCommandPoolCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkCommandPoolCreateInfo::sType)
+		.def_property("pNext", [](VkCommandPoolCreateInfo &self) { return self.pNext; }, [](VkCommandPoolCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkCommandPoolCreateInfo::flags)
+		.def_readwrite("queueFamilyIndex", &VkCommandPoolCreateInfo::queueFamilyIndex);
+
+	py::class_<CommandBufferAllocateInfo>(m, "CommandBufferAllocateInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](CommandBufferAllocateInfo &self) { return self.pNext; }, [](CommandBufferAllocateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("commandPool", [](CommandBufferAllocateInfo &self) { return self.commandPool; }, [](CommandBufferAllocateInfo &self, CommandPool *pool) { self.commandPool = pool; })
+		.def_readwrite("level", &CommandBufferAllocateInfo::level)
+		.def_readwrite("commandBufferCount", &CommandBufferAllocateInfo::commandBufferCount);
 
 	py::class_<VkClearDepthStencilValue>(m, "ClearDepthStencilValue")
 		.def(py::init<>())
@@ -1565,12 +1615,6 @@ PYBIND11_MODULE(_vk, m)
 		.value("VK_STRUCTURE_TYPE_DEVICE_GROUP_BIND_SPARSE_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_DEVICE_GROUP_BIND_SPARSE_INFO_KHR)
 		.value("VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_DEVICE_GROUP_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_DEVICE_GROUP_INFO_KHR)
 		.value("VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO_KHR)
-		.value("VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_CAPABILITIES_KHR", VkStructureType::VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_CAPABILITIES_KHR)
-		.value("VK_STRUCTURE_TYPE_IMAGE_SWAPCHAIN_CREATE_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_IMAGE_SWAPCHAIN_CREATE_INFO_KHR)
-		.value("VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR)
-		.value("VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR)
-		.value("VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_INFO_KHR)
-		.value("VK_STRUCTURE_TYPE_DEVICE_GROUP_SWAPCHAIN_CREATE_INFO_KHR", VkStructureType::VK_STRUCTURE_TYPE_DEVICE_GROUP_SWAPCHAIN_CREATE_INFO_KHR)
 		.value("VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT", VkStructureType::VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT)
 		.value("VK_STRUCTURE_TYPE_VI_SURFACE_CREATE_INFO_NN", VkStructureType::VK_STRUCTURE_TYPE_VI_SURFACE_CREATE_INFO_NN)
 		.value("VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT", VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT)
@@ -1873,7 +1917,6 @@ PYBIND11_MODULE(_vk, m)
 		.value("VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET", VkDescriptorUpdateTemplateType::VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET)
 		.value("VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS_KHR", VkDescriptorUpdateTemplateType::VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS_KHR)
 		.value("VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET_KHR", VkDescriptorUpdateTemplateType::VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET_KHR)
-		.value("VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS_KHR", VkDescriptorUpdateTemplateType::VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS_KHR)
 		.export_values();
 	py::enum_<VkObjectType>(m, "ObjectType", py::arithmetic())
 		.value("VK_OBJECT_TYPE_UNKNOWN", VkObjectType::VK_OBJECT_TYPE_UNKNOWN)
@@ -2327,7 +2370,6 @@ PYBIND11_MODULE(_vk, m)
 		.value("VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_EXT", VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_EXT)
 		.value("VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR_EXT", VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR_EXT)
 		.value("VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR_EXT", VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR_EXT)
-		.value("VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_EXT", VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_EXT)
 		.value("VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_NV_EXT", VkDebugReportObjectTypeEXT::VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_NV_EXT)
 		.export_values();
 	py::enum_<VkRasterizationOrderAMD>(m, "RasterizationOrderAMD", py::arithmetic())
@@ -2511,7 +2553,6 @@ PYBIND11_MODULE(_vk, m)
 	py::enum_<VkSwapchainCreateFlagBitsKHR>(m, "SwapchainCreateFlagBitsKHR", py::arithmetic())
 		.value("VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR", VkSwapchainCreateFlagBitsKHR::VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR)
 		.value("VK_SWAPCHAIN_CREATE_PROTECTED_BIT_KHR", VkSwapchainCreateFlagBitsKHR::VK_SWAPCHAIN_CREATE_PROTECTED_BIT_KHR)
-		.value("VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR", VkSwapchainCreateFlagBitsKHR::VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR)
 		.value("VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR", VkSwapchainCreateFlagBitsKHR::VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR)
 		.export_values();
 	py::enum_<VkViewportCoordinateSwizzleNV>(m, "ViewportCoordinateSwizzleNV", py::arithmetic())

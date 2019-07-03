@@ -97,3 +97,67 @@ bool RenderPass::isValid()
 {
 	return vkHandle != VK_NULL_HANDLE;
 }
+
+Framebuffer::Framebuffer()
+{
+}
+
+Framebuffer::Framebuffer(Device * device, FramebufferCreateInfo & createInfo)
+	: _device(device)
+{
+	VkFramebufferCreateInfo _createInfo = {};
+	createInfo.getVKStruct(&_createInfo);
+	checkVKResult(_device->table.vkCreateFramebuffer(_device->vkHandle, &_createInfo, nullptr, &vkHandle));
+}
+
+Framebuffer::~Framebuffer()
+{
+	if (isValid())
+	{
+		//py::print("in Framebuffer::~Framebuffer()");
+		_device->table.vkDestroyFramebuffer(_device->vkHandle, vkHandle, nullptr);
+		vkHandle = VK_NULL_HANDLE;
+		_device = VK_NULL_HANDLE;
+		//py::print("Framebuffer destroyed.");
+	}
+}
+
+bool Framebuffer::isValid()
+{
+	return vkHandle != VK_NULL_HANDLE;
+}
+
+FramebufferCreateInfo::FramebufferCreateInfo()
+{
+}
+
+FramebufferCreateInfo::~FramebufferCreateInfo()
+{
+	renderPass = nullptr;
+	pNext = nullptr;
+}
+
+void FramebufferCreateInfo::setAttachments(std::vector<ImageView*>& imageViews)
+{
+	_attachments.empty();
+	attachments = imageViews;
+	for (auto iv : attachments)
+	{
+		_attachments.emplace_back(iv->vkHandle);
+	}
+}
+
+void FramebufferCreateInfo::getVKStruct(VkFramebufferCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->attachmentCount = static_cast<uint32_t>(_attachments.size());
+	if (info->attachmentCount > 0)
+		info->pAttachments = _attachments.data();
+	if (renderPass != nullptr)
+		info->renderPass = renderPass->vkHandle;
+	info->width = width;
+	info->height = height;
+	info->layers = layers;
+}

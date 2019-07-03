@@ -12,6 +12,7 @@
 #include "createInfo.h"
 #include "image.h"
 #include "pipeline.h"
+#include "cmdBuffers.h"
 
 
 namespace py = pybind11;
@@ -72,6 +73,10 @@ public:
 	PipelineLayout* createPipelineLayout(PipelineLayoutCreateInfo &createInfo);
 	RenderPass* createRenderPass(RenderPassCreateInfo &createInfo);
 	std::vector<Pipeline*> createGraphicsPipelines(PipelineCache &cache, std::vector<GraphicsPipelineCreateInfo*> &createInfos);
+	std::vector<Pipeline*> createComputePipelines(PipelineCache &cache, std::vector<ComputePipelineCreateInfo*> &infos);
+	Framebuffer* createFramebuffer(FramebufferCreateInfo &createInfo);
+	CommandPool* createCommandPool(VkCommandPoolCreateInfo &createInfo);
+	std::vector<CommandBuffer*> allocateCommandBuffers(CommandBufferAllocateInfo &createInfo);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 	VolkDeviceTable table;

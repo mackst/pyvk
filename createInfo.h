@@ -15,6 +15,7 @@ class SurfaceKHR;
 class SwapchainKHR;
 class Image;
 class ShaderModule;
+class CommandPool;
 
 
 #ifndef CREATEINFO_H
@@ -315,5 +316,44 @@ public:
 	Pipeline *basePipelineHandle = nullptr;
 	int32_t basePipelineIndex = 0;
 };
+
+
+class ComputePipelineCreateInfo
+{
+public:
+	ComputePipelineCreateInfo();
+	~ComputePipelineCreateInfo();
+
+	void setStage(PipelineShaderStageCreateInfo &info);
+	PipelineShaderStageCreateInfo getStage() { return stage; }
+
+	void getVKStruct(VkComputePipelineCreateInfo *info);
+
+	const void* pNext = nullptr;
+
+	VkPipelineCreateFlags flags;
+	PipelineShaderStageCreateInfo stage;
+	VkPipelineShaderStageCreateInfo _stage = {};
+	PipelineLayout *layout = nullptr;
+	Pipeline *basePipelineHandle = nullptr;
+	int32_t basePipelineIndex = 0;
+};
+
+
+class CommandBufferAllocateInfo
+{
+public:
+	CommandBufferAllocateInfo();
+	~CommandBufferAllocateInfo();
+
+	void getVKStruct(VkCommandBufferAllocateInfo *info);
+
+	const void* pNext = nullptr;
+	CommandPool *commandPool = nullptr;
+	VkCommandBufferLevel level;
+	uint32_t commandBufferCount = 0;
+};
+
+
 
 #endif // !CREATEINFO_H
