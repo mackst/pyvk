@@ -3,7 +3,7 @@
 #include "image.h"
 #include "shadermodule.h"
 #include "utils.h"
-#include "cmdBuffers.h"
+
 
 ApplicationInfo::ApplicationInfo()
 {
@@ -502,4 +502,162 @@ void CommandBufferAllocateInfo::getVKStruct(VkCommandBufferAllocateInfo * info)
 	info->commandBufferCount = commandBufferCount;
 	info->commandPool = commandPool->vkHandle;
 	info->level = level;
+}
+
+CommandBufferInheritanceInfo::CommandBufferInheritanceInfo()
+{
+}
+
+CommandBufferInheritanceInfo::~CommandBufferInheritanceInfo()
+{
+	renderPass = nullptr;
+	framebuffer = nullptr;
+	pNext = nullptr;
+}
+
+void CommandBufferInheritanceInfo::getVKStruct(VkCommandBufferInheritanceInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+	info->pNext = pNext;
+	if (renderPass != nullptr)
+		info->renderPass = renderPass->vkHandle;
+	else
+		info->renderPass = VK_NULL_HANDLE;
+	if (framebuffer != nullptr)
+		info->framebuffer = framebuffer->vkHandle;
+	else
+		info->framebuffer = VK_NULL_HANDLE;
+	info->subpass = subpass;
+	info->occlusionQueryEnable = occlusionQueryEnable;
+	info->queryFlags = queryFlags;
+	info->pipelineStatistics = pipelineStatistics;
+}
+
+CommandBufferBeginInfo::CommandBufferBeginInfo()
+{
+}
+
+CommandBufferBeginInfo::~CommandBufferBeginInfo()
+{
+	pNext = nullptr;
+	inheritanceInfo = nullptr;
+}
+
+void CommandBufferBeginInfo::setInheritanceInfo(CommandBufferInheritanceInfo *info)
+{
+	inheritanceInfo = info;
+	inheritanceInfo->getVKStruct(&_inheritanceInfo);
+}
+
+void CommandBufferBeginInfo::getVKStruct(VkCommandBufferBeginInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	if (inheritanceInfo != nullptr)
+		info->pInheritanceInfo = &_inheritanceInfo;
+	else
+		info->pInheritanceInfo = VK_NULL_HANDLE;
+}
+
+SubmitInfo::SubmitInfo()
+{
+}
+
+SubmitInfo::~SubmitInfo()
+{
+	pNext = nullptr;
+	waitSemaphores = {};
+	_waitSemaphores = {};
+	commandBuffers = {};
+	_commandBuffers = {};
+	signalSemaphores = {};
+	_signalSemaphores = {};
+}
+
+void SubmitInfo::setWaitSemaphores(std::vector<Semaphore*>& semaphores)
+{
+	_waitSemaphores.empty();
+	waitSemaphores = semaphores;
+	for (auto semaphore : waitSemaphores)
+	{
+		_waitSemaphores.emplace_back(semaphore->vkHandle);
+	}
+}
+
+void SubmitInfo::setWaitDstStageMask(std::vector<VkPipelineStageFlagBits>& flags)
+{
+	_waitDstStageMask.empty();
+	waitDstStageMask = flags;
+	for (auto i : waitDstStageMask)
+	{
+		_waitDstStageMask.emplace_back((VkPipelineStageFlags)i);
+	}
+}
+
+void SubmitInfo::setCommandBuffers(std::vector<CommandBuffer*>& buffers)
+{
+	_commandBuffers.empty();
+	commandBuffers = buffers;
+	for (auto buffer : commandBuffers)
+	{
+		_commandBuffers.emplace_back(buffer->vkHandle);
+	}
+}
+
+void SubmitInfo::setSignalSemaphores(std::vector<Semaphore*>& semaphores)
+{
+	_signalSemaphores.empty();
+	signalSemaphores = semaphores;
+	for (auto semaphore : signalSemaphores)
+	{
+		_signalSemaphores.emplace_back(semaphore->vkHandle);
+	}
+}
+
+void SubmitInfo::getVKStruct(VkSubmitInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info->pNext = pNext;
+	info->pWaitDstStageMask = _waitDstStageMask.data();
+	info->waitSemaphoreCount = static_cast<uint32_t>(_waitSemaphores.size());
+	if (info->waitSemaphoreCount > 0)
+		info->pWaitSemaphores = _waitSemaphores.data();
+	info->commandBufferCount = static_cast<uint32_t>(_commandBuffers.size());
+	if (info->commandBufferCount > 0)
+		info->pCommandBuffers = _commandBuffers.data();
+	info->signalSemaphoreCount = static_cast<uint32_t>(_signalSemaphores.size());
+	if (info->signalSemaphoreCount > 0)
+		info->pSignalSemaphores = _signalSemaphores.data();
+}
+
+RenderPassBeginInfo::RenderPassBeginInfo()
+{
+}
+
+RenderPassBeginInfo::~RenderPassBeginInfo()
+{
+	pNext = nullptr;
+	renderPass = nullptr;
+	framebuffer = nullptr;
+}
+
+void RenderPassBeginInfo::getVKStruct(VkRenderPassBeginInfo *info)
+{
+	info->sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	info->pNext = pNext;
+	info->renderArea = renderArea;
+	info->clearValueCount = static_cast<uint32_t>(clearValues.size());
+	if (info->clearValueCount > 0)
+		info->pClearValues = clearValues.data();
+	if (renderPass != nullptr)
+		info->renderPass = renderPass->vkHandle;
+	else
+		info->renderPass = VK_NULL_HANDLE;
+	if (framebuffer != nullptr)
+		info->framebuffer = framebuffer->vkHandle;
+	else
+	{
+		info->framebuffer = VK_NULL_HANDLE;
+	}
 }

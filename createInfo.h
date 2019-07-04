@@ -7,6 +7,8 @@
 #include "volk.h"
 #include "pipeline.h"
 #include "descriptors.h"
+#include "scc.h"
+#include "cmdBuffers.h"
 
 namespace py = pybind11;
 
@@ -15,7 +17,6 @@ class SurfaceKHR;
 class SwapchainKHR;
 class Image;
 class ShaderModule;
-class CommandPool;
 
 
 #ifndef CREATEINFO_H
@@ -352,6 +353,103 @@ public:
 	CommandPool *commandPool = nullptr;
 	VkCommandBufferLevel level;
 	uint32_t commandBufferCount = 0;
+};
+
+
+class CommandBufferInheritanceInfo
+{
+public:
+	CommandBufferInheritanceInfo();
+	~CommandBufferInheritanceInfo();
+
+	void setRenderPass(RenderPass *pass) { renderPass = pass; }
+	RenderPass* getRenderPass() { return renderPass; }
+	void setFramebuffer(Framebuffer *buffer) { framebuffer = buffer; }
+	Framebuffer* getFramebuffer() { return framebuffer; }
+
+	void getVKStruct(VkCommandBufferInheritanceInfo *info);
+
+	const void* pNext = nullptr;
+	RenderPass *renderPass = nullptr;
+	uint32_t subpass;
+	Framebuffer *framebuffer = nullptr;
+	VkBool32 occlusionQueryEnable;
+	VkQueryControlFlags queryFlags;
+	VkQueryPipelineStatisticFlags pipelineStatistics;
+};
+
+
+
+class CommandBufferBeginInfo
+{
+public:
+	CommandBufferBeginInfo();
+	~CommandBufferBeginInfo();
+
+	void setInheritanceInfo(CommandBufferInheritanceInfo *info);
+	CommandBufferInheritanceInfo* getInheritanceInfo() { return inheritanceInfo; }
+
+	void getVKStruct(VkCommandBufferBeginInfo *info);
+
+	const void* pNext = nullptr;
+	VkCommandBufferUsageFlagBits flags;
+	CommandBufferInheritanceInfo *inheritanceInfo = nullptr;
+	VkCommandBufferInheritanceInfo _inheritanceInfo = {};
+};
+
+
+class SubmitInfo
+{
+public:
+	SubmitInfo();
+	~SubmitInfo();
+
+	void setWaitSemaphores(std::vector<Semaphore*> &semaphores);
+	std::vector<Semaphore*> getWaitSemaphores() { return waitSemaphores; }
+	void setWaitDstStageMask(std::vector<VkPipelineStageFlagBits> &flags);
+	std::vector<VkPipelineStageFlagBits> getWaitDstStageMask() { return waitDstStageMask; }
+	void setCommandBuffers(std::vector<CommandBuffer*> &buffers);
+	std::vector<CommandBuffer*> getCommandBuffers() { return commandBuffers; }
+	void setSignalSemaphores(std::vector<Semaphore*> &semaphores);
+	std::vector<Semaphore*> getSignalSemaphores() { return signalSemaphores; }
+
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkSubmitInfo *info);
+
+	const void* pNext = nullptr;
+	std::vector<Semaphore*> waitSemaphores = {};
+	std::vector<VkSemaphore> _waitSemaphores = {};
+	std::vector<VkPipelineStageFlagBits> waitDstStageMask = {};
+	std::vector<VkPipelineStageFlags> _waitDstStageMask = {};
+	std::vector<CommandBuffer*> commandBuffers = {};
+	std::vector<VkCommandBuffer> _commandBuffers = {};
+	std::vector<Semaphore*> signalSemaphores = {};
+	std::vector<VkSemaphore> _signalSemaphores = {};
+};
+
+
+class RenderPassBeginInfo
+{
+public:
+	RenderPassBeginInfo();
+	~RenderPassBeginInfo();
+
+	void setRenderPass(RenderPass *_renderPass) { renderPass = _renderPass; }
+	RenderPass* getRenderPass() { return renderPass; }
+	void setFramebuffer(Framebuffer *_framebuffer) { framebuffer = _framebuffer; }
+	Framebuffer* getFramebuffer() { return framebuffer; }
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkRenderPassBeginInfo *info);
+
+	const void* pNext = nullptr;
+	RenderPass *renderPass = nullptr;
+	Framebuffer *framebuffer = nullptr;
+	VkRect2D renderArea;
+	std::vector<VkClearValue> clearValues = {};
 };
 
 

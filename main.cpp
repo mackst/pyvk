@@ -126,7 +126,22 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<CommandBuffer>(m, "CommandBuffer")
 		.def(py::init<>())
+		.def("begin", &CommandBuffer::begin, py::arg("info"))
+		.def("end", &CommandBuffer::end)
+		.def("beginRenderPass", &CommandBuffer::beginRenderPass, py::arg("renderPassBegin"), py::arg("contents"))
+		.def("endRenderPass", &CommandBuffer::endRenderPass)
+		.def("executeCommands", &CommandBuffer::executeCommands, py::arg("cmdBuffers"))
+		.def("bindPipeline", &CommandBuffer::bindPipeline, py::arg("pipelineBindPoint"), py::arg("pipeline"))
+		.def("draw", &CommandBuffer::draw, py::arg("vertexCount"), py::arg("instanceCount"), py::arg("firstVertex"), py::arg("firstInstance"))
 		.def_property_readonly("isValid", &CommandBuffer::isValid);
+
+	py::class_<Semaphore>(m, "Semaphore")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Semaphore::isValid);
+
+	py::class_<Fence>(m, "Fence")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Fence::isValid);
 
 	py::class_<SubpassDescription>(m, "SubpassDescription")
 		.def(py::init<>())
@@ -645,6 +660,30 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("level", &CommandBufferAllocateInfo::level)
 		.def_readwrite("commandBufferCount", &CommandBufferAllocateInfo::commandBufferCount);
 
+	py::class_<CommandBufferInheritanceInfo>(m, "CommandBufferInheritanceInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](CommandBufferInheritanceInfo &self) { return self.pNext; }, [](CommandBufferInheritanceInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_property("renderPass", &CommandBufferInheritanceInfo::getRenderPass, &CommandBufferInheritanceInfo::setRenderPass)
+		.def_readwrite("subpass", &CommandBufferInheritanceInfo::subpass)
+		.def_property("framebuffer", &CommandBufferInheritanceInfo::getFramebuffer, &CommandBufferInheritanceInfo::setFramebuffer)
+		.def_readwrite("occlusionQueryEnable", &CommandBufferInheritanceInfo::occlusionQueryEnable)
+		.def_readwrite("queryFlags", &CommandBufferInheritanceInfo::queryFlags)
+		.def_readwrite("pipelineStatistics", &CommandBufferInheritanceInfo::pipelineStatistics);
+
+	py::class_<CommandBufferBeginInfo>(m, "CommandBufferBeginInfo")
+		.def(py::init<>())
+		.def_property("pNext", [](CommandBufferBeginInfo &self) { return self.pNext; }, [](CommandBufferBeginInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &CommandBufferBeginInfo::flags)
+		.def_property("pInheritanceInfo", &CommandBufferBeginInfo::getInheritanceInfo, &CommandBufferBeginInfo::setInheritanceInfo);
+
+	py::class_<RenderPassBeginInfo>(m, "RenderPassBeginInfo")
+		.def(py::init<>())
+		.def_property("pNext", &RenderPassBeginInfo::getNext, &RenderPassBeginInfo::setNext)
+		.def_readwrite("renderArea", &RenderPassBeginInfo::renderArea)
+		.def_readwrite("clearValues", &RenderPassBeginInfo::clearValues)
+		.def_property("renderPass", &RenderPassBeginInfo::getRenderPass, &RenderPassBeginInfo::setRenderPass)
+		.def_property("framebuffer", &RenderPassBeginInfo::getFramebuffer, &RenderPassBeginInfo::setFramebuffer);
+
 	py::class_<VkClearDepthStencilValue>(m, "ClearDepthStencilValue")
 		.def(py::init<>())
 		.def_readwrite("depth", &VkClearDepthStencilValue::depth)
@@ -878,6 +917,14 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("x", &VkDispatchIndirectCommand::x)
 		.def_readwrite("y", &VkDispatchIndirectCommand::y)
 		.def_readwrite("z", &VkDispatchIndirectCommand::z);
+
+	py::class_<SubmitInfo>(m, "SubmitInfo")
+		.def(py::init<>())
+		.def_property("pNext", &SubmitInfo::getNext, &SubmitInfo::setNext)
+		.def_property("waitSemaphores", &SubmitInfo::getWaitSemaphores, &SubmitInfo::setWaitSemaphores)
+		.def_property("waitDstStageMask", &SubmitInfo::getWaitDstStageMask, &SubmitInfo::setWaitDstStageMask)
+		.def_property("commandBuffers", &SubmitInfo::getCommandBuffers, &SubmitInfo::setCommandBuffers)
+		.def_property("signalSemaphores", &SubmitInfo::getSignalSemaphores, &SubmitInfo::setSignalSemaphores);
 
 	py::class_<VkConformanceVersionKHR>(m, "ConformanceVersionKHR")
 		.def(py::init<>())

@@ -10,6 +10,12 @@ namespace py = pybind11;
 
 
 class Device;
+class DeviceQueue;
+class CommandBufferBeginInfo;
+class SubmitInfo;
+class RenderPassBeginInfo;
+class Fence;
+class Pipeline;
 
 
 #ifndef CMDBUFFERS_H
@@ -39,10 +45,18 @@ public:
 	CommandBuffer();
 	~CommandBuffer();
 
+	bool begin(CommandBufferBeginInfo &info);
+	bool end();
+
+	CommandBuffer beginRenderPass(RenderPassBeginInfo &renderPassBegin, VkSubpassContents contents);
+	CommandBuffer endRenderPass();
+	CommandBuffer executeCommands(std::vector<CommandBuffer*> &cmdBuffers);
+	CommandBuffer bindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline *pipeline);
+	CommandBuffer draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+
 	bool isValid();
 
 	VkCommandBuffer vkHandle = VK_NULL_HANDLE;
-	//VkCommandPool pool = VK_NULL_HANDLE;
 	Device *_device = nullptr;
 	CommandPool *_cmdPool = nullptr;
 
