@@ -399,7 +399,32 @@ class HelloTriangleApplication(QtGui.QWindow):
 
         self.__commandBuffers = self.__device.allocateCommandBuffers(allocInfo)
 
-        for cmdBuffer in self.__commandBuffers:
+        for i in range(len(self.__commandBuffers)):
+            cmdBuffer = self.__commandBuffers[i]
+            print("commandBuffer is valid: {}".format(cmdBuffer.isValid))
+
+            beginInfo = _vk.CommandBufferBeginInfo()
+            beginInfo.flags = _vk.VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
+
+            cmdBuffer.begin(beginInfo)
+
+            renderPassInfo = _vk.RenderPassBeginInfo()
+            renderPassInfo.renderPass = self.__renderPass
+            renderPassInfo.framebuffer = self.__swapChainFramebuffers[i]
+            renderPassInfo.renderArea.offset = _vk.Offset2D(0, 0)
+            renderPassInfo.renderArea.extent = self.__swapChainExtent
+            renderPassInfo.clearValues = [_vk.ClearValue(_vk.ClearColorValue(0.0, 0.0, 0.0, 1.0)),]
+
+            cmdBuffer.beginRenderPass(renderPassInfo, _vk.VK_SUBPASS_CONTENTS_INLINE)
+
+            cmdBuffer.bindPipeline(_vk.VK_PIPELINE_BIND_POINT_GRAPHICS, self.__graphicsPipeline)
+
+            cmdBuffer.draw(3, 1, 0, 0)
+
+            cmdBuffer.endRenderPass()
+
+            cmdBuffer.end()
+            #i += 1
             print("commandBuffer is valid: {}".format(cmdBuffer.isValid))
 
     def __chooseSwapSurfaceFormat(self, formats):
