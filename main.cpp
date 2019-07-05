@@ -67,11 +67,15 @@ PYBIND11_MODULE(_vk, m)
 		.def("createFence", &Device::createFence, py::arg("createInfo"))
 		.def("waitForFences", &Device::waitForFences, py::arg("fences"), py::arg("waitAll"), py::arg("timeout"))
 		.def("resetFences", &Device::resetFences, py::arg("fences"))
+		.def("waitIdle", &Device::waitIdle)
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
 
 	py::class_<Queue>(m, "Queue")
 		.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
+		.def("submit", &Queue::submit, py::arg("infos"), py::arg("fence") = nullptr)
+		.def("presentKHR", &Queue::presentKHR, py::arg("info"))
+		.def("waitIdle", &Queue::waitIdle)
 		.def_property_readonly("isValid", &Queue::isValid);
 
 	py::class_<Image>(m, "Image")
@@ -191,6 +195,14 @@ PYBIND11_MODULE(_vk, m)
 		.def("getImagesKHR", &SwapchainKHR::getImagesKHR)
 		.def("acquireNextImageKHR", &SwapchainKHR::acquireNextImageKHR, py::arg("timeout"), py::arg("semaphore") = nullptr , py::arg("fence") = nullptr)
 		.def_property_readonly("isValid", &SwapchainKHR::isValid);
+
+	py::class_<PresentInfoKHR>(m, "PresentInfoKHR")
+		.def(py::init<>())
+		.def_property("pNext", &PresentInfoKHR::getNext, &PresentInfoKHR::setNext)
+		.def_property("waitSemaphores", &PresentInfoKHR::getWaitSemaphores, &PresentInfoKHR::setWaitSemaphores)
+		.def_property("swapchains", &PresentInfoKHR::getSwapchains, &PresentInfoKHR::setSwapchains)
+		.def_readwrite("imageIndices", &PresentInfoKHR::imageIndices)
+		.def_readwrite("results", &PresentInfoKHR::results);
 	//
 
 	py::class_<ApplicationInfo>(m, "ApplicationInfo")

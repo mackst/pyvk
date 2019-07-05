@@ -82,6 +82,8 @@ public:
 	bool waitForFences(std::vector<Fence*> &fences, VkBool32 waitAll, uint64_t timeout);
 	bool resetFences(std::vector<Fence*> &fences);
 
+	Device* waitIdle();
+
 	VkDevice vkHandle = VK_NULL_HANDLE;
 	VolkDeviceTable table;
 
@@ -96,6 +98,8 @@ public:
 	~Queue();
 
 	Queue* submit(std::vector<SubmitInfo*> &infos, Fence *fence = nullptr);
+	Queue* presentKHR(PresentInfoKHR &info);
+	Queue* waitIdle();
 
 	bool isValid();
 

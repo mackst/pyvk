@@ -4,7 +4,6 @@
 #include "image.h"
 
 
-
 DebugUtilsMessengerEXT::DebugUtilsMessengerEXT()
 {
 }

@@ -351,6 +351,12 @@ bool Device::resetFences(std::vector<Fence*>& fences)
 	return result == VK_SUCCESS;
 }
 
+Device * Device::waitIdle()
+{
+	checkVKResult(table.vkDeviceWaitIdle(vkHandle));
+	return this;
+}
+
 
 
 Queue::Queue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex)
@@ -379,6 +385,20 @@ Queue * Queue::submit(std::vector<SubmitInfo*>& infos, Fence * fence)
 	if (fence != nullptr)
 		_fence = fence->vkHandle;
 	checkVKResult(_device->table.vkQueueSubmit(vkHandle, count, submitInfo.data(), _fence));
+	return this;
+}
+
+Queue * Queue::presentKHR(PresentInfoKHR & info)
+{
+	VkPresentInfoKHR presentInfo = {};
+	info.getVKStruct(&presentInfo);
+	checkVKResult(_device->table.vkQueuePresentKHR(vkHandle, &presentInfo));
+	return this;
+}
+
+Queue * Queue::waitIdle()
+{
+	checkVKResult(_device->table.vkQueueWaitIdle(vkHandle));
 	return this;
 }
 

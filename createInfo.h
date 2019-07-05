@@ -453,5 +453,32 @@ public:
 };
 
 
+class PresentInfoKHR
+{
+public:
+	PresentInfoKHR();
+	~PresentInfoKHR();
+
+	void setWaitSemaphores(std::vector<Semaphore*> semaphores);
+	std::vector<Semaphore*> getWaitSemaphores() { return waitSemaphores; }
+	void setSwapchains(std::vector<SwapchainKHR*> _chains);
+	std::vector<SwapchainKHR*> getSwapchains() { return swapchains; }
+
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkPresentInfoKHR *info);
+
+	const void* pNext = nullptr;
+	std::vector<Semaphore*> waitSemaphores = {};
+	std::vector<VkSemaphore> _waitSemaphores = {};
+	std::vector<SwapchainKHR*> swapchains = {};
+	std::vector<VkSwapchainKHR> _swapchains = {};
+	std::vector<uint32_t> imageIndices = {};
+	std::vector<VkResult> results = {};
+};
+
+
+
 
 #endif // !CREATEINFO_H

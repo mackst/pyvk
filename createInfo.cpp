@@ -661,3 +661,49 @@ void RenderPassBeginInfo::getVKStruct(VkRenderPassBeginInfo *info)
 		info->framebuffer = VK_NULL_HANDLE;
 	}
 }
+
+PresentInfoKHR::PresentInfoKHR()
+{
+}
+
+PresentInfoKHR::~PresentInfoKHR()
+{
+	pNext = nullptr;
+	waitSemaphores = {};
+	swapchains = {};
+}
+
+void PresentInfoKHR::setWaitSemaphores(std::vector<Semaphore*> semaphores)
+{
+	_waitSemaphores.empty();
+	waitSemaphores = semaphores;
+	for (auto semaphore : waitSemaphores)
+	{
+		_waitSemaphores.emplace_back(semaphore->vkHandle);
+	}
+}
+
+void PresentInfoKHR::setSwapchains(std::vector<SwapchainKHR*> _chains)
+{
+	_swapchains.empty();
+	swapchains = _chains;
+	for (auto swapchain : swapchains)
+	{
+		_swapchains.emplace_back(swapchain->vkHandle);
+	}
+}
+
+void PresentInfoKHR::getVKStruct(VkPresentInfoKHR * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	info->pNext = pNext;
+	info->pImageIndices = imageIndices.data();
+	info->waitSemaphoreCount = static_cast<uint32_t>(_waitSemaphores.size());
+	if (info->waitSemaphoreCount > 0)
+		info->pWaitSemaphores = _waitSemaphores.data();
+	info->swapchainCount = static_cast<uint32_t>(_swapchains.size());
+	if (info->swapchainCount > 0)
+		info->pSwapchains = _swapchains.data();
+	if (results.size() > 0)
+		info->pResults = results.data();
+}
