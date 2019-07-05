@@ -14,6 +14,7 @@ PYBIND11_MODULE(_vk, m)
 {
 	m.doc() = "vulkan for python.";
 
+	m.attr("UINT64_MAX") = std::numeric_limits<uint64_t>::max();
 	m.def("makeVersion", [](uint32_t major, uint32_t minor, uint32_t patch) { return VK_MAKE_VERSION(major, minor, patch); }, py::arg("major") = 1, py::arg("minor") = 0, py::arg("patch") = 0);
 
 	py::class_<Instance>(m, "Instance")
@@ -62,12 +63,16 @@ PYBIND11_MODULE(_vk, m)
 		.def("createFramebuffer", &Device::createFramebuffer, py::arg("createInfo"))
 		.def("createCommandPool", &Device::createCommandPool, py::arg("createInfo"))
 		.def("allocateCommandBuffers", &Device::allocateCommandBuffers, py::arg("allocateInfo"))
+		.def("createSemaphore", &Device::createSemaphore, py::arg("createInfo"))
+		.def("createFence", &Device::createFence, py::arg("createInfo"))
+		.def("waitForFences", &Device::waitForFences, py::arg("fences"), py::arg("waitAll"), py::arg("timeout"))
+		.def("resetFences", &Device::resetFences, py::arg("fences"))
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
 
-	py::class_<DeviceQueue>(m, "DeviceQueue")
+	py::class_<Queue>(m, "Queue")
 		.def(py::init<Device*, uint32_t, uint32_t>(), py::arg("device"), py::arg("queueFamilyIndex"), py::arg("queueIndex"))
-		.def_property_readonly("isValid", &DeviceQueue::isValid);
+		.def_property_readonly("isValid", &Queue::isValid);
 
 	py::class_<Image>(m, "Image")
 		.def(py::init<>())
@@ -141,6 +146,8 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<Fence>(m, "Fence")
 		.def(py::init<>())
+		.def("wait", &Fence::wait, py::arg("timeout"))
+		.def("reset", &Fence::reset)
 		.def_property_readonly("isValid", &Fence::isValid);
 
 	py::class_<SubpassDescription>(m, "SubpassDescription")
@@ -182,6 +189,7 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<SwapchainKHR>(m, "SwapchainKHR")
 		.def(py::init<Device*, SwapchainCreateInfoKHR&>())
 		.def("getImagesKHR", &SwapchainKHR::getImagesKHR)
+		.def("acquireNextImageKHR", &SwapchainKHR::acquireNextImageKHR, py::arg("timeout"), py::arg("semaphore") = nullptr , py::arg("fence") = nullptr)
 		.def_property_readonly("isValid", &SwapchainKHR::isValid);
 	//
 
@@ -722,6 +730,12 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("dstAccessMask", &VkSubpassDependency::dstAccessMask)
 		.def_readwrite("dependencyFlags", &VkSubpassDependency::dependencyFlags);
 
+	py::class_<VkFenceCreateInfo>(m, "FenceCreateInfo")
+		.def(py::init([]() { VkFenceCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkFenceCreateInfo::sType)
+		.def_property("pNext", [](VkFenceCreateInfo &self) { return self.pNext; }, [](VkFenceCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkFenceCreateInfo::flags);
+
 	py::class_<VkPhysicalDeviceFeatures>(m, "PhysicalDeviceFeatures")
 		.def(py::init<>())
 		.def_readwrite("robustBufferAccess", &VkPhysicalDeviceFeatures::robustBufferAccess)
@@ -896,6 +910,12 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("optimalBufferCopyOffsetAlignment", &VkPhysicalDeviceLimits::optimalBufferCopyOffsetAlignment)
 		.def_readwrite("optimalBufferCopyRowPitchAlignment", &VkPhysicalDeviceLimits::optimalBufferCopyRowPitchAlignment)
 		.def_readwrite("nonCoherentAtomSize", &VkPhysicalDeviceLimits::nonCoherentAtomSize);
+
+	py::class_<VkSemaphoreCreateInfo>(m, "SemaphoreCreateInfo")
+		.def(py::init([]() { VkSemaphoreCreateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO; return out; }))
+		.def_readwrite("sType", &VkSemaphoreCreateInfo::sType)
+		.def_property("pNext", [](VkSemaphoreCreateInfo &self) { return self.pNext; }, [](VkSemaphoreCreateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("flags", &VkSemaphoreCreateInfo::flags);
 
 	py::class_<VkDrawIndirectCommand>(m, "DrawIndirectCommand")
 		.def(py::init<>())

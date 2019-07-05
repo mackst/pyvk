@@ -72,6 +72,7 @@ public:
 	bool isValid();
 
 	py::list getImagesKHR();
+	uint32_t acquireNextImageKHR(uint64_t timeout, Semaphore *semaphore = nullptr, Fence *fence = nullptr);
 
 	VkSwapchainKHR vkHandle = VK_NULL_HANDLE;
 private:

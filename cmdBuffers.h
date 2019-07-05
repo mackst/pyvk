@@ -48,11 +48,11 @@ public:
 	bool begin(CommandBufferBeginInfo &info);
 	bool end();
 
-	CommandBuffer beginRenderPass(RenderPassBeginInfo &renderPassBegin, VkSubpassContents contents);
-	CommandBuffer endRenderPass();
-	CommandBuffer executeCommands(std::vector<CommandBuffer*> &cmdBuffers);
-	CommandBuffer bindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline *pipeline);
-	CommandBuffer draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+	CommandBuffer* beginRenderPass(RenderPassBeginInfo &renderPassBegin, VkSubpassContents contents);
+	CommandBuffer* endRenderPass();
+	CommandBuffer* executeCommands(std::vector<CommandBuffer*> &cmdBuffers);
+	CommandBuffer* bindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline *pipeline);
+	CommandBuffer* draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
 
 	bool isValid();
 
@@ -61,6 +61,7 @@ public:
 	CommandPool *_cmdPool = nullptr;
 
 };
+
 
 
 #endif // !CMDBUFFERS_H

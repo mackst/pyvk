@@ -17,11 +17,9 @@ CommandPool::~CommandPool()
 {
 	if (isValid())
 	{
-		py::print("in CommandPool::~CommandPool().");
 		_device->table.vkDestroyCommandPool(_device->vkHandle, vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
 		_device = nullptr;
-		py::print("commandPool destroyed.");
 	}
 }
 
@@ -48,18 +46,15 @@ CommandBuffer::~CommandBuffer()
 {
 	if (isValid())
 	{
-		py::print("in CommandBuffer::~CommandBuffer().");
 		_device->table.vkFreeCommandBuffers(_device->vkHandle, _cmdPool->vkHandle, 1, &vkHandle);
 		vkHandle = VK_NULL_HANDLE;
 		_cmdPool = nullptr;
 		_device = nullptr;
-		py::print("commandBuffer freed.");
 	}
 }
 
 bool CommandBuffer::begin(CommandBufferBeginInfo & info)
 {
-	py::print("in CommandBuffer::begin().");
 	VkCommandBufferBeginInfo beginInfo = {};
 	info.getVKStruct(&beginInfo);
 	auto result = _device->table.vkBeginCommandBuffer(vkHandle, &beginInfo);
@@ -69,29 +64,26 @@ bool CommandBuffer::begin(CommandBufferBeginInfo & info)
 
 bool CommandBuffer::end()
 {
-	py::print("in CommandBuffer::end().");
 	auto result = _device->table.vkEndCommandBuffer(vkHandle);
 	checkVKResult(result);
 	return result == VK_SUCCESS;
 }
 
-CommandBuffer CommandBuffer::beginRenderPass(RenderPassBeginInfo & renderPassBegin, VkSubpassContents contents)
+CommandBuffer* CommandBuffer::beginRenderPass(RenderPassBeginInfo & renderPassBegin, VkSubpassContents contents)
 {
-	py::print("in CommandBuffer::beginRenderPass().");
 	VkRenderPassBeginInfo info = {};
 	renderPassBegin.getVKStruct(&info);
 	_device->table.vkCmdBeginRenderPass(vkHandle, &info, contents);
-	return *this;
+	return this;
 }
 
-CommandBuffer CommandBuffer::endRenderPass()
+CommandBuffer* CommandBuffer::endRenderPass()
 {
-	py::print("in CommandBuffer::endRenderPass().");
 	_device->table.vkCmdEndRenderPass(vkHandle);
-	return *this;
+	return this;
 }
 
-CommandBuffer CommandBuffer::executeCommands(std::vector<CommandBuffer*>& cmdBuffers)
+CommandBuffer* CommandBuffer::executeCommands(std::vector<CommandBuffer*>& cmdBuffers)
 {
 	std::vector<VkCommandBuffer> cmds;
 	for (auto cmd : cmdBuffers)
@@ -99,21 +91,19 @@ CommandBuffer CommandBuffer::executeCommands(std::vector<CommandBuffer*>& cmdBuf
 		cmds.emplace_back(cmd->vkHandle);
 	}
 	_device->table.vkCmdExecuteCommands(vkHandle, static_cast<uint32_t>(cmds.size()), cmds.data());
-	return *this;
+	return this;
 }
 
-CommandBuffer CommandBuffer::bindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline * pipeline)
+CommandBuffer* CommandBuffer::bindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline * pipeline)
 {
-	py::print("in CommandBuffer::bindPipeline().");
 	_device->table.vkCmdBindPipeline(vkHandle, pipelineBindPoint, pipeline->vkHandle);
-	return *this;
+	return this;
 }
 
-CommandBuffer CommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+CommandBuffer* CommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
-	py::print("in CommandBuffer::draw().");
 	_device->table.vkCmdDraw(vkHandle, vertexCount, instanceCount, firstVertex, firstInstance);
-	return *this;
+	return this;
 }
 
 bool CommandBuffer::isValid()

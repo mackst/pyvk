@@ -181,9 +181,9 @@ bool Device::isValid()
 	return vkHandle != VK_NULL_HANDLE;
 }
 
-DeviceQueue * Device::getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex)
+Queue * Device::getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex)
 {
-	return new DeviceQueue(this, queueFamilyIndex, queueIndex);
+	return new Queue(this, queueFamilyIndex, queueIndex);
 }
 
 SwapchainKHR * Device::createSwapchainKHR(SwapchainCreateInfoKHR &createInfo)
@@ -311,19 +311,78 @@ std::vector<CommandBuffer*> Device::allocateCommandBuffers(CommandBufferAllocate
 	return buffers;
 }
 
-
-
-DeviceQueue::DeviceQueue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex)
+Semaphore * Device::createSemaphore(VkSemaphoreCreateInfo * createInfo)
 {
-	device->table.vkGetDeviceQueue(device->vkHandle, queueFamilyIndex, queueIndex, &vkHandle);
+	auto *semaphore = new Semaphore();
+	table.vkCreateSemaphore(vkHandle, createInfo, nullptr, &semaphore->vkHandle);
+	semaphore->_device = this;
+	return semaphore;
 }
 
-DeviceQueue::~DeviceQueue()
+Fence * Device::createFence(VkFenceCreateInfo * createInfo)
+{
+	auto *fence = new Fence();
+	table.vkCreateFence(vkHandle, createInfo, nullptr, &fence->vkHandle);
+	fence->_device = this;
+	return fence;
+}
+
+bool Device::waitForFences(std::vector<Fence*>& fences, VkBool32 waitAll, uint64_t timeout)
+{
+	std::vector<VkFence> _fences;
+	for (auto fence : fences)
+	{
+		_fences.emplace_back(fence->vkHandle);
+	}
+	auto result = table.vkWaitForFences(vkHandle, static_cast<uint32_t>(_fences.size()), _fences.data(), waitAll, timeout);
+	checkVKResult(result);
+	return result == VK_SUCCESS;
+}
+
+bool Device::resetFences(std::vector<Fence*>& fences)
+{
+	std::vector<VkFence> _fences;
+	for (auto fence : fences)
+	{
+		_fences.emplace_back(fence->vkHandle);
+	}
+	auto result = table.vkResetFences(vkHandle, static_cast<uint32_t>(_fences.size()), _fences.data());
+	checkVKResult(result);
+	return result == VK_SUCCESS;
+}
+
+
+
+Queue::Queue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex)
+	: _device(device)
+{
+	_device->table.vkGetDeviceQueue(_device->vkHandle, queueFamilyIndex, queueIndex, &vkHandle);
+}
+
+Queue::~Queue()
 {
 	vkHandle = VK_NULL_HANDLE;
+	_device = nullptr;
 }
 
-bool DeviceQueue::isValid()
+Queue * Queue::submit(std::vector<SubmitInfo*>& infos, Fence * fence)
+{
+	auto count = static_cast<uint32_t>(infos.size());
+	std::vector<VkSubmitInfo> submitInfo;
+	for (auto info : infos)
+	{
+		VkSubmitInfo _info = {};
+		info->getVKStruct(&_info);
+		submitInfo.emplace_back(_info);
+	}
+	VkFence _fence = VK_NULL_HANDLE;
+	if (fence != nullptr)
+		_fence = fence->vkHandle;
+	checkVKResult(_device->table.vkQueueSubmit(vkHandle, count, submitInfo.data(), _fence));
+	return this;
+}
+
+bool Queue::isValid()
 {
 	return vkHandle != VK_NULL_HANDLE;
 }

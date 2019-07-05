@@ -19,7 +19,7 @@ namespace py = pybind11;
 
 
 class SurfaceKHR;
-class DeviceQueue;
+class Queue;
 class SwapchainKHR;
 
 
@@ -65,7 +65,7 @@ public:
 	void destroy();
 
 	bool isValid();
-	DeviceQueue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
+	Queue* getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex);
 	SwapchainKHR* createSwapchainKHR(SwapchainCreateInfoKHR &createInfo);
 	py::list getSwapchainImagesKHR(SwapchainKHR &swapchain);
 	ImageView* createImageView(ImageViewCreateInfo &creatInfo);
@@ -77,6 +77,10 @@ public:
 	Framebuffer* createFramebuffer(FramebufferCreateInfo &createInfo);
 	CommandPool* createCommandPool(VkCommandPoolCreateInfo &createInfo);
 	std::vector<CommandBuffer*> allocateCommandBuffers(CommandBufferAllocateInfo &createInfo);
+	Semaphore* createSemaphore(VkSemaphoreCreateInfo *createInfo);
+	Fence* createFence(VkFenceCreateInfo *createInfo);
+	bool waitForFences(std::vector<Fence*> &fences, VkBool32 waitAll, uint64_t timeout);
+	bool resetFences(std::vector<Fence*> &fences);
 
 	VkDevice vkHandle = VK_NULL_HANDLE;
 	VolkDeviceTable table;
@@ -85,16 +89,19 @@ public:
 };
 
 
-class DeviceQueue
+class Queue
 {
 public:
-	DeviceQueue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex);
-	~DeviceQueue();
+	Queue(Device *device, uint32_t queueFamilyIndex, uint32_t queueIndex);
+	~Queue();
+
+	Queue* submit(std::vector<SubmitInfo*> &infos, Fence *fence = nullptr);
 
 	bool isValid();
 
 
 	VkQueue vkHandle = VK_NULL_HANDLE;
+	Device *_device = nullptr;
 };
 
 

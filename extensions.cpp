@@ -154,3 +154,16 @@ py::list SwapchainKHR::getImagesKHR()
 
 	return images;
 }
+
+uint32_t SwapchainKHR::acquireNextImageKHR(uint64_t timeout, Semaphore * semaphore, Fence * fence)
+{
+	uint32_t imageIndex;
+	VkSemaphore _semaphore = VK_NULL_HANDLE;
+	if (semaphore != nullptr)
+		_semaphore = semaphore->vkHandle;
+	VkFence _fence = VK_NULL_HANDLE;
+	if (fence != nullptr)
+		_fence = fence->vkHandle;
+	checkVKResult(_device->table.vkAcquireNextImageKHR(_device->vkHandle, vkHandle, timeout, _semaphore, _fence, &imageIndex));
+	return imageIndex;
+}

@@ -37,6 +37,9 @@ public:
 	Fence();
 	~Fence();
 
+	bool wait(uint64_t timeout);
+	bool reset();
+
 	bool isValid();
 
 	VkFence vkHandle = VK_NULL_HANDLE;
