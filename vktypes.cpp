@@ -100,3 +100,33 @@ std::string viewportToString(VkViewport & viewport)
 		", maxDepth=" + std::to_string(viewport.maxDepth) + " )>";
 	return a;
 }
+
+std::vector<VkMemoryType> getPhysicalDeviceMemoryTypes(VkPhysicalDeviceMemoryProperties & properties)
+{
+	std::vector<VkMemoryType> out;
+	for (auto i = 0; i < properties.memoryTypeCount; i++)
+		out.emplace_back(properties.memoryTypes[i]);
+	return out;
+}
+
+std::vector<VkMemoryHeap> getPhysicalDeviceMemoryHeaps(VkPhysicalDeviceMemoryProperties & properties)
+{
+	std::vector<VkMemoryHeap> out;
+	for (auto i = 0; i < properties.memoryHeapCount; i++)
+		out.emplace_back(properties.memoryHeaps[i]);
+	return out;
+}
+
+void setPhysicalDeviceMemoryTypes(VkPhysicalDeviceMemoryProperties & properties, std::vector<VkMemoryType>& mts)
+{
+	properties.memoryTypeCount = static_cast<uint32_t>(mts.size());
+	for (auto i = 0; i < properties.memoryTypeCount; i++)
+		properties.memoryTypes[i] = mts[i];
+}
+
+void setPhysicalDeviceMemoryHeaps(VkPhysicalDeviceMemoryProperties & properties, std::vector<VkMemoryHeap>& mhs)
+{
+	properties.memoryHeapCount = static_cast<uint32_t>(mhs.size());
+	for (auto i = 0; i < properties.memoryHeapCount; i++)
+		properties.memoryHeaps[i] = mhs[i];
+}

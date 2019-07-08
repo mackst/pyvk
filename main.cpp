@@ -46,6 +46,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("__repr__", &PhysicalDevice::toString)
 		.def_property_readonly("isValid", &PhysicalDevice::isValid)
 		.def_property_readonly("properties", &PhysicalDevice::getProperties)
+		.def_property_readonly("memoryProperties", &PhysicalDevice::getMemoryProperties)
 		.def_property_readonly("queueFamilyProperties", &PhysicalDevice::getQueueFamilyProperties)
 		.def("createDevice", [](PhysicalDevice &self, DeviceCreateInfo &info) { return new Device(self, info); });// , py::return_value_policy::take_ownership);
 
@@ -68,6 +69,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("waitForFences", &Device::waitForFences, py::arg("fences"), py::arg("waitAll"), py::arg("timeout"))
 		.def("resetFences", &Device::resetFences, py::arg("fences"))
 		.def("allocateMemory", &Device::allocateMemory, py::arg("info"))
+		.def("createBuffer", &Device::createBuffer, py::arg("createInfo"))
 		.def("waitIdle", &Device::waitIdle)
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
@@ -81,6 +83,8 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<DeviceMemory>(m, "DeviceMemory")
 		.def(py::init<>())
+		.def("map", &DeviceMemory::map, py::arg("offset"), py::arg("size"), py::arg("flags"))
+		.def("unmap", &DeviceMemory::unmap)
 		.def_property_readonly("isValid", &DeviceMemory::isValid);
 
 	py::class_<Image>(m, "Image")
@@ -614,8 +618,8 @@ PYBIND11_MODULE(_vk, m)
 
 	py::class_<VkPhysicalDeviceMemoryProperties>(m, "PhysicalDeviceMemoryProperties")
 		.def(py::init<>())
-		.def_property("memoryTypes", [](VkPhysicalDeviceMemoryProperties &self) { std::vector<VkMemoryType> mt; for (auto i = 0; i < self.memoryTypeCount; i++) mt.emplace_back(self.memoryTypes[i]); return mt; }, [](VkPhysicalDeviceMemoryProperties &self, std::vector<VkMemoryType> &types) { self.memoryTypeCount = static_cast<uint32_t>(types.size()); for (auto i = 0; i < self.memoryTypeCount; i++) self.memoryTypes[i] = types[i]; })
-		.def_property("memoryHeaps", [](VkPhysicalDeviceMemoryProperties &self) { std::vector<VkMemoryHeap> mh; for (auto i = 0; i < self.memoryHeapCount; i++) mh.emplace_back(self.memoryTypes[i]); return mh; }, [](VkPhysicalDeviceMemoryProperties &self, std::vector<VkMemoryHeap> &heaps) { self.memoryTypeCount = static_cast<uint32_t>(heaps.size()); for (auto i = 0; i < self.memoryHeapCount; i++) self.memoryHeaps[i] = heaps[i]; });
+		.def_property("memoryTypes", &getPhysicalDeviceMemoryTypes, &setPhysicalDeviceMemoryTypes)
+		.def_property("memoryHeaps", &getPhysicalDeviceMemoryHeaps, &setPhysicalDeviceMemoryHeaps);
 
 	py::class_<VkMemoryAllocateInfo>(m, "MemoryAllocateInfo")
 		.def(py::init([]() { VkMemoryAllocateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO; return out; }))

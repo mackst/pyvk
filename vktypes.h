@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "volk.h"
 
@@ -23,4 +24,11 @@ std::string rect2DToString(VkRect2D &rect);
 
 VkViewport* getViewport(float x, float y, float width, float height, float minDepth, float maxDepth);
 std::string viewportToString(VkViewport &viewport);
+
+
+std::vector<VkMemoryType> getPhysicalDeviceMemoryTypes(VkPhysicalDeviceMemoryProperties &properties);
+std::vector<VkMemoryHeap> getPhysicalDeviceMemoryHeaps(VkPhysicalDeviceMemoryProperties &properties);
+
+void setPhysicalDeviceMemoryTypes(VkPhysicalDeviceMemoryProperties &properties, std::vector<VkMemoryType> &mts);
+void setPhysicalDeviceMemoryHeaps(VkPhysicalDeviceMemoryProperties &properties, std::vector<VkMemoryHeap> &mhs);
 

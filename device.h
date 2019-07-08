@@ -13,6 +13,7 @@
 #include "image.h"
 #include "pipeline.h"
 #include "cmdBuffers.h"
+#include "buffers.h"
 
 
 namespace py = pybind11;
@@ -40,6 +41,7 @@ public:
 
 	VkPhysicalDeviceProperties getProperties();
 	VkPhysicalDeviceProperties2 getProperties2(VkPhysicalDeviceProperties2* properties2 = nullptr);
+	VkPhysicalDeviceMemoryProperties getMemoryProperties();
 	std::vector<VkLayerProperties> layerProperties();
 	std::vector<VkExtensionProperties> extensionProperties(const char* layerName = nullptr);
 	std::vector<VkQueueFamilyProperties> getQueueFamilyProperties();
@@ -61,6 +63,7 @@ public:
 	~DeviceMemory();
 
 	py::buffer map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
+	DeviceMemory* unmap();
 
 	bool isValid();
 
@@ -97,6 +100,7 @@ public:
 	bool waitForFences(std::vector<Fence*> &fences, VkBool32 waitAll, uint64_t timeout);
 	bool resetFences(std::vector<Fence*> &fences);
 	DeviceMemory* allocateMemory(VkMemoryAllocateInfo *info);
+	Buffer* createBuffer(BufferCreateInfo &createInfo);
 
 	Device* waitIdle();
 

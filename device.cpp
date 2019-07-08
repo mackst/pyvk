@@ -58,6 +58,13 @@ VkPhysicalDeviceProperties2 PhysicalDevice::getProperties2(VkPhysicalDevicePrope
 	}
 }
 
+VkPhysicalDeviceMemoryProperties PhysicalDevice::getMemoryProperties()
+{
+	VkPhysicalDeviceMemoryProperties memProperties;
+	vkGetPhysicalDeviceMemoryProperties(vkHandle, &memProperties);
+	return memProperties;
+}
+
 std::vector<VkLayerProperties> PhysicalDevice::layerProperties()
 {
 	std::vector<VkLayerProperties> layerProperties;
@@ -359,6 +366,11 @@ DeviceMemory * Device::allocateMemory(VkMemoryAllocateInfo * info)
 	return memory;
 }
 
+Buffer * Device::createBuffer(BufferCreateInfo & createInfo)
+{
+	return new Buffer(this, createInfo);
+}
+
 Device * Device::waitIdle()
 {
 	checkVKResult(table.vkDeviceWaitIdle(vkHandle));
@@ -431,7 +443,23 @@ DeviceMemory::~DeviceMemory()
 
 py::buffer DeviceMemory::map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags)
 {
-	return py::buffer();
+	py::buffer buf;
+	auto buffer_info = buf.request(true);
+	buffer_info.size = size;
+	buffer_info.format = py::format_descriptor<char>::value;
+	buffer_info.ndim = 1;
+	buffer_info.shape = { (int64_t)size };
+	buffer_info.strides = { 1 };
+
+	checkVKResult(_device->table.vkMapMemory(_device->vkHandle, vkHandle, offset, size, flags, &buffer_info.ptr));
+
+	return buf;
+}
+
+DeviceMemory * DeviceMemory::unmap()
+{
+	_device->table.vkUnmapMemory(_device->vkHandle, vkHandle);
+	return this;
 }
 
 bool DeviceMemory::isValid()
