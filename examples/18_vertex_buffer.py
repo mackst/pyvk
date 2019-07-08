@@ -70,7 +70,7 @@ class Vertex(object):
         a1.binding = 0
         a1.location = 1
         a1.format = _vk.VK_FORMAT_R32G32B32_SFLOAT
-        a1.offset = Vertex.COLOR.nbytes
+        a1.offset = Vertex.POS.nbytes
         return [a0, a1]
 
 
@@ -194,6 +194,8 @@ class HelloTriangleApplication(QtGui.QWindow):
         self.__createGraphicsPipeline()
         self.__createFramebuffers()
         self.__createCommandBuffers()
+
+        self.__device.waitIdle()
 
     def __cretaeInstance(self):
         createInfo = _vk.InstanceCreateInfo()
@@ -475,24 +477,22 @@ class HelloTriangleApplication(QtGui.QWindow):
         bufferInfo.usage = _vk.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
         bufferInfo.sharingMode = _vk.VK_SHARING_MODE_EXCLUSIVE
 
-        print('create vertex buffer')
         self.__vertexBuffer = self.__device.createBuffer(bufferInfo)
-        print('getMemoryRequirements')
+        
         memRequirements = self.__vertexBuffer.getMemoryRequirements()
 
         allocInfo = _vk.MemoryAllocateInfo()
         allocInfo.allocationSize = memRequirements.size
         allocInfo.memoryTypeIndex = self.__findMemoryType(memRequirements.memoryTypeBits, _vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | _vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
-        print('allocateMemory')
+        
         self.__vertexBufferMemory = self.__device.allocateMemory(allocInfo)
-        print('bind buffer and memory')
+        
         self.__vertexBuffer.bindMemory(self.__vertexBufferMemory, 0)
-        print('map memory')
-        buffer = self.__vertexBufferMemory.map(0, bufferInfo.size, 0)
-        buffer_array = np.array(buffer, copy=False)
-        print('set data')
-        buffer_array = vertices
-        print('unmap')
+        
+        self.__vertexBufferMemory.map(0, bufferInfo.size, 0)
+        
+        self.__vertexBufferMemory.copyFromBytes(vertices.tobytes(), vertices.nbytes)
+        
         self.__vertexBufferMemory.unmap()
 
     def __findMemoryType(self, typeFilter, properties):
@@ -511,8 +511,8 @@ class HelloTriangleApplication(QtGui.QWindow):
 
         self.__commandBuffers = self.__device.allocateCommandBuffers(allocInfo)
 
-        for i in range(len(self.__commandBuffers)):
-            cmdBuffer = self.__commandBuffers[i]
+        for i, cmdBuffer in enumerate(self.__commandBuffers):
+            #cmdBuffer = self.__commandBuffers[i]
 
             beginInfo = _vk.CommandBufferBeginInfo()
             beginInfo.flags = _vk.VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
@@ -529,6 +529,8 @@ class HelloTriangleApplication(QtGui.QWindow):
             cmdBuffer.beginRenderPass(renderPassInfo, _vk.VK_SUBPASS_CONTENTS_INLINE)
 
             cmdBuffer.bindPipeline(_vk.VK_PIPELINE_BIND_POINT_GRAPHICS, self.__graphicsPipeline)
+
+            cmdBuffer.bindVertexBuffer(0, [self.__vertexBuffer, ], [0, ])
 
             cmdBuffer.draw(3, 1, 0, 0)
 

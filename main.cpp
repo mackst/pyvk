@@ -85,6 +85,7 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<>())
 		.def("map", &DeviceMemory::map, py::arg("offset"), py::arg("size"), py::arg("flags"))
 		.def("unmap", &DeviceMemory::unmap)
+		.def("copyFromBytes", &DeviceMemory::copyFromBytes, py::arg("bytes"), py::arg("size"))
 		.def_property_readonly("isValid", &DeviceMemory::isValid);
 
 	py::class_<Image>(m, "Image")
@@ -160,6 +161,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("endRenderPass", &CommandBuffer::endRenderPass)
 		.def("executeCommands", &CommandBuffer::executeCommands, py::arg("cmdBuffers"))
 		.def("bindPipeline", &CommandBuffer::bindPipeline, py::arg("pipelineBindPoint"), py::arg("pipeline"))
+		.def("bindVertexBuffer", &CommandBuffer::bindVertexBuffer, py::arg("firstBinding"), py::arg("buffers"), py::arg("offsets"))
 		.def("draw", &CommandBuffer::draw, py::arg("vertexCount"), py::arg("instanceCount"), py::arg("firstVertex"), py::arg("firstInstance"))
 		.def_property_readonly("isValid", &CommandBuffer::isValid);
 

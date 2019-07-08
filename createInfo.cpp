@@ -140,6 +140,7 @@ void DeviceCreateInfo::setExtensionNames(std::vector<std::string>& names)
 
 void DeviceCreateInfo::setQueueCreateInfos(std::vector<DeviceQueueCreateInfo> infos)
 {
+	_queueCreateInfos.clear();
 	queueCreateInfos = infos;
 	for (auto info : queueCreateInfos)
 	{
@@ -362,6 +363,8 @@ PipelineLayoutCreateInfo::~PipelineLayoutCreateInfo()
 
 void PipelineLayoutCreateInfo::setSetLayouts(std::vector<DescriptorSetLayout>& layouts)
 {
+	_setLayouts.clear();
+
 	setLayouts = layouts;
 	for (auto setLayout : setLayouts)
 	{
@@ -402,6 +405,7 @@ GraphicsPipelineCreateInfo::~GraphicsPipelineCreateInfo()
 
 void GraphicsPipelineCreateInfo::setStages(std::vector<PipelineShaderStageCreateInfo*>& infos)
 {
+	_stages.clear();
 	stages = infos;
 	for (auto i : stages)
 	{
@@ -577,7 +581,7 @@ SubmitInfo::~SubmitInfo()
 
 void SubmitInfo::setWaitSemaphores(std::vector<Semaphore*>& semaphores)
 {
-	_waitSemaphores.empty();
+	_waitSemaphores.clear();
 	waitSemaphores = semaphores;
 	for (auto semaphore : waitSemaphores)
 	{
@@ -587,7 +591,7 @@ void SubmitInfo::setWaitSemaphores(std::vector<Semaphore*>& semaphores)
 
 void SubmitInfo::setWaitDstStageMask(std::vector<VkPipelineStageFlagBits>& flags)
 {
-	_waitDstStageMask.empty();
+	_waitDstStageMask.clear();
 	waitDstStageMask = flags;
 	for (auto i : waitDstStageMask)
 	{
@@ -597,7 +601,7 @@ void SubmitInfo::setWaitDstStageMask(std::vector<VkPipelineStageFlagBits>& flags
 
 void SubmitInfo::setCommandBuffers(std::vector<CommandBuffer*>& buffers)
 {
-	_commandBuffers.empty();
+	_commandBuffers.clear();
 	commandBuffers = buffers;
 	for (auto buffer : commandBuffers)
 	{
@@ -607,7 +611,7 @@ void SubmitInfo::setCommandBuffers(std::vector<CommandBuffer*>& buffers)
 
 void SubmitInfo::setSignalSemaphores(std::vector<Semaphore*>& semaphores)
 {
-	_signalSemaphores.empty();
+	_signalSemaphores.clear();
 	signalSemaphores = semaphores;
 	for (auto semaphore : signalSemaphores)
 	{
@@ -675,7 +679,7 @@ PresentInfoKHR::~PresentInfoKHR()
 
 void PresentInfoKHR::setWaitSemaphores(std::vector<Semaphore*> semaphores)
 {
-	_waitSemaphores.empty();
+	_waitSemaphores.clear();
 	waitSemaphores = semaphores;
 	for (auto semaphore : waitSemaphores)
 	{
@@ -685,7 +689,7 @@ void PresentInfoKHR::setWaitSemaphores(std::vector<Semaphore*> semaphores)
 
 void PresentInfoKHR::setSwapchains(std::vector<SwapchainKHR*> _chains)
 {
-	_swapchains.empty();
+	_swapchains.clear();
 	swapchains = _chains;
 	for (auto swapchain : swapchains)
 	{

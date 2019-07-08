@@ -100,6 +100,16 @@ CommandBuffer* CommandBuffer::bindPipeline(VkPipelineBindPoint pipelineBindPoint
 	return this;
 }
 
+CommandBuffer * CommandBuffer::bindVertexBuffer(uint32_t firstBinding, std::vector<Buffer*> _buffers, std::vector<VkDeviceSize> &_offsets)
+{
+	std::vector<VkDeviceSize> offsets = _offsets;
+	std::vector<VkBuffer> buffers;
+	for (auto buf : _buffers)
+		buffers.emplace_back(buf->vkHandle);
+	_device->table.vkCmdBindVertexBuffers(vkHandle, firstBinding, static_cast<uint32_t>(_buffers.size()), buffers.data(), offsets.data());
+	return this;
+}
+
 CommandBuffer* CommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
 	_device->table.vkCmdDraw(vkHandle, vertexCount, instanceCount, firstVertex, firstInstance);

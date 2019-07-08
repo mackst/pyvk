@@ -62,13 +62,15 @@ public:
 	DeviceMemory();
 	~DeviceMemory();
 
-	py::buffer map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
+	DeviceMemory* map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
 	DeviceMemory* unmap();
+	DeviceMemory* copyFromBytes(py::bytes _bytes, uint32_t size);
 
 	bool isValid();
 
 	VkDeviceMemory vkHandle = VK_NULL_HANDLE;
 	Device *_device = nullptr;
+	void* _memData = nullptr;
 };
 
 

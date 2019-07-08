@@ -441,24 +441,23 @@ DeviceMemory::~DeviceMemory()
 	}
 }
 
-py::buffer DeviceMemory::map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags)
+DeviceMemory * DeviceMemory::map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags)
 {
-	py::buffer buf;
-	auto buffer_info = buf.request(true);
-	buffer_info.size = size;
-	buffer_info.format = py::format_descriptor<char>::value;
-	buffer_info.ndim = 1;
-	buffer_info.shape = { (int64_t)size };
-	buffer_info.strides = { 1 };
-
-	checkVKResult(_device->table.vkMapMemory(_device->vkHandle, vkHandle, offset, size, flags, &buffer_info.ptr));
-
-	return buf;
+	checkVKResult(_device->table.vkMapMemory(_device->vkHandle, vkHandle, offset, size, flags, &_memData));
+	return this;
 }
 
 DeviceMemory * DeviceMemory::unmap()
 {
 	_device->table.vkUnmapMemory(_device->vkHandle, vkHandle);
+	_memData = nullptr;
+	return this;
+}
+
+DeviceMemory * DeviceMemory::copyFromBytes(py::bytes _bytes, uint32_t size)
+{
+	auto bytes = static_cast<std::string>(_bytes);
+	memcpy(_memData, bytes.c_str(), size);
 	return this;
 }
 
