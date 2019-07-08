@@ -470,7 +470,38 @@ class HelloTriangleApplication(QtGui.QWindow):
         self.__commandPool = self.__device.createCommandPool(poolInfo)
 
     def __createVertexBuffer(self):
+        bufferInfo = _vk.BufferCreateInfo()
+        bufferInfo.size = vertices.nbytes
+        bufferInfo.usage = _vk.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+        bufferInfo.sharingMode = _vk.VK_SHARING_MODE_EXCLUSIVE
 
+        print('create vertex buffer')
+        self.__vertexBuffer = self.__device.createBuffer(bufferInfo)
+        print('getMemoryRequirements')
+        memRequirements = self.__vertexBuffer.getMemoryRequirements()
+
+        allocInfo = _vk.MemoryAllocateInfo()
+        allocInfo.allocationSize = memRequirements.size
+        allocInfo.memoryTypeIndex = self.__findMemoryType(memRequirements.memoryTypeBits, _vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | _vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+        print('allocateMemory')
+        self.__vertexBufferMemory = self.__device.allocateMemory(allocInfo)
+        print('bind buffer and memory')
+        self.__vertexBuffer.bindMemory(self.__vertexBufferMemory, 0)
+        print('map memory')
+        buffer = self.__vertexBufferMemory.map(0, bufferInfo.size, 0)
+        buffer_array = np.array(buffer, copy=False)
+        print('set data')
+        buffer_array = vertices
+        print('unmap')
+        self.__vertexBufferMemory.unmap()
+
+    def __findMemoryType(self, typeFilter, properties):
+        memProperties = self.__physicalDevice.memoryProperties
+        for i, memType in enumerate(memProperties.memoryTypes):
+            if typeFilter & (1 << i) and (memType.propertyFlags & properties) == properties:
+                return i
+
+        raise Exception("failed to find suitable memory type!")
 
     def __createCommandBuffers(self):
         allocInfo = _vk.CommandBufferAllocateInfo()
