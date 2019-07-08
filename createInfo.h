@@ -9,6 +9,8 @@
 #include "descriptors.h"
 #include "scc.h"
 #include "cmdBuffers.h"
+#include "buffers.h"
+
 
 namespace py = pybind11;
 
@@ -477,6 +479,49 @@ public:
 	std::vector<uint32_t> imageIndices = {};
 	std::vector<VkResult> results = {};
 };
+
+
+class BufferCreateInfo
+{
+public:
+	BufferCreateInfo();
+	~BufferCreateInfo();
+
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkBufferCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkBufferCreateFlags flags;
+	VkDeviceSize size;
+	VkBufferUsageFlags usage;
+	VkSharingMode sharingMode;
+	std::vector<uint32_t> queueFamilyIndices = {};
+};
+
+
+class CreateBufferViewInfo
+{
+public:
+	CreateBufferViewInfo();
+	~CreateBufferViewInfo();
+
+	void setBuffer(Buffer* _buffer) { buffer = _buffer; }
+	Buffer* getBuffer() { return buffer; }
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkBufferViewCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkBufferViewCreateFlags flags = 0;
+	Buffer *buffer = nullptr;
+	VkFormat format;
+	VkDeviceSize offset;
+	VkDeviceSize range;
+};
+
 
 
 

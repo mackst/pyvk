@@ -67,6 +67,7 @@ PYBIND11_MODULE(_vk, m)
 		.def("createFence", &Device::createFence, py::arg("createInfo"))
 		.def("waitForFences", &Device::waitForFences, py::arg("fences"), py::arg("waitAll"), py::arg("timeout"))
 		.def("resetFences", &Device::resetFences, py::arg("fences"))
+		.def("allocateMemory", &Device::allocateMemory, py::arg("info"))
 		.def("waitIdle", &Device::waitIdle)
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
@@ -77,6 +78,10 @@ PYBIND11_MODULE(_vk, m)
 		.def("presentKHR", &Queue::presentKHR, py::arg("info"))
 		.def("waitIdle", &Queue::waitIdle)
 		.def_property_readonly("isValid", &Queue::isValid);
+
+	py::class_<DeviceMemory>(m, "DeviceMemory")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &DeviceMemory::isValid);
 
 	py::class_<Image>(m, "Image")
 		.def(py::init<>())
@@ -123,6 +128,16 @@ PYBIND11_MODULE(_vk, m)
 	py::class_<Framebuffer>(m, "Framebuffer")
 		.def(py::init<>())
 		.def_property_readonly("isValid", &Framebuffer::isValid);
+
+	py::class_<Buffer>(m, "Buffer")
+		.def(py::init<>())
+		.def("bindMemory", &Buffer::bind)
+		.def("getMemoryRequirements", &Buffer::getMemoryRequirements)
+		.def_property_readonly("isValid", &Buffer::isValid);
+
+	py::class_<BufferView>(m, "BufferView")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &BufferView::isValid);
 
 	py::class_<PipelineCache>(m, "PipelineCache")
 		.def(py::init<>())
@@ -597,6 +612,18 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("implementationVersion", &VkLayerProperties::implementationVersion)
 		.def_readonly("description", &VkLayerProperties::description);
 
+	py::class_<VkPhysicalDeviceMemoryProperties>(m, "PhysicalDeviceMemoryProperties")
+		.def(py::init<>())
+		.def_property("memoryTypes", [](VkPhysicalDeviceMemoryProperties &self) { std::vector<VkMemoryType> mt; for (auto i = 0; i < self.memoryTypeCount; i++) mt.emplace_back(self.memoryTypes[i]); return mt; }, [](VkPhysicalDeviceMemoryProperties &self, std::vector<VkMemoryType> &types) { self.memoryTypeCount = static_cast<uint32_t>(types.size()); for (auto i = 0; i < self.memoryTypeCount; i++) self.memoryTypes[i] = types[i]; })
+		.def_property("memoryHeaps", [](VkPhysicalDeviceMemoryProperties &self) { std::vector<VkMemoryHeap> mh; for (auto i = 0; i < self.memoryHeapCount; i++) mh.emplace_back(self.memoryTypes[i]); return mh; }, [](VkPhysicalDeviceMemoryProperties &self, std::vector<VkMemoryHeap> &heaps) { self.memoryTypeCount = static_cast<uint32_t>(heaps.size()); for (auto i = 0; i < self.memoryHeapCount; i++) self.memoryHeaps[i] = heaps[i]; });
+
+	py::class_<VkMemoryAllocateInfo>(m, "MemoryAllocateInfo")
+		.def(py::init([]() { VkMemoryAllocateInfo out = {}; out.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO; return out; }))
+		.def_readwrite("sType", &VkMemoryAllocateInfo::sType)
+		.def_property("pNext", [](VkMemoryAllocateInfo &self) { return self.pNext; }, [](VkMemoryAllocateInfo &self, void* pNext) { self.pNext = pNext; })
+		.def_readwrite("allocationSize", &VkMemoryAllocateInfo::allocationSize)
+		.def_readwrite("memoryTypeIndex", &VkMemoryAllocateInfo::memoryTypeIndex);
+
 	py::class_<VkMemoryRequirements>(m, "MemoryRequirements")
 		.def(py::init<>())
 		.def_readwrite("size", &VkMemoryRequirements::size)
@@ -618,6 +645,32 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("linearTilingFeatures", &VkFormatProperties::linearTilingFeatures)
 		.def_readwrite("optimalTilingFeatures", &VkFormatProperties::optimalTilingFeatures)
 		.def_readwrite("bufferFeatures", &VkFormatProperties::bufferFeatures);
+
+	py::class_<VkImageFormatProperties>(m, "ImageFormatProperties")
+		.def(py::init<>())
+		.def_readwrite("maxExtent", &VkImageFormatProperties::maxExtent)
+		.def_readwrite("maxMipLevels", &VkImageFormatProperties::maxMipLevels)
+		.def_readwrite("maxArrayLayers", &VkImageFormatProperties::maxArrayLayers)
+		.def_readwrite("sampleCounts", &VkImageFormatProperties::sampleCounts)
+		.def_readwrite("maxResourceSize", &VkImageFormatProperties::maxResourceSize);
+
+	py::class_<BufferCreateInfo>(m, "BufferCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", &BufferCreateInfo::getNext, &BufferCreateInfo::setNext)
+		.def_readwrite("flags", &BufferCreateInfo::flags)
+		.def_readwrite("size", &BufferCreateInfo::size)
+		.def_readwrite("usage", &BufferCreateInfo::usage)
+		.def_readwrite("sharingMode", &BufferCreateInfo::sharingMode)
+		.def_readwrite("queueFamilyIndices", &BufferCreateInfo::queueFamilyIndices);
+
+	py::class_<CreateBufferViewInfo>(m, "BufferViewCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", &CreateBufferViewInfo::getNext, &CreateBufferViewInfo::setNext)
+		.def_readwrite("flags", &CreateBufferViewInfo::flags)
+		.def_property("buffer", &CreateBufferViewInfo::getBuffer, &CreateBufferViewInfo::setBuffer)
+		.def_readwrite("format", &CreateBufferViewInfo::format)
+		.def_readwrite("offset", &CreateBufferViewInfo::offset)
+		.def_readwrite("range", &CreateBufferViewInfo::range);
 
 	py::class_<VkImageSubresource>(m, "ImageSubresource")
 		.def(py::init<>())

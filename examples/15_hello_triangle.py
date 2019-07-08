@@ -15,6 +15,8 @@ deviceExtensions = [
 
 VK_EXT_DEBUG_UTILS_EXTENSION_NAME = 'VK_EXT_debug_utils'
 
+MAX_FRAMES_IN_FLIGHT = 3
+
 enableValidationLayers = True
 
 
@@ -216,8 +218,7 @@ class HelloTriangleApplication(QtGui.QWindow):
             imageCount = swapChainSupport.capabilities.maxImageCount
 
         indices = self.__findQueueFamilies(self.__physicalDevice)
-        queueFamily = {}.fromkeys([indices.graphicsFamily, indices.presentFamily])
-        queueFamilies = list(queueFamily.keys())
+
         createInfo = _vk.SwapchainCreateInfoKHR()
         createInfo.surface = self.__surface
         createInfo.minImageCount = imageCount
@@ -231,7 +232,9 @@ class HelloTriangleApplication(QtGui.QWindow):
         createInfo.compositeAlpha = _vk.VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR
         createInfo.presentMode = presentMode
         createInfo.clipped = True
-        createInfo.queueFamilyIndices = queueFamilies
+        if indices.graphicsFamily != indices.presentFamily:
+            createInfo.imageSharingMode = _vk.VK_SHARING_MODE_CONCURRENT
+            createInfo.queueFamilyIndices = [indices.graphicsFamily, indices.presentFamily]
 
         self.__swapChain = self.__device.createSwapchainKHR(createInfo)
         assert self.__swapChain.isValid
@@ -282,9 +285,18 @@ class HelloTriangleApplication(QtGui.QWindow):
         subpass.pipelineBindPoint = _vk.VK_PIPELINE_BIND_POINT_GRAPHICS
         subpass.colorAttachments = [colorAttachmentRef, ]
 
+        dependency = _vk.SubpassDependency()
+        dependency.srcSubpass = _vk.VK_SUBPASS_EXTERNAL
+        dependency.dstSubpass = 0
+        dependency.srcStageMask = _vk.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        dependency.srcAccessMask = 0
+        dependency.dstStageMask = _vk.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        dependency.dstAccessMask = _vk.VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | _vk.VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+
         renderPassInfo = _vk.RenderPassCreateInfo()
         renderPassInfo.attachments = [colorAttachment, ]
         renderPassInfo.subpasses = [subpass, ]
+        renderPassInfo.dependencies = [dependency, ]
 
         #print('renderpass attachmentCount')
 
@@ -441,7 +453,7 @@ class HelloTriangleApplication(QtGui.QWindow):
         semaphoreInfo = _vk.SemaphoreCreateInfo()
         fenceInfo = _vk.FenceCreateInfo()
         fenceInfo.flags = _vk.VK_FENCE_CREATE_SIGNALED_BIT
-        for i in range(2):
+        for i in range(len(self.__swapChainFramebuffers)):
             self.__imageAvailableSemaphores.append(self.__device.createSemaphore(semaphoreInfo))
             self.__renderFinishedSemaphores.append(self.__device.createSemaphore(semaphoreInfo))
             self.__inFlightFences.append(self.__device.createFence(fenceInfo))
@@ -476,8 +488,9 @@ class HelloTriangleApplication(QtGui.QWindow):
         presentInfo.imageIndices = [imageIndex, ]
 
         self.__presentQueue.presentKHR(presentInfo)
-        #self.__presentQueue.waitIdle()
-        self.__currentFrame = (self.__currentFrame + 1) % len(self.__inFlightFences)
+        self.__presentQueue.waitIdle()
+
+        self.__currentFrame = (self.__currentFrame + 1) % len(self.__swapChainFramebuffers)
         
         self.requestUpdate()
 
@@ -559,8 +572,8 @@ class HelloTriangleApplication(QtGui.QWindow):
     def __getRequiredExtensions(self):
         extensionNames = [e.extensionName for e in _vk.Instance.getExtensionProperties()]
         if enableValidationLayers:
-            if VK_EXT_DEBUG_UTILS_EXTENSION_NAME not in extensionNames:
-                extensionNames.append(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
+            if _vk.VK_EXT_DEBUG_UTILS_EXTENSION_NAME not in extensionNames:
+                extensionNames.append(_vk.VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
 
         return extensionNames
 

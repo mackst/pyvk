@@ -707,3 +707,49 @@ void PresentInfoKHR::getVKStruct(VkPresentInfoKHR * info)
 	if (results.size() > 0)
 		info->pResults = results.data();
 }
+
+BufferCreateInfo::BufferCreateInfo()
+{
+}
+
+BufferCreateInfo::~BufferCreateInfo()
+{
+	pNext = nullptr;
+}
+
+void BufferCreateInfo::getVKStruct(VkBufferCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->size = size;
+	info->usage = usage;
+	info->sharingMode = sharingMode;
+	info->queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
+	if (info->queueFamilyIndexCount > 0)
+		info->pQueueFamilyIndices = queueFamilyIndices.data();
+}
+
+CreateBufferViewInfo::CreateBufferViewInfo()
+{
+}
+
+CreateBufferViewInfo::~CreateBufferViewInfo()
+{
+	pNext = nullptr;
+	buffer = nullptr;
+}
+
+void CreateBufferViewInfo::getVKStruct(VkBufferViewCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	if (buffer != nullptr)
+		info->buffer = buffer->vkHandle;
+	else
+		info->buffer = VK_NULL_HANDLE;
+	info->format = format;
+	info->offset = offset;
+	info->range = range;
+}

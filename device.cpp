@@ -351,6 +351,14 @@ bool Device::resetFences(std::vector<Fence*>& fences)
 	return result == VK_SUCCESS;
 }
 
+DeviceMemory * Device::allocateMemory(VkMemoryAllocateInfo * info)
+{
+	auto memory = new DeviceMemory();
+	memory->_device = this;
+	checkVKResult(table.vkAllocateMemory(vkHandle, info, nullptr, &memory->vkHandle));
+	return memory;
+}
+
 Device * Device::waitIdle()
 {
 	checkVKResult(table.vkDeviceWaitIdle(vkHandle));
@@ -407,3 +415,26 @@ bool Queue::isValid()
 	return vkHandle != VK_NULL_HANDLE;
 }
 
+DeviceMemory::DeviceMemory()
+{
+}
+
+DeviceMemory::~DeviceMemory()
+{
+	if (isValid())
+	{
+		_device->table.vkFreeMemory(_device->vkHandle, vkHandle, nullptr);
+		vkHandle = VK_NULL_HANDLE;
+		_device = nullptr;
+	}
+}
+
+py::buffer DeviceMemory::map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags)
+{
+	return py::buffer();
+}
+
+bool DeviceMemory::isValid()
+{
+	return vkHandle != VK_NULL_HANDLE;
+}

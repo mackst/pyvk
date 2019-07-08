@@ -54,6 +54,21 @@ public:
 };
 
 
+class DeviceMemory
+{
+public:
+	DeviceMemory();
+	~DeviceMemory();
+
+	py::buffer map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
+
+	bool isValid();
+
+	VkDeviceMemory vkHandle = VK_NULL_HANDLE;
+	Device *_device = nullptr;
+};
+
+
 
 class Device
 {
@@ -81,6 +96,7 @@ public:
 	Fence* createFence(VkFenceCreateInfo *createInfo);
 	bool waitForFences(std::vector<Fence*> &fences, VkBool32 waitAll, uint64_t timeout);
 	bool resetFences(std::vector<Fence*> &fences);
+	DeviceMemory* allocateMemory(VkMemoryAllocateInfo *info);
 
 	Device* waitIdle();
 
