@@ -139,7 +139,7 @@ FramebufferCreateInfo::~FramebufferCreateInfo()
 
 void FramebufferCreateInfo::setAttachments(std::vector<ImageView*>& imageViews)
 {
-	_attachments.empty();
+	_attachments.clear();
 	attachments = imageViews;
 	for (auto iv : attachments)
 	{
