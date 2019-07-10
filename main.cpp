@@ -70,6 +70,10 @@ PYBIND11_MODULE(_vk, m)
 		.def("resetFences", &Device::resetFences, py::arg("fences"))
 		.def("allocateMemory", &Device::allocateMemory, py::arg("info"))
 		.def("createBuffer", &Device::createBuffer, py::arg("createInfo"))
+		.def("createDescriptorSetLayout", &Device::createDescriptorSetLayout, py::arg("createInfo"))
+		.def("createDescriptorPool", &Device::createDescriptorPool, py::arg("createInfo"))
+		.def("allocateDescriptorSets", &Device::allocateDescriptorSets, py::arg("info"))
+		.def("updateDescriptorSets", &Device::updateDescriptorSets, py::arg("writes"), py::arg("copies"))
 		.def("waitIdle", &Device::waitIdle)
 		.def_readonly("physicalDevice", &Device::_physicalDevice)
 		.def_property_readonly("isValid", &Device::isValid);
@@ -96,6 +100,10 @@ PYBIND11_MODULE(_vk, m)
 		.def(py::init<>())
 		.def_property_readonly("isValid", &ImageView::isValid);
 
+	py::class_<Sampler>(m, "Sampler")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &Sampler::isValid);
+
 	py::class_<ImageViewCreateInfo>(m, "ImageViewCreateInfo")
 		.def(py::init<>())
 		.def_property("pNext", [](ImageViewCreateInfo &self) { return self.pNext; }, [](ImageViewCreateInfo &self, void* pNext) { self.pNext = pNext; })
@@ -105,6 +113,66 @@ PYBIND11_MODULE(_vk, m)
 		.def_readwrite("format", &ImageViewCreateInfo::format)
 		.def_readwrite("components", &ImageViewCreateInfo::components)
 		.def_readwrite("subresourceRange", &ImageViewCreateInfo::subresourceRange);
+
+	py::class_<DescriptorSetLayoutBinding>(m, "DescriptorSetLayoutBinding")
+		.def(py::init<>())
+		.def_readwrite("binding", &DescriptorSetLayoutBinding::binding)
+		.def_readwrite("descriptorType", &DescriptorSetLayoutBinding::descriptorType)
+		.def_readwrite("descriptorCount", &DescriptorSetLayoutBinding::descriptorCount)
+		.def_readwrite("stageFlags", &DescriptorSetLayoutBinding::stageFlags)
+		.def_property("immutableSamplers", &DescriptorSetLayoutBinding::getImmutableSamplers, &DescriptorSetLayoutBinding::setImmutableSamplers);
+
+	py::class_<DescriptorSetLayoutCreateInfo>(m, "DescriptorSetLayoutCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", &DescriptorSetLayoutCreateInfo::getNext, &DescriptorSetLayoutCreateInfo::setNext)
+		.def_readwrite("flags", &DescriptorSetLayoutCreateInfo::flags)
+		.def_property("bindings", &DescriptorSetLayoutCreateInfo::getBindings, &DescriptorSetLayoutCreateInfo::setBindings);
+
+	py::class_<VkDescriptorPoolSize>(m, "DescriptorPoolSize")
+		.def(py::init<>())
+		.def_readwrite("type", &VkDescriptorPoolSize::type)
+		.def_readwrite("descriptorCount", &VkDescriptorPoolSize::descriptorCount);
+
+	py::class_<DescriptorPoolCreateInfo>(m, "DescriptorPoolCreateInfo")
+		.def(py::init<>())
+		.def_property("pNext", &DescriptorPoolCreateInfo::getNext, &DescriptorPoolCreateInfo::setNext)
+		.def_readwrite("flags", &DescriptorPoolCreateInfo::flags)
+		.def_readwrite("maxSets", &DescriptorPoolCreateInfo::maxSets)
+		.def_readwrite("poolSizes", &DescriptorPoolCreateInfo::poolSizes);
+
+	py::class_<DescriptorSetAllocateInfo>(m, "DescriptorSetAllocateInfo")
+		.def(py::init<>())
+		.def_property("pNext", &DescriptorSetAllocateInfo::getNext, &DescriptorSetAllocateInfo::setNext)
+		.def_property("descriptorPool", &DescriptorSetAllocateInfo::getPool, &DescriptorSetAllocateInfo::setPool)
+		.def_property("setLayouts", &DescriptorSetAllocateInfo::getSetLayouts, &DescriptorSetAllocateInfo::setSetLayouts);
+
+	py::class_<DescriptorBufferInfo>(m, "DescriptorBufferInfo")
+		.def(py::init<>())
+		.def_property("buffer", &DescriptorBufferInfo::getBuffer, &DescriptorBufferInfo::setBuffer)
+		.def_readwrite("offset", &DescriptorBufferInfo::offset)
+		.def_readwrite("range", &DescriptorBufferInfo::range);
+
+	py::class_<WriteDescriptorSet>(m, "WriteDescriptorSet")
+		.def(py::init<>())
+		.def_property("pNext", &WriteDescriptorSet::getNext, &WriteDescriptorSet::setNext)
+		.def_property("dstSet", &WriteDescriptorSet::getDstSet, &WriteDescriptorSet::setDstSet)
+		.def_readwrite("dstBinding", &WriteDescriptorSet::dstBinding)
+		.def_readwrite("dstArrayElement", &WriteDescriptorSet::dstArrayElement)
+		.def_readwrite("descriptorCount", &WriteDescriptorSet::descriptorCount)
+		.def_readwrite("descriptorType", &WriteDescriptorSet::descriptorType)
+		.def_property("imageInfo", &WriteDescriptorSet::getImageInfos, &WriteDescriptorSet::setImageInfos)
+		.def_property("bufferInfo", &WriteDescriptorSet::getBufferInfos, &WriteDescriptorSet::setBufferInfos);
+
+	py::class_<CopyDescriptorSet>(m, "CopyDescriptorSet")
+		.def(py::init<>())
+		.def_property("pNext", &CopyDescriptorSet::getNext, &CopyDescriptorSet::setNext)
+		.def_property("dstSet", &CopyDescriptorSet::getDstSet, &CopyDescriptorSet::setDstSet)
+		.def_readwrite("dstBinding", &CopyDescriptorSet::dstBinding)
+		.def_readwrite("dstArrayElement", &CopyDescriptorSet::dstArrayElement)
+		.def_readwrite("descriptorCount", &CopyDescriptorSet::descriptorCount)
+		.def_readwrite("srcBinding", &CopyDescriptorSet::srcBinding)
+		.def_readwrite("srcArrayElement", &CopyDescriptorSet::srcArrayElement)
+		.def_property("srcSet", &CopyDescriptorSet::getSrcSet, &CopyDescriptorSet::setSrcSet);
 
 	py::class_<ShaderModule>(m, "ShaderModule")
 		.def(py::init<>())
@@ -153,6 +221,18 @@ PYBIND11_MODULE(_vk, m)
 		.def("reset", &CommandPool::reset, py::arg("flags") = 0)
 		.def_property_readonly("isValid", &CommandPool::isValid);
 
+	py::class_<DescriptorSetLayout>(m, "DescriptorSetLayout")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &DescriptorSetLayout::isValid);
+
+	py::class_<DescriptorPool>(m, "DescriptorPool")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &DescriptorPool::isValid);
+
+	py::class_<DescriptorSet>(m, "DescriptorSet")
+		.def(py::init<>())
+		.def_property_readonly("isValid", &DescriptorSet::isValid);
+
 	py::class_<CommandBuffer>(m, "CommandBuffer")
 		.def(py::init<>())
 		.def("begin", &CommandBuffer::begin, py::arg("info"))
@@ -163,6 +243,8 @@ PYBIND11_MODULE(_vk, m)
 		.def("bindPipeline", &CommandBuffer::bindPipeline, py::arg("pipelineBindPoint"), py::arg("pipeline"))
 		.def("bindVertexBuffer", &CommandBuffer::bindVertexBuffer, py::arg("firstBinding"), py::arg("buffers"), py::arg("offsets"))
 		.def("draw", &CommandBuffer::draw, py::arg("vertexCount"), py::arg("instanceCount"), py::arg("firstVertex"), py::arg("firstInstance"))
+		.def("dispatch", &CommandBuffer::dispatch, py::arg("groupCountX"), py::arg("groupCountY"), py::arg("groupCountZ"))
+		.def("bindDescriptorSets", &CommandBuffer::bindDescriptorSets, py::arg("pipelineBindPoint"), py::arg("layout"), py::arg("firstSet"), py::arg("descriptorSets"), py::arg("dynamicOffsets"))
 		.def_property_readonly("isValid", &CommandBuffer::isValid);
 
 	py::class_<Semaphore>(m, "Semaphore")

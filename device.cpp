@@ -4,6 +4,7 @@
 #include "extensions.h"
 
 
+
 PhysicalDevice::PhysicalDevice()
 {
 }
@@ -371,6 +372,77 @@ Buffer * Device::createBuffer(BufferCreateInfo & createInfo)
 	return new Buffer(this, createInfo);
 }
 
+DescriptorSetLayout * Device::createDescriptorSetLayout(DescriptorSetLayoutCreateInfo & createInfo)
+{
+	auto layout = new DescriptorSetLayout();
+	VkDescriptorSetLayoutCreateInfo info = {};
+	createInfo.getVKStruct(&info);
+	checkVKResult(table.vkCreateDescriptorSetLayout(vkHandle, &info, nullptr, &layout->vkHandle));
+	layout->_device = this;
+	return layout;
+}
+
+DescriptorPool * Device::createDescriptorPool(DescriptorPoolCreateInfo & createInfo)
+{
+	auto pool = new DescriptorPool();
+	VkDescriptorPoolCreateInfo info = {};
+	createInfo.getVKStruct(&info);
+	checkVKResult(table.vkCreateDescriptorPool(vkHandle, &info, nullptr, &pool->vkHandle));
+	pool->_device = this;
+
+	return pool;
+}
+
+std::vector<DescriptorSet*> Device::allocateDescriptorSets(DescriptorSetAllocateInfo & info)
+{
+	std::vector<DescriptorSet*> sets;
+	std::vector<VkDescriptorSet> dsets(info.setLayouts.size());
+
+	VkDescriptorSetAllocateInfo allocInfo = {};
+	info.getVKStruct(&allocInfo);
+
+	checkVKResult(table.vkAllocateDescriptorSets(vkHandle, &allocInfo, dsets.data()));
+	
+	for (auto set : dsets)
+	{
+		auto ds = new DescriptorSet();
+		ds->_pool = info.getPool();
+		ds->vkHandle = set;
+		sets.emplace_back(ds);
+	}
+
+	return sets;
+}
+
+Device * Device::updateDescriptorSets(std::vector<WriteDescriptorSet>& writes, std::vector<CopyDescriptorSet>& copies)
+{
+	std::vector<VkWriteDescriptorSet> _writes;
+	
+	for (auto ws : writes)
+	{
+		VkWriteDescriptorSet set = {};
+		ws.getVKStruct(&set);
+		_writes.emplace_back(set);
+	}
+	auto copyCount = static_cast<uint32_t>(copies.size());
+	if (copyCount > 0)
+	{
+		std::vector<VkCopyDescriptorSet> _copies;
+		for (auto cs : copies)
+		{
+			VkCopyDescriptorSet cset = {};
+			cs.getVKStruct(&cset);
+			_copies.emplace_back(cset);
+		}
+		table.vkUpdateDescriptorSets(vkHandle, static_cast<uint32_t>(_writes.size()), _writes.data(), copyCount, _copies.data());
+	}
+	else
+		table.vkUpdateDescriptorSets(vkHandle, static_cast<uint32_t>(_writes.size()), _writes.data(), 0, VK_NULL_HANDLE);
+		
+
+	return this;
+}
+
 Device * Device::waitIdle()
 {
 	checkVKResult(table.vkDeviceWaitIdle(vkHandle));
@@ -441,10 +513,25 @@ DeviceMemory::~DeviceMemory()
 	}
 }
 
-DeviceMemory * DeviceMemory::map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags)
+py::buffer DeviceMemory::map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags)
 {
-	checkVKResult(_device->table.vkMapMemory(_device->vkHandle, vkHandle, offset, size, flags, &_memData));
-	return this;
+	void* data;
+	checkVKResult(_device->table.vkMapMemory(_device->vkHandle, vkHandle, offset, size, flags, &data));
+
+	_memData = (char*)data;
+
+	py::buffer_info info;
+	info.format = py::format_descriptor<char>::value;
+	info.itemsize = sizeof(char);
+	info.ndim = 1;
+	info.shape = { (int64_t)size };
+	info.size = size;
+	info.strides = { sizeof(char) };
+	info.ptr = _memData;
+
+	py::memoryview view(info);
+
+	return py::buffer(view);
 }
 
 DeviceMemory * DeviceMemory::unmap()

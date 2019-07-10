@@ -19,6 +19,7 @@ class SurfaceKHR;
 class SwapchainKHR;
 class Image;
 class ShaderModule;
+class Sampler;
 
 
 #ifndef CREATEINFO_H
@@ -270,13 +271,13 @@ public:
 	PipelineLayoutCreateInfo();
 	~PipelineLayoutCreateInfo();
 
-	std::vector<DescriptorSetLayout> getSetLayouts() { return setLayouts; }
-	void setSetLayouts(std::vector<DescriptorSetLayout> &layouts);
+	std::vector<DescriptorSetLayout*> getSetLayouts() { return setLayouts; }
+	void setSetLayouts(std::vector<DescriptorSetLayout*> &layouts);
 
 	void getVKStruct(VkPipelineLayoutCreateInfo *info);
 
 	const void* pNext = nullptr;
-	std::vector<DescriptorSetLayout> setLayouts;
+	std::vector<DescriptorSetLayout*> setLayouts;
 	std::vector<VkDescriptorSetLayout> _setLayouts;
 	std::vector<VkPushConstantRange> pushConstantRanges;
 };
@@ -522,6 +523,157 @@ public:
 	VkDeviceSize range;
 };
 
+
+class DescriptorSetLayoutBinding
+{
+public:
+	DescriptorSetLayoutBinding();
+	~DescriptorSetLayoutBinding();
+
+	void setImmutableSamplers(std::vector<Sampler*> &samplers);
+	std::vector<Sampler*> getImmutableSamplers() { return immutableSamplers; };
+
+	void getVKStruct(VkDescriptorSetLayoutBinding *_binding);
+
+	uint32_t binding;
+	VkDescriptorType descriptorType;
+	uint32_t descriptorCount;
+	VkShaderStageFlags stageFlags;
+	std::vector<Sampler*> immutableSamplers = {};
+	std::vector<VkSampler> _immutableSamplers = {};
+};
+
+
+class DescriptorSetLayoutCreateInfo
+{
+public:
+	DescriptorSetLayoutCreateInfo();
+	~DescriptorSetLayoutCreateInfo();
+
+	void setBindings(std::vector<DescriptorSetLayoutBinding> &dsl_bindings);
+	std::vector<DescriptorSetLayoutBinding> getBindings() { return bindings; }
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkDescriptorSetLayoutCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkDescriptorSetLayoutCreateFlags flags = 0;
+	std::vector<DescriptorSetLayoutBinding> bindings = {};
+	std::vector<VkDescriptorSetLayoutBinding> _bindings = {};
+};
+
+
+class DescriptorPoolCreateInfo
+{
+public:
+	DescriptorPoolCreateInfo();
+	~DescriptorPoolCreateInfo();
+
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkDescriptorPoolCreateInfo *info);
+
+	const void* pNext = nullptr;
+	VkDescriptorPoolCreateFlags flags = 0;
+	uint32_t maxSets;
+	std::vector<VkDescriptorPoolSize> poolSizes;
+};
+
+
+class DescriptorSetAllocateInfo
+{
+public:
+	DescriptorSetAllocateInfo();
+	~DescriptorSetAllocateInfo();
+
+	void setSetLayouts(std::vector<DescriptorSetLayout*> &layouts);
+	std::vector<DescriptorSetLayout*> getSetLayouts() { return setLayouts; }
+	void setPool(DescriptorPool* pool) { _pool = pool; }
+	DescriptorPool* getPool() { return _pool; }
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkDescriptorSetAllocateInfo *info);
+
+	const void* pNext = nullptr;
+	DescriptorPool* _pool = nullptr;
+	std::vector<DescriptorSetLayout*> setLayouts = {};
+	std::vector<VkDescriptorSetLayout> _setLayouts = {};
+};
+
+
+class DescriptorBufferInfo
+{
+public:
+	DescriptorBufferInfo() {}
+	~DescriptorBufferInfo() { _buffer = nullptr; }
+
+	void setBuffer(Buffer* buffer) { _buffer = buffer; }
+	Buffer* getBuffer() { return _buffer; }
+
+	void getVKStruct(VkDescriptorBufferInfo *info);
+
+	Buffer* _buffer = nullptr;
+	VkDeviceSize offset;
+	VkDeviceSize range;
+};
+
+
+class WriteDescriptorSet
+{
+public:
+	WriteDescriptorSet();
+	~WriteDescriptorSet();
+
+	void setImageInfos(std::vector<VkDescriptorImageInfo> &imageInfos);
+	std::vector<VkDescriptorImageInfo> getImageInfos() { return _imageInfos; }
+	void setBufferInfos(std::vector<DescriptorBufferInfo> &infos);
+	std::vector<DescriptorBufferInfo> getBufferInfos() { return bufferInfos; }
+	void setDstSet(DescriptorSet* set) { _dstSet = set; }
+	DescriptorSet* getDstSet() { return _dstSet; }
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkWriteDescriptorSet *set);
+
+	const void* pNext = nullptr;
+	DescriptorSet *_dstSet = nullptr;
+	uint32_t dstBinding;
+	uint32_t dstArrayElement;
+	uint32_t descriptorCount;
+	VkDescriptorType descriptorType;
+	std::vector<VkDescriptorImageInfo> _imageInfos = {};
+	std::vector<DescriptorBufferInfo> bufferInfos = {};
+	std::vector<VkDescriptorBufferInfo> _bufferInfos = {};
+};
+
+
+class CopyDescriptorSet
+{
+public:
+	CopyDescriptorSet();
+	~CopyDescriptorSet();
+
+	void setSrcSet(DescriptorSet* srcset) { _srcSet = srcset; }
+	DescriptorSet* getSrcSet() { return _srcSet; }
+	void setDstSet(DescriptorSet* set) { _dstSet = set; }
+	DescriptorSet* getDstSet() { return _dstSet; }
+	void setNext(void* next) { pNext = next; }
+	const void* getNext() { return pNext; }
+
+	void getVKStruct(VkCopyDescriptorSet *set);
+
+	const void* pNext = nullptr;
+	DescriptorSet *_srcSet = nullptr;
+	uint32_t srcBinding;
+	uint32_t srcArrayElement;
+	DescriptorSet *_dstSet = nullptr;
+	uint32_t dstBinding;
+	uint32_t dstArrayElement;
+	uint32_t descriptorCount;
+};
 
 
 

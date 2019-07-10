@@ -11,7 +11,9 @@ Image::~Image()
 {
 	if (isValid())
 	{
+		_device->table.vkDestroyImage(_device->vkHandle, vkHandle, nullptr);
 		vkHandle = VK_NULL_HANDLE;
+		_device = nullptr;
 	}
 }
 
@@ -50,6 +52,25 @@ bool ImageView::create(ImageViewCreateInfo &createInfo)
 }
 
 bool ImageView::isValid()
+{
+	return vkHandle != VK_NULL_HANDLE;
+}
+
+Sampler::Sampler()
+{
+}
+
+Sampler::~Sampler()
+{
+	if (isValid())
+	{
+		_device->table.vkDestroySampler(_device->vkHandle, vkHandle, nullptr);
+		vkHandle = VK_NULL_HANDLE;
+		_device = nullptr;
+	}
+}
+
+bool Sampler::isValid()
 {
 	return vkHandle != VK_NULL_HANDLE;
 }

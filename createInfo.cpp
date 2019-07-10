@@ -361,14 +361,14 @@ PipelineLayoutCreateInfo::~PipelineLayoutCreateInfo()
 	_setLayouts = {};
 }
 
-void PipelineLayoutCreateInfo::setSetLayouts(std::vector<DescriptorSetLayout>& layouts)
+void PipelineLayoutCreateInfo::setSetLayouts(std::vector<DescriptorSetLayout*>& layouts)
 {
 	_setLayouts.clear();
 
 	setLayouts = layouts;
 	for (auto setLayout : setLayouts)
 	{
-		_setLayouts.emplace_back(setLayout.vkHandle);
+		_setLayouts.emplace_back(setLayout->vkHandle);
 	}
 }
 
@@ -485,7 +485,10 @@ void ComputePipelineCreateInfo::getVKStruct(VkComputePipelineCreateInfo * info)
 	info->flags = flags;
 	info->stage = _stage;
 	info->layout = layout->vkHandle;
-	info->basePipelineHandle = basePipelineHandle->vkHandle;
+	if (basePipelineHandle != nullptr)
+		info->basePipelineHandle = basePipelineHandle->vkHandle;
+	else
+		info->basePipelineHandle = VK_NULL_HANDLE;
 	info->basePipelineIndex = basePipelineIndex;
 }
 
@@ -756,4 +759,195 @@ void CreateBufferViewInfo::getVKStruct(VkBufferViewCreateInfo * info)
 	info->format = format;
 	info->offset = offset;
 	info->range = range;
+}
+
+DescriptorSetLayoutBinding::DescriptorSetLayoutBinding()
+{
+}
+
+DescriptorSetLayoutBinding::~DescriptorSetLayoutBinding()
+{
+	immutableSamplers.clear();
+	_immutableSamplers.clear();
+}
+
+void DescriptorSetLayoutBinding::setImmutableSamplers(std::vector<Sampler*>& samplers)
+{
+	immutableSamplers = samplers;
+	_immutableSamplers.clear();
+	for (auto sampler : immutableSamplers)
+	{
+		_immutableSamplers.emplace_back(sampler->vkHandle);
+	}
+}
+
+void DescriptorSetLayoutBinding::getVKStruct(VkDescriptorSetLayoutBinding * _binding)
+{
+	_binding->binding = binding;
+	_binding->descriptorCount = descriptorCount;
+	_binding->descriptorType = descriptorType;
+	if (_immutableSamplers.size() > 0)
+		_binding->pImmutableSamplers = _immutableSamplers.data();
+	_binding->stageFlags = stageFlags;
+}
+
+DescriptorSetLayoutCreateInfo::DescriptorSetLayoutCreateInfo()
+{
+}
+
+DescriptorSetLayoutCreateInfo::~DescriptorSetLayoutCreateInfo()
+{
+	pNext = nullptr;
+	bindings.clear();
+	_bindings.clear();
+}
+
+void DescriptorSetLayoutCreateInfo::setBindings(std::vector<DescriptorSetLayoutBinding>& dsl_bindings)
+{
+	bindings = dsl_bindings;
+	_bindings.clear();
+	for (auto binding : bindings)
+	{
+		VkDescriptorSetLayoutBinding b = {};
+		binding.getVKStruct(&b);
+		_bindings.emplace_back(b);
+	}
+
+}
+
+void DescriptorSetLayoutCreateInfo::getVKStruct(VkDescriptorSetLayoutCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->bindingCount = static_cast<uint32_t>(_bindings.size());
+	if (info->bindingCount > 0)
+		info->pBindings = _bindings.data();
+}
+
+DescriptorPoolCreateInfo::DescriptorPoolCreateInfo()
+{
+}
+
+DescriptorPoolCreateInfo::~DescriptorPoolCreateInfo()
+{
+	pNext = nullptr;
+}
+
+void DescriptorPoolCreateInfo::getVKStruct(VkDescriptorPoolCreateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	info->pNext = pNext;
+	info->flags = flags;
+	info->maxSets = maxSets;
+	info->poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+	if (info->poolSizeCount > 0)
+		info->pPoolSizes = poolSizes.data();
+}
+
+DescriptorSetAllocateInfo::DescriptorSetAllocateInfo()
+{
+}
+
+DescriptorSetAllocateInfo::~DescriptorSetAllocateInfo()
+{
+	pNext = nullptr;
+	setLayouts.clear();
+	_setLayouts.clear();
+}
+
+void DescriptorSetAllocateInfo::setSetLayouts(std::vector<DescriptorSetLayout*>& layouts)
+{
+	setLayouts = layouts;
+	_setLayouts.clear();
+	for (auto layout : setLayouts)
+		_setLayouts.emplace_back(layout->vkHandle);
+}
+
+void DescriptorSetAllocateInfo::getVKStruct(VkDescriptorSetAllocateInfo * info)
+{
+	info->sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	info->pNext = pNext;
+	info->descriptorPool = _pool->vkHandle;
+	info->descriptorSetCount = static_cast<uint32_t>(_setLayouts.size());
+	if (info->descriptorSetCount > 0)
+		info->pSetLayouts = _setLayouts.data();
+}
+
+WriteDescriptorSet::WriteDescriptorSet()
+{
+}
+
+WriteDescriptorSet::~WriteDescriptorSet()
+{
+	pNext = nullptr;
+	_dstSet = nullptr;
+	bufferInfos.clear();
+	_bufferInfos.clear();
+}
+
+void WriteDescriptorSet::setImageInfos(std::vector<VkDescriptorImageInfo>& imageInfos)
+{
+	_imageInfos = imageInfos;
+	descriptorCount = static_cast<uint32_t>(_imageInfos.size());
+}
+
+void WriteDescriptorSet::setBufferInfos(std::vector<DescriptorBufferInfo>& infos)
+{
+	_bufferInfos.clear();
+	bufferInfos = infos;
+	for (auto info : bufferInfos)
+	{
+		VkDescriptorBufferInfo binfo = {};
+		info.getVKStruct(&binfo);
+		_bufferInfos.emplace_back(binfo);
+	}
+
+	descriptorCount = static_cast<uint32_t>(bufferInfos.size());
+}
+
+void WriteDescriptorSet::getVKStruct(VkWriteDescriptorSet * set)
+{
+	set->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	set->pNext = pNext;
+	set->dstSet = _dstSet->vkHandle;
+	set->dstBinding = dstBinding;
+	set->dstArrayElement = dstArrayElement;
+	set->descriptorCount = descriptorCount;
+	set->descriptorType = descriptorType;
+	if (_imageInfos.size() > 0)
+		set->pImageInfo = _imageInfos.data();
+	if (_bufferInfos.size() > 0)
+		set->pBufferInfo = _bufferInfos.data();
+}
+
+void DescriptorBufferInfo::getVKStruct(VkDescriptorBufferInfo * info)
+{
+	info->buffer = _buffer->vkHandle;
+	info->offset = offset;
+	info->range = range;
+}
+
+CopyDescriptorSet::CopyDescriptorSet()
+{
+}
+
+CopyDescriptorSet::~CopyDescriptorSet()
+{
+	pNext = nullptr;
+	_srcSet = nullptr;
+	_dstSet = nullptr;
+}
+
+void CopyDescriptorSet::getVKStruct(VkCopyDescriptorSet * set)
+{
+	set->sType = VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET;
+	set->pNext = pNext;
+	set->srcSet = _srcSet->vkHandle;
+	set->srcBinding = srcBinding;
+	set->srcArrayElement = srcArrayElement;
+	set->dstSet = _dstSet->vkHandle;
+	set->dstBinding = dstBinding;
+	set->dstArrayElement = dstArrayElement;
+	set->descriptorCount = descriptorCount;
 }

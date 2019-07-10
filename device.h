@@ -62,7 +62,7 @@ public:
 	DeviceMemory();
 	~DeviceMemory();
 
-	DeviceMemory* map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
+	py::buffer map(VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
 	DeviceMemory* unmap();
 	DeviceMemory* copyFromBytes(py::bytes _bytes, uint32_t size);
 
@@ -70,7 +70,7 @@ public:
 
 	VkDeviceMemory vkHandle = VK_NULL_HANDLE;
 	Device *_device = nullptr;
-	void* _memData = nullptr;
+	char* _memData = nullptr;
 };
 
 
@@ -103,7 +103,11 @@ public:
 	bool resetFences(std::vector<Fence*> &fences);
 	DeviceMemory* allocateMemory(VkMemoryAllocateInfo *info);
 	Buffer* createBuffer(BufferCreateInfo &createInfo);
+	DescriptorSetLayout* createDescriptorSetLayout(DescriptorSetLayoutCreateInfo &createInfo);
+	DescriptorPool* createDescriptorPool(DescriptorPoolCreateInfo &createInfo);
+	std::vector<DescriptorSet*> allocateDescriptorSets(DescriptorSetAllocateInfo &info);
 
+	Device* updateDescriptorSets(std::vector<WriteDescriptorSet> &writes, std::vector<CopyDescriptorSet> &copies);
 	Device* waitIdle();
 
 	VkDevice vkHandle = VK_NULL_HANDLE;

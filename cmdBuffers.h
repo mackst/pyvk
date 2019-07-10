@@ -16,7 +16,9 @@ class SubmitInfo;
 class RenderPassBeginInfo;
 class Fence;
 class Pipeline;
+class PipelineLayout;
 class Buffer;
+class DescriptorSet;
 
 
 #ifndef CMDBUFFERS_H
@@ -55,6 +57,8 @@ public:
 	CommandBuffer* bindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline *pipeline);
 	CommandBuffer* bindVertexBuffer(uint32_t firstBinding, std::vector<Buffer*> _buffers, std::vector<VkDeviceSize> &_offsets);
 	CommandBuffer* draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+	CommandBuffer* dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+	CommandBuffer* bindDescriptorSets(VkPipelineBindPoint pipelineBindPoint, PipelineLayout *layout, uint32_t firstSet, std::vector<DescriptorSet*> &descriptorSets, std::vector<uint32_t> &dynamicOffsets);
 
 	bool isValid();
 

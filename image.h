@@ -45,9 +45,21 @@ public:
 	bool isValid();
 
 	VkImage vkHandle = VK_NULL_HANDLE;
+	Device *_device = nullptr;
 };
 
 
+class Sampler
+{
+public:
+	Sampler();
+	~Sampler();
+
+	bool isValid();
+
+	VkSampler vkHandle = VK_NULL_HANDLE;
+	Device *_device = nullptr;
+};
 
 
 #endif // !VKTYPES_H

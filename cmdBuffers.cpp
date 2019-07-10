@@ -116,6 +116,23 @@ CommandBuffer* CommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount,
 	return this;
 }
 
+CommandBuffer * CommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+{
+	_device->table.vkCmdDispatch(vkHandle, groupCountX, groupCountY, groupCountZ);
+	return this;
+}
+
+CommandBuffer * CommandBuffer::bindDescriptorSets(VkPipelineBindPoint pipelineBindPoint, PipelineLayout * layout, uint32_t firstSet, std::vector<DescriptorSet*>& descriptorSets, std::vector<uint32_t>& dynamicOffsets)
+{
+	std::vector<VkDescriptorSet> _dsets;
+	for (auto set : descriptorSets)
+		_dsets.emplace_back(set->vkHandle);
+	auto dsCount = static_cast<uint32_t>(descriptorSets.size());
+	auto dynamicOffsetCount = static_cast<uint32_t>(dynamicOffsets.size());
+	_device->table.vkCmdBindDescriptorSets(vkHandle, pipelineBindPoint, layout->vkHandle, firstSet, dsCount, _dsets.data(), dynamicOffsetCount, dynamicOffsets.data());
+	return this;
+}
+
 bool CommandBuffer::isValid()
 {
 	return vkHandle != VK_NULL_HANDLE;
