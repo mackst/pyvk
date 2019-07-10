@@ -489,8 +489,16 @@ class HelloTriangleApplication(QtGui.QWindow):
         
         self.__vertexBuffer.bindMemory(self.__vertexBufferMemory, 0)
         
-        self.__vertexBufferMemory.map(0, bufferInfo.size, 0)
-        
+        buffer = self.__vertexBufferMemory.map(0, bufferInfo.size, 0)
+        #mv = memoryview(buffer)
+        #print(mv, mv.nbytes)
+        #mv2 = mv.cast('f')
+        #print(mv2, mv2.nbytes)
+        #buffer_array = np.frombuffer(buffer)
+        #print(buffer_array, buffer_array.nbytes)
+
+        #buffer_array = vertices
+        #print(buffer_array, buffer_array.nbytes)
         self.__vertexBufferMemory.copyFromBytes(vertices.tobytes(), vertices.nbytes)
         
         self.__vertexBufferMemory.unmap()
